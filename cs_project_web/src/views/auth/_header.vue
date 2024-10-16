@@ -22,24 +22,22 @@
           <ul class="sidebar-nav">
             <template v-if="isRegistrasi == 'sudah'">
               <li>
-                <template
-                  v-if="this.$root.halamanSekarang == 'cmpHalDashboard'"
-                >
+                <template v-if="this.$root.halamanSekarang == 'cmpHalDashboard'">
                   <a
                     href="javascript:void(0);"
                     @click="$root.goto('cmpHalDashboard')"
-                    class="active"
-                    ><i class="gi gi-stopwatch sidebar-nav-icon"></i
-                    ><span class="sidebar-nav-mini-hide">DASHBOARD</span></a
-                  >
+                    class="active">
+                    <i class="gi gi-stopwatch sidebar-nav-icon"></i
+                    ><span class="sidebar-nav-mini-hide">DASHBOARD</span>
+                  </a>
                 </template>
+
                 <template v-else>
                   <a
                     href="javascript:void(0);"
                     @click="$root.goto('cmpHalDashboard')"
                     ><i class="gi gi-stopwatch sidebar-nav-icon"></i
-                    ><span class="sidebar-nav-mini-hide">DASHBOARD</span></a
-                  >
+                    ><span class="sidebar-nav-mini-hide">DASHBOARD</span></a>
                 </template>
               </li>
               <li v-for="(value, key, index) in $root.menuHeader" :key="key">
@@ -49,14 +47,12 @@
                     $root.menuHeader_status[key]
                       ? 'sidebar-nav-menu open'
                       : 'sidebar-nav-menu'
-                  "
-                  @click="$root.status_menu_open(key)"
-                  ><i
-                    class="fa fa-angle-left sidebar-nav-indicator sidebar-nav-mini-hide"
-                  ></i
-                  ><i :class="menuHeader_logo[key]"></i
-                  ><span class="sidebar-nav-mini-hide">{{ key }} </span></a
-                >
+                  "@click="$root.status_menu_open(key)">
+                  <i class="fa fa-angle-left sidebar-nav-indicator sidebar-nav-mini-hide"></i>
+                  <i :class="menuHeader_logo[key]"></i>
+                  <span class="sidebar-nav-mini-hide">{{ key }} </span>
+                </a>
+
                 <ul
                   :style="
                     $root.menuHeader_status[key]

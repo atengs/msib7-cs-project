@@ -325,7 +325,7 @@ export default {
         },
       };
       await axios
-        .get(mythis.$root.apiHostJWT + `api/mst-category`, config)
+      .get(mythis.$root.apiHost + mythis.$root.prefixApi +`master-categories`, config)
         .then(async (res) => {
           const data = res.data.data;
           this.mstCategory = data;
@@ -344,7 +344,7 @@ export default {
         },
       };
       await axios
-        .get(mythis.$root.apiHostJWT + `api/mst-job-category`, config)
+      .get(mythis.$root.apiHost + mythis.$root.prefixApi +`master-job-category`, config)
         .then(async (res) => {
           const data = res.data.data;
           this.mstJobCategory = data;
@@ -397,7 +397,7 @@ export default {
               Authorization: AuthStr,
             },
           };
-          var url = mythis.$root.apiHostJWT + "api/mst-joblist";
+          var url = mythis.$root.apiHost + mythis.$root.prefixApi +"master-job-list";
           axios
             .post(
               url,
@@ -538,7 +538,7 @@ export default {
           },
         },
         server: {
-          url: this.$root.apiHostJWT + "api/mst-joblist/getData",
+          url: this.$root.apiHost + this.$root.prefixApi +"master-job-list/getData",
           then: (data) =>
             data.results.map((card) => [
               card.id,
@@ -595,7 +595,7 @@ export default {
           };
           axios
             .delete(
-              mythis.$root.apiHostJWT + `legal/docStatusList/${id}`,
+              mythis.$root.apiHost + mythis.$root.prefixApi +`master-job-list/${id}`,
               config
             )
             .then((res) => {
@@ -621,7 +621,7 @@ export default {
       };
       axios
         .put(
-          mythis.$root.apiHostJWT + "api/mst-joblist/update/" + mythis.todo.id,
+          mythis.$root.apiHost + mythis.$root.prefixApi +"master-job-list/" + mythis.todo.id,
           {
             category_code: mythis.todo.category_code,
             job_category_code: mythis.todo.job_category_code,
@@ -687,7 +687,7 @@ export default {
         },
       };
       await axios
-        .get(mythis.$root.apiHostJWT + `api/mst-joblist/getById/${id}`, config)
+      .get(mythis.$root.apiHost + mythis.$root.prefixApi +`master-categories`, config)
         .then(async (res) => {
           //console.log(res.data.data);
           //mythis.acuanEdit = id;

@@ -22,7 +22,8 @@
             data-dismiss="modal"
             aria-label="Close"
             :disabled="$root.flagButtonLoading"
-            @click="show_modal()">
+            @click="show_modal()"
+          >
             <span aria-hidden="true">X</span>
           </button>
         </div>
@@ -33,61 +34,41 @@
             <div class="col-md-12">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="example-nf-email">Code Name</label>
-                  <CmpInputText
-                    id="inputA"
-                    type="text"
-                    placeholder="Code Name"
-                    v-model="todo.code"
-                    :class="
-                      errorField.code
-                        ? 'form-control input-lg input-error'
-                        : 'form-control input-lg'
-                    "
-                    :disabled="!flagButtonAdd"
-                    @input="(val) => (todo.code = todo.code.toUpperCase())"
-                  />
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="example-nf-email">Name</label>
+                  <label for="example-nf-email">Category Name</label>
                   <CmpInputText
                     type="text"
                     placeholder="Name"
-                    v-model="todo.name"
+                    v-model="todo.category_name"
                     :class="
                       errorField.name
                         ? 'form-control input-lg input-error'
                         : 'form-control input-lg'
                     "
-                    @input="(val) => (todo.name = todo.name.toUpperCase())"
+                    @input="(val) => (todo.category_name = todo.category_name.toUpperCase())"
+                  />
+                </div>
+              </div>
+
+              
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="example-nf-email">Prefix</label>
+                  <CmpInputText
+                    type="text"
+                    placeholder="Prefix"
+                    v-model="todo.category_prefix"
+                    :class="
+                      errorField.name
+                        ? 'form-control input-lg input-error'
+                        : 'form-control input-lg'
+                    "
+                    @input="(val) => (todo.category_prefix = todo.category_prefix.toUpperCase())"
                   />
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="row">
-            <div class="col-md-12">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="example-nf-email">Description</label>
-                  <textarea
-                    :class="
-                      errorField.desc
-                        ? 'form-control input-lg input-error'
-                        : 'form-control input-lg'
-                    "
-                    rows="4"
-                    v-model="todo.desc"
-                    placeholder="Description"
-                    @input="(val) => (todo.desc = todo.desc.toUpperCase())"
-                  ></textarea>
-                </div>
-              </div>
-            </div>
+
           </div>
           <!-- END Wizards Row -->
         </div>
@@ -102,12 +83,10 @@
                 class="btn btn-sm btn-primary pull-left"
                 :disabled="
                   $root.flagButtonLoading ||
-                  todo.name == null ||
-                  todo.name == '' ||
-                  todo.code == null ||
-                  todo.code == '' ||
-                  todo.desc == null ||
-                  todo.desc == ''
+                  todo.category_name == null ||
+                  todo.category_name == '' ||
+                  todo.category_prefix == null ||
+                  todo.category_prefix == ''
                 "
               >
                 <i
@@ -124,12 +103,10 @@
                 class="btn btn-sm btn-primary pull-left"
                 :disabled="
                   $root.flagButtonLoading ||
-                  todo.name == null ||
-                  todo.name == '' ||
-                  todo.code == null ||
-                  todo.code == '' ||
-                  todo.desc == null ||
-                  todo.desc == ''
+                  todo.category_name == null ||
+                  todo.category_name == '' ||
+                  todo.category_prefix == null ||
+                  todo.category_prefix == ''
                 "
               >
                 <i
@@ -162,70 +139,14 @@
       </div>
       <!-- END Block Title -->
 
-
-
       <div class="block-content">
-
-
-        <!-- <pre>{{ csv }}</pre> -->
-
-        <div v-if="csv != null"> 
-          <strong>{{ csv.length }}</strong>data<br />
-        </div>
-
-        <vue-csv-import
-        v-model="csv"
-        :fields="dataImportCsv">
-        
-    
-        <vue-csv-toggle-headers></vue-csv-toggle-headers>
-        <vue-csv-errors></vue-csv-errors>
-        <vue-csv-input></vue-csv-input>
-        <vue-csv-table-map
-          :auto-match="true"
-          :table-attributes="{
-            id: 'csv-table',
-            class: 'table table-bordered table-hover',
-          }"
-          ></vue-csv-table-map>
-    </vue-csv-import>
-
-
-          <button
-              v-if="csv !=null"
-              @click="saveTodobulky()"
-              type="button"
-              class="btn btn-sm btn-primary pull-left">s
-              SAVE BULKY</button>
-              <br>
-        
         <!------------------------>
         <!-- Button trigger modal -->
-        <download-excel
-        class="button"
-        :data="json_data"
-        :fields="jason_fields"
-        :worksheet="nama_sheetnya"
-        :name="nama_excelnya"
-        :before-generate="startDownload"
-        :before-finish="finishDownload"
-        type="xlsx"
-        >
-        <button 
-        class="btn btn-sm btn-info pull-left"
-        @click="download_excel_xyz()"
-        >
-        <i class="fas fa-file-excel"></i>Export Excel </button>
-        </download-excel>
-        
-
-        <button class="btn btn-sm btn-danger pull-left" @click="exportPdf()">
-           Export PDF</button>
-         
         <button
           v-if="status_table && $root.accessRoles[access_page].create"
           class="btn btn-sm btn-primary pull-right"
-          @click="show_modal()">
+          @click="show_modal()"
+        >
           ADD DATA
         </button>
 
@@ -252,15 +173,10 @@ import loadingBar from "@/assets/img/Moving_train.gif";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
-import JsonExcel from "vue-json-excel3";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-
 export default {
   components: {
-    downloadExcel: JsonExcel,
     // CmpSelect2,
-    // LoadingX,  
+    // LoadingX,
     // CmpInputText,
     // CmpInputText,
   },
@@ -270,13 +186,10 @@ export default {
       isLogin: localStorage.getItem("token") != null ? 1 : 0,
       activemenu: null,
       grid: new Grid(),
-
-      
       // grid2: new Grid(),
       errorField: {
-        name: false,
-        code: false,
-        desc: false,
+        category_name: false,
+        category_prefix: false,
       },
 
       userid: 0,
@@ -285,264 +198,22 @@ export default {
       modal: false,
 
       todo: {
-        name: "",
-        code: "",
-        desc: "",
+        category_name: "",
+        category_prefix: "",
       },
 
       flagButtonAdd: true,
-
-      csv: null,
-      
-      dataImportCsv: {
-        name: {
-          label: "name",
-          required: true,
-          
-        },
-        code:{
-        label: "code",
-        required: true,
-        },
-
-        desc:{
-        label: "desc",
-        required: true,        
-      },
-      
-
-
-    },
-    data_x_tabel: [],
-    data_x_excel: [],
-      nama_excelnya: "",
-      nama_sheetnya: "Master Doc Status",
-      json_data: [],
-      json_meta: [
-        [
-          {
-            key: "charset",
-            value: "utf-8",
-          },
-        ],
-      ],
-      json_fields: {
-        name: "name",
-        code: "code",
-        desc: "desc",
-      },
-  };
+    };
   },
   async mounted() {
     // await this.$root.refreshToken(localStorage.getItem("token"));
     this.getTable();
+    this.generateCode();
     // this.userid = this.$root.get_id_user(localStorage.getItem("unique"));
-    this.userid = localStorage.getItem("unique");
-    console.log(this.userid)
+    // this.userid = localStorage.getItem("userid");
+    this.userid = 'ADMIN';
   },
-  
   methods: {
-
-
-
-    async exportPdf() {
-      const mythis = this;
-      mythis.$root.presentLoading();
-
-      try {
-        let allData = [];
-        let count = 1;
-        let nn = 0;
-        const limitx = 100;
-
-        while (count > 0) {
-          const offsetx = limitx * nn;
-
-          const reqData = await axios({
-            method: 'get',
-            url: mythis.$root.apiHost + 'api/status?offset=' + offsetx + '&limit=' + limitx,
-          });
-
-          const resData = reqData.data;
-          allData = [...allData, ...resData.results];
-
-          if (resData.results.length === 0 || resData.results.length < limitx) {
-            count = 0;
-          }
-
-          nn++;
-          if (nn >= 100) {
-            // Safety check to prevent infinite loop
-            count = 0;
-          }
-        }
-
-        const doc = new jsPDF();
-        let totalPagesExp = '{total_pages_count_string}';
-
-        doc.setFontSize(18);
-        doc.text('Master Area Report', 14, 22);
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-
-        // Add Print Date
-        doc.setFontSize(10);
-        doc.text(`Print Date: ${new Date().toLocaleString()}`, 14, 30);
-
-        doc.autoTable({
-          theme: 'striped',
-          head: [['No', 'Code Name', 'Name', 'Description']],
-          body: allData.map((doc_statuses, index) => [index + 1, doc_statuses.name, doc_statuses.code, doc_statuses.desc.toLocaleString()]),
-          startY: 35, // Adjusted to accommodate the Print Date
-          didDrawPage: function (data) {
-            // Footer
-            let str = 'Page ' + doc.internal.getNumberOfPages();
-            if (typeof doc.putTotalPages === 'function') {
-              str = str + ' of ' + totalPagesExp;
-            }
-            doc.setFontSize(10);
-
-            let pageSize = doc.internal.pageSize;
-            let pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
-            doc.text(str, data.settings.margin.left, pageHeight - 10);
-          },
-          showHead: 'everyPage',
-        });
-
-        if (typeof doc.putTotalPages === 'function') {
-          doc.putTotalPages(totalPagesExp);
-        }
-
-        const fileName = 'Master_Area_Report_' + mythis.formatDate(new Date()) + '.pdf';
-        doc.save(fileName);
-        console.log(fileName + ' generated');
-
-        mythis.$root.stopLoading();
-        Swal.fire('Success', 'PDF has been generated successfully', 'success');
-      } catch (error) {
-        console.error('Error generating PDF:', error);
-        mythis.$root.stopLoading();
-        Swal.fire('Error', 'Failed to generate PDF', 'error');
-      }
-    },
-
-    
-    
-    
-
-    padTo2Digits(num) {
-      return num.toString().padStart(2, "0");
-    },
-    formatDate(date) {
-      return (
-        [
-          date.getFullYear(),
-          this.padTo2Digits(date.getMonth() + 1),
-          this.padTo2Digits(date.getDate()),
-        ].join("-") +
-        " " +
-        [
-          this.padTo2Digits(date.getHours()),
-          this.padTo2Digits(date.getMinutes()),
-          this.padTo2Digits(date.getSeconds()),
-        ].join(":")
-      );
-    },
-
-    
-
-    async getDataExportExcel() {
-      var mythis = this;
-      mythis.$root.presentLoading();
-      var nn = 0;
-      var count = 1;
-      var limitx = 100;
-      var offsetx = 0;
-      var baris = 0;
-
-      var nomor_x = 1;
-      var br_pdf = 0;
-      var br_flag = 0;
-      var br_string = "";
-      var html = "";
-
-      var baris_excel = 0;
-      // mythis.json_data = [];
-      mythis.data_x_excel = [];
-
-      while (count > 0) {
-        offsetx = limitx * nn;
-
-        const reqData = await axios({
-          method: "get",
-          url:
-            mythis.$root.apiHost +
-            "api/status?offset=" +
-            offsetx +
-            "&limit=" +
-            limitx,
-        });
-
-        console.log(reqData);
-
-        const resData = reqData.data;
-        console.log(resData.results.length);
-        if (resData.results.length == 0) {
-          count = 0;
-        }
-
-        Object.keys(resData.results).forEach(function (key) {
-          const countries_x = {
-            nomor: nomor_x,
-
-            name: "'" + resData.results[key].name,
-            code: resData.results[key].code,
-            desc: resData.results[key].desc,
-          };
-          mythis.data_x_excel[baris_excel] = countries_x;
-
-          br_pdf++;
-          baris_excel++;
-          nomor_x++;
-          ////////////////////////////////////////////////////////
-          ////////////////////////////////////////////////////////
-        });
-
-        nn = nn + 1;
-        if (resData.count < resData.nomorBaris) {
-          count = 0;
-        }
-        if (nn >= 100) {
-          count = 0;
-        }
-      }
-
-      baris_excel++;
-      //Penutup Excel
-
-      baris_excel++;
-      var countries_x = {
-        nomor: "",
-        nama: "Print Date",
-        nik: mythis.formatDate(new Date()),
-      };
-      mythis.data_x_excel[baris_excel] = countries_x;
-
-      mythis.json_data = mythis.data_x_excel;
-      mythis.flagDownloadXLS = 1;
-
-      var a = new Date().toLocaleString("en-GB");
-      mythis.nama_excelnya = "MASTER_STATUS_" + a + ".xlsx";
-      // mythis.nama_sheetnya = mythis.nama_excelnya;
-
-      mythis.$root.stopLoading();
-    },
-    download_excel_xyz() {},
-    async startDownload() {
-      await this.getDataExportExcel();
-    },
-    finishDownload() {},
-
     mySelectEvent() {
       this.todo.roles = this.tmp.cboRoles.code;
     },
@@ -588,14 +259,14 @@ export default {
               Authorization: AuthStr,
             },
           };
-          var url = mythis.$root.apiHost + mythis.$root.prefixApi +"status";
+          var url = mythis.$root.apiHost + mythis.$root.prefixApi +"master-categories";
           axios
             .post(
               url,
               {
-                name: mythis.todo.name,
-                desc: mythis.todo.desc,
-                code: mythis.todo.code,
+                // category_code: mythis.todo.category_code,
+                category_name: mythis.todo.category_name,
+                category_prefix: mythis.todo.category_prefix,
                 userid: mythis.userid,
               },
               config
@@ -644,85 +315,6 @@ export default {
         }
       });
     },
-    saveTodobulky() {
-      var mythis = this;
-
-      Swal.fire({
-        title: "Create Document Status",
-        text: "Are you sure?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes",
-        cancelButtonText: "Cancel",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          /////////////////////////////////////////////////////////////////////
-          // mythis.$root.presentLoading();
-          mythis.$root.flagButtonLoading = true;
-          const AuthStr = "bearer " + localStorage.getItem("token");
-          const config = {
-            headers: {
-              Authorization: AuthStr,
-            },
-          };
-          var url = mythis.$root.apiHost + mythis.$root.prefixApi +"storebulky";
-          axios
-            .post(
-              url,
-              {
-                csv: mythis.csv,
-                user_id: mythis.userid,
-                
-              },
-              config
-            )
-            .then((res) => {
-              Swal.fire("Created!", res.data.message, "success");
-              //mythis.$root.stopLoading();
-              mythis.$root.flagButtonLoading = false;
-              mythis.resetForm();
-              mythis.show_modal();
-              mythis.refreshTable();
-            })
-            .catch(function (error) {
-              mythis.$root.flagButtonLoading = false;
-              if (error.response) {
-                //console.log(error.response.data);
-                if (error.response.status == 422) {
-                  mythis.errorList = error.response.data;
-                  // mythis.$root.loader = false;
-                  if (Object.keys(mythis.errorList).length > 0) {
-                    //refresh semua menjadi false
-                    Object.keys(mythis.errorField).forEach(function (key) {
-                      mythis.errorField[key] = false;
-                    });
-                    //membuat jika error jadi true
-                    Object.keys(mythis.errorList).forEach(function (key) {
-                      toast.error(mythis.errorList[key], { theme: "colored" });
-
-                      // const myArray = key.split(".");
-                      // mythis.errorField[myArray[1]] = true;
-                      mythis.errorField[key] = true;
-                    });
-                  }
-                } else {
-                  toast.error(error.response.data.message, {
-                    theme: "colored",
-                  });
-                }
-              } else if (error.request) {
-                console.log(error.request);
-              } else {
-                console.log("Error", error.message);
-              }
-            });
-          /////////////////////////////////////////////////////////////////////
-        }
-      });
-    },
-
     show_modal() {
       this.modal = !this.modal;
       if (this.modal == false) {
@@ -764,9 +356,9 @@ export default {
         columns: [
           { name: "ID", hidden: true },
           "No",
-          "Code Name",
-          "Name",
-          "Description",
+          "CODE",
+          "CATEGORY NAME",
+          "PREFIX",
           {
             name: "Action",
             formatter: (_, row) =>
@@ -805,14 +397,14 @@ export default {
           },
         },
         server: {
-          url: this.$root.apiHost + this.$root.prefixApi +"status",
+          url: this.$root.apiHost + this.$root.prefixApi +"master-categories/getData",
           then: (data) =>
             data.results.map((card) => [
               card.id,
               data.nomorBaris++ + 1,
-              html(`<span class="pull-left">${card.code}</span>`),
-              html(`<span class="pull-left">${card.name}</span>`),
-              html(`<span class="pull-left">${card.desc}</span>`),
+              html(`<span class="pull-left">${card.category_code}</span>`),
+              html(`<span class="pull-left">${card.category_name}</span>`),
+              html(`<span class="pull-left">${card.category_prefix}</span>`),
             ]),
           total: (data) => data.count,
           handle: (res) => {
@@ -859,7 +451,7 @@ export default {
           };
           axios
             .delete(
-              mythis.$root.apiHost + mythis.$root.prefixApi +`status/${id}`,
+              mythis.$root.apiHost + mythis.$root.prefixApi +`master-categories/${id}`,
               config
             )
             .then((res) => {
@@ -885,11 +477,10 @@ export default {
       };
       axios
         .put(
-          mythis.$root.apiHost + mythis.$root.prefixApi +"status/" + mythis.todo.id,
+          mythis.$root.apiHost + mythis.$root.prefixApi +"master-categories/" + mythis.todo.id,
           {
-            name: mythis.todo.name,
-            desc: mythis.todo.desc,
-            code: mythis.todo.code,
+            category_name: mythis.todo.category_name,
+            category_prefix: mythis.todo.category_prefix,
             userid: mythis.userid,
           },
           config
@@ -948,19 +539,34 @@ export default {
         },
       };
       await axios
-        .get(mythis.$root.apiHost + mythis.$root.prefixApi +`status/${id}`, config)
-        .then(async (res) => { 
+      .get(mythis.$root.apiHost + mythis.$root.prefixApi +`master-categories/${id}`, config)
+        .then(async (res) => {
           //console.log(res.data.data);
           //mythis.acuanEdit = id;
           //mythis.todo = res.data.data;
           mythis.todo.id = id;
-          mythis.todo.name = res.data.data.name.toUpperCase();
-          mythis.todo.desc = res.data.data.desc.toUpperCase();
-          mythis.todo.code = res.data.data.code;
-
-          document.getElementById("inputA").focus(); // sets the focus on the input
+          mythis.todo.category_name = res.data.data.category_name.toUpperCase();
+          mythis.todo.category_prefix = res.data.data.category_prefix.toUpperCase();
 
           mythis.$root.stopLoading();
+        });
+    },
+
+    async generateCode() {
+      var mythis = this;
+      mythis.todo = {};
+      const AuthStr = "bearer " + localStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: AuthStr,
+        },
+      };
+      await axios
+      .get(mythis.$root.apiHost + mythis.$root.prefixApi + `generateCode`, config)
+        .then(async (res) => {
+          console.log(res)
+          const data = res.data;
+          this.todo.category_code = data;
         });
     },
   },

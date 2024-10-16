@@ -89,9 +89,13 @@ import cmpHalDashboard1 from "@/views/pages/cmpHalDashboard.vue";
 import cmpHalDashboard2 from "@/views/pages/cmpHalDashboard.vue";
 import cmpHalDashboard3 from "@/views/pages/cmpHalDashboard.vue";
 import cmpMasterDocStatus from "@/views/pages/test/cmpMasterDocStatus.vue";
-import cmpMasterCategory from "@/views/pages/master/cmpMasterCategory.vue";
-import cmpMasterJoblist from "@/views/pages/master/cmpMasterJoblist.vue";
 import cmpHalRoute from "@/views/pages/cmpHalRoute.vue";
+import cmpMasterCategories from "./views/pages/master/cmpMasterCategories.vue";
+import cmpMasterJobList from "./views/pages/master/cmpMasterJobList.vue";
+import cmpTransaction from "./views/pages/master/cmpTransaction.vue";
+
+
+
 
 //MENU DINAMIS GET DARI FOLDER - START
 // const componentViews = import.meta.globEager("@/views/*.vue");
@@ -123,8 +127,9 @@ const routeComponent = {
   cmpHalDashboard2: markRaw(cmpHalDashboard2),
   cmpHalDashboard3: markRaw(cmpHalDashboard3),
   cmpMasterDocStatus: markRaw(cmpMasterDocStatus),
-  cmpMasterCategory: markRaw(cmpMasterCategory),
-  cmpMasterJoblist: markRaw(cmpMasterJoblist),
+  cmpMasterCategories: markRaw(cmpMasterCategories),
+  cmpMasterJobList: markRaw(cmpMasterJobList),
+  cmpTransaction: markRaw(cmpTransaction),
   Login: markRaw(_Login),
   _logout: markRaw(_logout),
   _header: markRaw(_header),
@@ -278,6 +283,7 @@ export default {
       timerLoginDetik = import.meta.env.VITE_APP_TIMER_LOGIN_DETIK,
       secretCodeEnc = import.meta.env.VITE_APP_SECRET_CODE_ENC,
       appName = import.meta.env.VITE_APP_NAMA_APLIKASI,
+      prefixApi = import.meta.env.VITE_APP_PREFIX_API,
       // menuHeader_logo = menuHeader_X_logo,
       // menuUserHtml = routeComponent_Menu,
       // menuHeader = menuHeader_X,
@@ -303,6 +309,7 @@ export default {
       appName: appName,
       apiHost: apiHost,
       appHost: appHost,
+      prefixApi : prefixApi,
       appID: appID,
       apiHostJWT: apiHostJWT,
       appBaseUrl: appBaseUrl,
@@ -344,23 +351,25 @@ export default {
       // menuHeader_status: null,
 
       menuHeader: {
-        "MENU": {
+        "NAMA MENU": {
           MASTER: {
-            // cmpMasterDocStatus: "MENU TEST 1",
-            cmpMasterCategory: "MASTER CATEGORY",
-            cmpMasterJoblist: "MASTER JOB LIST",
-            // "SUB MENU": {
-            //   cmpHalDashboard1: "DASHBOARD1",
-            //   cmpHalDashboard2: "DASHBOARD2",
-            //   cmpHalDashboard3: "DASHBOARD3",
-            // },
+            cmpMasterDocStatus: "MENU TEST 1",
+            cmpMasterCategories: "MASTER CATEGORY",
+            cmpMasterJobList: "MASTER JOB LIST",
+            cmpTransaction: "TRANSACTION",
+            "SUB MENU": {
+              cmpHalDashboard1: "DASHBOARD1",
+              cmpHalDashboard2: "DASHBOARD2",
+              cmpHalDashboard3: "DASHBOARD3",
+            },
           },
         },
       },
       menuUserHtml: {
         cmpMasterDocStatus: "MENU TEST 1",
-        cmpMasterCategory: "MASTER CATEGORY",
-        cmpMasterJoblist: "MASTER JOB LIST",
+        cmpMasterCategories: "MASTER CATEGORY",
+        cmpMasterJobList: "MASTER JOB LIST",
+        cmpTransaction: "TRANSACTION",
         cmpHalDashboard1: "DASHBOARD1",
         cmpHalDashboard2: "DASHBOARD2",
         cmpHalDashboard3: "DASHBOARD3",
@@ -378,12 +387,17 @@ export default {
           update: true,
           delete: true,
         },
-        cmpMasterCategory: {
+        cmpMasterCategories: {
           create: true,
           update: true,
           delete: true,
         },
-        cmpMasterJoblist: {
+        cmpMasterJobList: {
+          create: true,
+          update: true,
+          delete: true,
+        },
+        cmpTransaction: {
           create: true,
           update: true,
           delete: true,

@@ -19,7 +19,7 @@ class MasterJobCategoryController extends Controller
             'status' => true,
             'message' => 'Berhasil',
             'data' => $data
-        ]);
+        ],200 );
     }
 
     /**
