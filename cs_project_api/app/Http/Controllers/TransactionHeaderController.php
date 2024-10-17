@@ -247,4 +247,20 @@ class TransactionHeaderController extends Controller
 
    }   
 
+   public function generateCode()
+    {
+        $kode =  '001';
+
+        // $count = MasterCategories::count();
+        $count = TransactionHeader::where('trans_date', date('Y-m-d'))
+        ->count();
+
+        if ($count > 0) {
+            $kode = str_pad($kode + $count, 3, '0', STR_PAD_LEFT);
+            return 'CAT' . date('Ymd') . $kode;
+        } else {
+            return 'CAT' . date('Ymd') . $kode;
+        }
+    }
+
 }

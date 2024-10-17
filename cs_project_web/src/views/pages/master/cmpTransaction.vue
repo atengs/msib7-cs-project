@@ -36,6 +36,7 @@
                 <div class="form-group">
                   <label for="example-nf-email">Trans Number</label>
                   <CmpInputText
+                    readonly
                     type="text"
                     placeholder="Trans Number"
                     v-model="todo.trans_number"
@@ -256,7 +257,7 @@
 
           <div class="row" v-for="(input, k) in ratecardForm" :key="k">
             <div class="col-md-12">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="form-group">
                   <label for="example-nf-email">Rate Card</label>
                   <select
@@ -277,7 +278,7 @@
                 </div>
               </div>
 
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="form-group">
                   <label for="example-nf-email">Nominal</label>
                   <CmpInputText
@@ -286,6 +287,22 @@
                     v-model="input.ratecard_nominal"
                     :class="
                       errorField.ratecard_nominal
+                        ? 'form-control input-lg input-error'
+                        : 'form-control input-lg'
+                    "
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="example-nf-email">Note</label>
+                  <CmpInputText
+                    type="text"
+                    placeholder="Note"
+                    v-model="input.note"
+                    :class="
+                      errorField.note
                         ? 'form-control input-lg input-error'
                         : 'form-control input-lg'
                     "
@@ -511,6 +528,7 @@ export default {
         {
           ratecard_id: "",
           ratecard_nominal: "",
+          note: "",
         },
       ],
     };
@@ -521,6 +539,7 @@ export default {
     this.getMasterCategory();
     this.getMasterJobCategory();
     this.getMasterJobList();
+    this.generateCode();
 
     // this.userid = this.$root.get_id_user(localStorage.getItem("unique"));
     // this.userid = localStorage.getItem("userid");
@@ -532,6 +551,7 @@ export default {
       this.ratecardForm.push({
         ratecard_id: "",
         ratecard_nominal: "",
+        note: "",
       });
     },
     // remove form
@@ -676,6 +696,11 @@ export default {
               Swal.fire("Created!", res.data.message, "success");
               //mythis.$root.stopLoading();
               mythis.$root.flagButtonLoading = false;
+              mythis.ratecardForm = [{
+                ratecard_id: "",
+                ratecard_nominal: "",
+                note: "",
+              }]
               mythis.resetForm();
               mythis.show_modal();
               mythis.refreshTable();
@@ -990,6 +1015,27 @@ export default {
           // document.getElementById("inputA").focus(); // sets the focus on the input
 
           mythis.$root.stopLoading();
+        });
+    },
+
+    // generate trx code
+    async generateCode(id) {
+      var mythis = this;
+      mythis.todo = {};
+      const AuthStr = "bearer " + localStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: AuthStr,
+        },
+      };
+      await axios
+        .get(
+          mythis.$root.apiHost + mythis.$root.prefixApi + `trx-header/generate-code`,
+          config
+        )
+        .then(async (res) => {
+          console.log(res.data.data);
+          const data = res.data.data;
         });
     },
   },
