@@ -251,6 +251,32 @@
             </div>
           </div>
 
+          <div class="row">
+            <div class="col-md-12">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="example-nf-email">Address</label>
+                  <CmpInputText
+                    type="text"
+                    placeholder="Address"
+                    v-model="todo.address"
+                    :class="
+                      errorField.address
+                        ? 'form-control input-lg input-error'
+                        : 'form-control input-lg'
+                    "
+                    @input="
+                      (val) =>
+                        (todo.address =
+                          todo.address.toUpperCase())
+                    "
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+
           <br />
           <br />
           <br />
@@ -534,6 +560,7 @@ export default {
     };
   },
   async mounted() {
+    // console.log(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate());
     // await this.$root.refreshToken(localStorage.getItem("token"));
     this.getTable();
     this.getMasterCategory();
@@ -681,6 +708,7 @@ export default {
                 trans_date: mythis.todo.trans_date,
                 payment_status: mythis.todo.payment_status,
                 person_in_charge: mythis.todo.person_in_charge,
+                address: mythis.todo.address,
                 project: mythis.todo.project,
                 job: mythis.todo.job,
                 acount_executive: mythis.todo.acount_executive,
@@ -702,6 +730,7 @@ export default {
                 note: "",
               }]
               mythis.resetForm();
+              mythis.generateCode();
               mythis.show_modal();
               mythis.refreshTable();
             })
@@ -787,6 +816,7 @@ export default {
           "TRANS DATE",
           "PAYMENT STATUS",
           "PERSON IN CHARGE",
+          "ADDRESS",
           "PROJECT",
           "JOB",
           "ACOUNT EXECUTIVE",
@@ -837,6 +867,7 @@ export default {
               html(`<span class="pull-left">${card.trans_date}</span>`),
               html(`<span class="pull-left">${card.payment_status}</span>`),
               html(`<span class="pull-left">${card.person_in_charge}</span>`),
+              html(`<span class="pull-left">${card.address}</span>`),
               html(`<span class="pull-left">${card.project}</span>`),
               html(`<span class="pull-left">${card.job}</span>`),
               html(`<span class="pull-left">${card.acount_executive}</span>`),
@@ -1034,8 +1065,10 @@ export default {
           config
         )
         .then(async (res) => {
-          console.log(res.data.data);
-          const data = res.data.data;
+          console.log(res.data);
+          this.todo.trans_number = res.data;
+          // console.log(res.data.data);
+          // const data = res.data.data;
         });
     },
   },

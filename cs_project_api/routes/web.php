@@ -46,8 +46,8 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     $router->put('/trx-header/{id}', 'TransactionHeaderController@update');
     $router->delete('/trx-header/{id}', 'TransactionHeaderController@destroy');
     $router->get('/trx-header/getData', 'TransactionHeaderController@getData');
-    $router->get('/trx-header/{id}', 'TransactionHeaderController@show');
     $router->get('/trx-header/generate-code', 'TransactionHeaderController@generateCode');
+    $router->get('/trx-header/{id}', 'TransactionHeaderController@show');
 
     // Transaction Detail
     $router->get('/trx-detail', 'TransactionDetailController@index');

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('trans_date')->nullable();
             $table->string('payment_status')->nullable();
             $table->string('person_in_charge')->nullable();
+            $table->string('address')->nullable();
             $table->string('project')->nullable();
             $table->string('job')->nullable();
             $table->string('acount_executive')->nullable();

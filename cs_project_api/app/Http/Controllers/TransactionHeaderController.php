@@ -8,6 +8,7 @@ use App\Models\PublicModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class TransactionHeaderController extends Controller
 {
@@ -47,6 +48,7 @@ class TransactionHeaderController extends Controller
             'trans_date' => 'required|date',
             'payment_status' => 'required|string',
             'person_in_charge' => 'required|string',
+            'address' => 'required|string',
             'project' => 'required|string',
             'job' => 'required|string',
             'acount_executive' => 'required|string',
@@ -62,6 +64,7 @@ class TransactionHeaderController extends Controller
         $item->trans_date = $request->input('trans_date');
         $item->payment_status = $request->input('payment_status');
         $item->person_in_charge = $request->input('person_in_charge');
+        $item->address = $request->input('address');
         $item->project = $request->input('project');
         $item->job = $request->input('job');
         $item->acount_executive = $request->input('acount_executive');
@@ -249,17 +252,18 @@ class TransactionHeaderController extends Controller
 
    public function generateCode()
     {
+        $romanMonth = [1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V', 6 => 'VI', 7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'];
         $kode =  '001';
 
         // $count = MasterCategories::count();
-        $count = TransactionHeader::where('trans_date', date('Y-m-d'))
+        $count = TransactionHeader::whereMonth('trans_date', date('m'))
         ->count();
 
         if ($count > 0) {
             $kode = str_pad($kode + $count, 3, '0', STR_PAD_LEFT);
-            return 'CAT' . date('Ymd') . $kode;
+            return 'EX/' . $kode . '/' . $romanMonth[date('m')] . '/' . date('Y') . '/CS';
         } else {
-            return 'CAT' . date('Ymd') . $kode;
+            return 'EX/' . $kode . '/' . $romanMonth[date('m')] . '/' . date('Y') . '/CS';
         }
     }
 
