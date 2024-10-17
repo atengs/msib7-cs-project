@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MasterJoblist;
+use App\Models\MasterRatecard;
 use App\Models\PublicModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 
-class MasterJoblistController extends Controller
+class MasterRatecardController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,7 +17,7 @@ class MasterJoblistController extends Controller
      */
     public function index()
     {
-        $data = MasterJobList::all();
+        $data = MasterRatecard::all();
         return response()->json([
             'status' => true,
             'message' => 'Berhasil',
@@ -50,7 +50,7 @@ class MasterJoblistController extends Controller
             'remarks'           => 'required'
         ]);
         //create post
-        $save = MasterJoblist::create([
+        $save = MasterRatecard::create([
             'category_code'     => $request->post('category_code'),
             'job_category_code'     => $request->post('job_category_code'),
             'job_description'     => $request->post('job_description'),
@@ -75,12 +75,12 @@ class MasterJoblistController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\MasterJoblist  $masterJoblist
+     * @param  \App\Models\MasterRatecard  $masterRatecard
      * @return \Illuminate\Http\Response
      */
     public function show(String $id)
     {
-        $data = MasterJobList::find($id);
+        $data = MasterRatecard::find($id);
         return response()->json([
             'status' => true,
             'message' => 'Berhasil',
@@ -91,10 +91,10 @@ class MasterJoblistController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\MasterJoblist  $masterJoblist
+     * @param  \App\Models\MasterRatecard  $masterRatecard
      * @return \Illuminate\Http\Response
      */
-    public function edit(MasterJoblist $masterJoblist)
+    public function edit(MasterRatecard $masterRatecard)
     {
         //
     }
@@ -103,7 +103,7 @@ class MasterJoblistController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\MasterJoblist  $masterJoblist
+     * @param  \App\Models\MasterRatecard  $masterRatecard
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, String $id)
@@ -115,7 +115,7 @@ class MasterJoblistController extends Controller
             'remarks'           => 'required'
         ]);
         //create post
-        $post = MasterJoblist::findOrFail($id);
+        $post = MasterRatecard::findOrFail($id);
         $post->update([
             'category_code'         => $request->post('category_code'),
             'job_category_code'     => $request->post('job_category_code'),
@@ -143,12 +143,12 @@ class MasterJoblistController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\MasterJoblist  $masterJoblist
+     * @param  \App\Models\MasterRatecard  $masterRatecard
      * @return \Illuminate\Http\Response
      */
     public function destroy(String $id)
     {
-        $data = MasterJoblist::find($id);
+        $data = MasterRatecard::find($id);
         if($data->delete()) {
             return response()->json([
                 'status'    => true,
@@ -167,12 +167,12 @@ class MasterJoblistController extends Controller
         $URL =  URL::current();
 
         if (!isset($request->search)) {
-            $count = (new MasterJoblist)->count();
+            $count = (new MasterRatecard)->count();
             $arr_pagination = (new PublicModel())->pagination_without_search($URL, $request->limit, $request->offset);
-            $todos = (new MasterJoblist)->get_data_($request->search, $arr_pagination);
+            $todos = (new MasterRatecard)->get_data_($request->search, $arr_pagination);
         } else {
             $arr_pagination = (new PublicModel)->pagination_without_search($URL, $request->limit, $request->offset, $request->search);
-            $todos =  (new MasterJoblist)->get_data_($request->search, $arr_pagination);
+            $todos =  (new MasterRatecard)->get_data_($request->search, $arr_pagination);
             $count = $todos->count();
         }
 

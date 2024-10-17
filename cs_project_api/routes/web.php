@@ -30,12 +30,12 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     
 
     // Master Job List
-    $router->get('/master-job-list', 'MasterJobListController@index');
-    $router->get('/master-job-list/getData', 'MasterJobListController@getData');
-    $router->get('/master-job-list/{id}', 'MasterJobListController@show');
-    $router->post('/master-job-list', 'MasterJobListController@store');
-    $router->put('/master-job-list/{id}', 'MasterJobListController@update');
-    $router->delete('/master-job-list/{id}', 'MasterJobListController@destroy');
+    $router->get('/master-job-list', 'MasterRatecardController@index');
+    $router->get('/master-job-list/getData', 'MasterRatecardController@getData');
+    $router->get('/master-job-list/{id}', 'MasterRatecardController@show');
+    $router->post('/master-job-list', 'MasterRatecardController@store');
+    $router->put('/master-job-list/{id}', 'MasterRatecardController@update');
+    $router->delete('/master-job-list/{id}', 'MasterRatecardController@destroy');
 
     $router->get('/master-job-category', 'MasterJobCategoryController@index');
 

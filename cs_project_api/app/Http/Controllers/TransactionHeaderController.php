@@ -27,7 +27,7 @@ class TransactionHeaderController extends Controller
         // $data = TransactionHeader::find($id);
         $data = TransactionHeader::select('transaction_header.*', 'mj.job_description', 'td.ratecard_id', 'td.ratecard_nominal')
         ->leftJoin('transaction_detail AS td', 'td.trans_number','=','transaction_header.trans_number')
-        ->leftJoin('master_joblists as mj','mj.id', '=', 'td.ratecard_id')
+        ->leftJoin('master_ratecard as mj','mj.id', '=', 'td.ratecard_id')
         ->whereNull('transaction_header.deleted_at')
         ->where('transaction_header.id', $id)
         ->first();

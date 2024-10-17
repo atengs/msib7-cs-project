@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('master_joblists', function (Blueprint $table) {
+        Schema::create('master_ratecard', function (Blueprint $table) {
             $table->id();
             $table->string('category_code')->nullable();
             $table->string('job_category_code')->nullable();
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('master_joblists');
+        Schema::dropIfExists('master_ratecard');
     }
 };

@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class MasterJoblist extends Model
+class MasterRatecard extends Model
 {
     use SoftDeletes;
     protected $dates = ['deleted_at'];
-    protected $table = 'master_joblists';
+    protected $table = 'master_ratecard';
     protected $fillable = [
         'category_code',
         'job_category_code',
@@ -29,11 +29,11 @@ class MasterJoblist extends Model
     {
         if (!empty($search)) $arr_pagination['offset'] = 0;
         $search = strtolower($search);
-        $data = MasterJoblist::select('master_joblists.*','master_categories.category_name', 'master_job_categories.job_category_name')
-            ->join('master_categories','master_categories.category_code','=','master_joblists.category_code')
-            ->join('master_job_categories','master_job_categories.job_category_code','=','master_joblists.job_category_code')
-            ->whereRaw(" lower(master_joblists.job_description) like '%$search%' ")
-            ->whereNull('master_joblists.deleted_by')
+        $data = MasterRatecard::select('master_ratecard.*','master_categories.category_name', 'master_job_categories.job_category_name')
+            ->join('master_categories','master_categories.category_code','=','master_ratecard.category_code')
+            ->join('master_job_categories','master_job_categories.job_category_code','=','master_ratecard.job_category_code')
+            ->whereRaw(" lower(master_ratecard.job_description) like '%$search%' ")
+            ->whereNull('master_ratecard.deleted_by')
             ->offset($arr_pagination['offset'])->limit($arr_pagination['limit'])
             ->orderBy('job_description', 'ASC')
             ->get();

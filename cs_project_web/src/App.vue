@@ -91,7 +91,7 @@ import cmpHalDashboard3 from "@/views/pages/cmpHalDashboard.vue";
 import cmpMasterDocStatus from "@/views/pages/test/cmpMasterDocStatus.vue";
 import cmpHalRoute from "@/views/pages/cmpHalRoute.vue";
 import cmpMasterCategories from "./views/pages/master/cmpMasterCategories.vue";
-import cmpMasterJobList from "./views/pages/master/cmpMasterJobList.vue";
+import cmpMasterRateCard from "./views/pages/master/cmpMasterRateCard.vue";
 import cmpTransaction from "./views/pages/master/cmpTransaction.vue";
 
 
@@ -128,7 +128,7 @@ const routeComponent = {
   cmpHalDashboard3: markRaw(cmpHalDashboard3),
   cmpMasterDocStatus: markRaw(cmpMasterDocStatus),
   cmpMasterCategories: markRaw(cmpMasterCategories),
-  cmpMasterJobList: markRaw(cmpMasterJobList),
+  cmpMasterRateCard: markRaw(cmpMasterRateCard),
   cmpTransaction: markRaw(cmpTransaction),
   Login: markRaw(_Login),
   _logout: markRaw(_logout),
@@ -355,7 +355,7 @@ export default {
           MASTER: {
             cmpMasterDocStatus: "MENU TEST 1",
             cmpMasterCategories: "MASTER CATEGORY",
-            cmpMasterJobList: "MASTER JOB LIST",
+            cmpMasterRateCard: "MASTER RATECARD",
             cmpTransaction: "TRANSACTION",
             "SUB MENU": {
               cmpHalDashboard1: "DASHBOARD1",
@@ -368,7 +368,7 @@ export default {
       menuUserHtml: {
         cmpMasterDocStatus: "MENU TEST 1",
         cmpMasterCategories: "MASTER CATEGORY",
-        cmpMasterJobList: "MASTER JOB LIST",
+        cmpMasterRateCard: "MASTER RATECARD",
         cmpTransaction: "TRANSACTION",
         cmpHalDashboard1: "DASHBOARD1",
         cmpHalDashboard2: "DASHBOARD2",
@@ -392,7 +392,7 @@ export default {
           update: true,
           delete: true,
         },
-        cmpMasterJobList: {
+        cmpMasterRateCard: {
           create: true,
           update: true,
           delete: true,
