@@ -56,20 +56,18 @@
 
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="example-nf-email">Payment Status</label>
+                  <label for="example-nf-email">Project</label>
                   <CmpInputText
                     type="text"
-                    placeholder="Payment Status"
-                    v-model="todo.payment_status"
+                    placeholder="Project"
+                    v-model="todo.project"
                     :class="
-                      errorField.payment_status
+                      errorField.project
                         ? 'form-control input-lg input-error'
                         : 'form-control input-lg'
                     "
                     @input="
-                      (val) =>
-                        (todo.payment_status =
-                          todo.payment_status.toUpperCase())
+                      (val) => (todo.project = todo.project.toUpperCase())
                     "
                   />
                 </div>
@@ -121,7 +119,7 @@
             </div>
           </div>
 
-          <div class="row">
+          <!-- <div class="row">
             <div class="col-md-12">
               <div class="col-md-6">
                 <div class="form-group">
@@ -161,7 +159,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <div class="row">
             <div class="col-md-12">
@@ -273,6 +271,27 @@
                   />
                 </div>
               </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="example-nf-email">Payment Status</label>
+                  <CmpInputText
+                    type="text"
+                    placeholder="Payment Status"
+                    v-model="todo.payment_status"
+                    :class="
+                      errorField.payment_status
+                        ? 'form-control input-lg input-error'
+                        : 'form-control input-lg'
+                    "
+                    @input="
+                      (val) =>
+                        (todo.payment_status =
+                          todo.payment_status.toUpperCase())
+                    "
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -308,7 +327,7 @@
                 <div class="form-group">
                   <label for="example-nf-email">Nominal</label>
                   <CmpInputText
-                    type="number"
+                    type="text"
                     placeholder="Nominal"
                     v-model="input.ratecard_nominal"
                     :class="
@@ -374,8 +393,8 @@
                   todo.trans_number == '' ||
                   todo.customer == null ||
                   todo.customer == '' ||
-                  todo.trans_date == null ||
-                  todo.trans_date == '' ||
+                  // todo.trans_date == null ||
+                  // todo.trans_date == '' ||
                   todo.payment_status == null ||
                   todo.payment_status == '' ||
                   todo.person_in_charge == null ||
@@ -508,6 +527,7 @@ export default {
   },
   data() {
     return {
+      
       access_page: this.$root.decryptData(localStorage.getItem("halaman")),
       isLogin: localStorage.getItem("token") != null ? 1 : 0,
       activemenu: null,
@@ -525,6 +545,7 @@ export default {
         acount_manager: false,
         finance_manager: false,
         ratecard: false,
+        
       },
 
       userid: 0,
@@ -705,7 +726,7 @@ export default {
               {
                 trans_number: mythis.todo.trans_number,
                 customer: mythis.todo.customer,
-                trans_date: mythis.todo.trans_date,
+                // trans_date: mythis.todo.trans_date,
                 payment_status: mythis.todo.payment_status,
                 person_in_charge: mythis.todo.person_in_charge,
                 address: mythis.todo.address,

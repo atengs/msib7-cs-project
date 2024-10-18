@@ -45,7 +45,7 @@ class TransactionHeaderController extends Controller
         $this->validate($request, [
             'trans_number' => 'required|string',
             'customer' => 'required|string',
-            'trans_date' => 'required|date',
+            // 'trans_date' => 'required|date',
             'payment_status' => 'required|string',
             'person_in_charge' => 'required|string',
             'address' => 'required|string',
@@ -61,7 +61,8 @@ class TransactionHeaderController extends Controller
  
         $item->trans_number = $request->input('trans_number');
         $item->customer = $request->input('customer');
-        $item->trans_date = $request->input('trans_date');
+        // $item->trans_date = $request->input('trans_date');
+        $item->trans_date = date('Y-m-d');
         $item->payment_status = $request->input('payment_status');
         $item->person_in_charge = $request->input('person_in_charge');
         $item->address = $request->input('address');
@@ -256,7 +257,7 @@ class TransactionHeaderController extends Controller
         $kode =  '001';
 
         // $count = MasterCategories::count();
-        $count = TransactionHeader::whereMonth('trans_date', date('m'))
+        $count = TransactionHeader::whereMonth('created_at', date('m'))
         ->count();
 
         if ($count > 0) {
