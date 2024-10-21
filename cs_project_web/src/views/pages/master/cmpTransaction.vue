@@ -861,28 +861,28 @@ export default {
           "ACOUNT EXECUTIVE",
           "ACOUNT MANAGER",
           "FINANCE MANAGER",
-          // {
-            // name: "Action",
-            // formatter: (_, row) =>
-            //   mythis.$root.accessRoles[mythis.access_page].update &&
-            //   mythis.$root.accessRoles[mythis.access_page].delete
-            //     ? html(
-            //         `
-            //       <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>
-            //       &nbsp;&nbsp;&nbsp;
-            //       <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>
-            //     `
-            //       )
-            //     : mythis.$root.accessRoles[mythis.access_page].update
-            //     ? html(
-            //         `
-            //       <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>`
-            //       )
-            //     : mythis.$root.accessRoles[mythis.access_page].delete
-            //     ? html(`&nbsp;&nbsp;&nbsp;
-            //       <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>`)
-            //     : ``,
-          // },
+          {
+            name: "Action",
+            formatter: (_, row) =>
+              mythis.$root.accessRoles[mythis.access_page].update &&
+              mythis.$root.accessRoles[mythis.access_page].delete
+                ? html(
+                    `
+                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>
+                  &nbsp;&nbsp;&nbsp;
+                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>
+                `
+                  )
+                : mythis.$root.accessRoles[mythis.access_page].update
+                ? html(
+                    `
+                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>`
+                  )
+                : mythis.$root.accessRoles[mythis.access_page].delete
+                ? html(`&nbsp;&nbsp;&nbsp;
+                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>`)
+                : ``,
+          },
         ],
         style: {
           table: {
@@ -996,6 +996,7 @@ export default {
             trans_date: mythis.todo.trans_date,
             payment_status: mythis.todo.payment_status,
             person_in_charge: mythis.todo.person_in_charge,
+            address: mythis.todo.address,
             project: mythis.todo.project,
             job: mythis.todo.job,
             acount_executive: mythis.todo.acount_executive,
@@ -1076,6 +1077,7 @@ export default {
           mythis.todo.trans_date = data.trans_date;
           mythis.todo.payment_status = data.payment_status;
           mythis.todo.person_in_charge = data.person_in_charge;
+          mythis.todo.address = data.address;
           mythis.todo.project = data.project;
           mythis.todo.job = data.job;
           mythis.todo.acount_executive = data.acount_executive;

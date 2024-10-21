@@ -125,6 +125,7 @@ class TransactionHeaderController extends Controller
             'trans_date' => 'required|date',
             'payment_status' => 'required|string',
             'person_in_charge' => 'required|string',
+            'address' => 'required|string',
             'project' => 'required|string',
             'job' => 'required|string',
             'acount_executive' => 'required|string',
@@ -144,6 +145,7 @@ class TransactionHeaderController extends Controller
         $item->trans_date = $request->input('trans_date');
         $item->payment_status = $request->input('payment_status');
         $item->person_in_charge = $request->input('person_in_charge');
+        $item->address = $request->input('address');
         $item->project = $request->input('project');
         $item->job = $request->input('job');
         $item->acount_executive = $request->input('acount_executive');
