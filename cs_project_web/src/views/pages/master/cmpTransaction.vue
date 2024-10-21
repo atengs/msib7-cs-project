@@ -311,11 +311,12 @@
                     v-model="input.ratecard_id"
                     name="category_code"
                     id="category_code"
+                    @change="updateNominal(k)"
                   >
                     <option
                       v-for="(item, index) in mstJobList"
                       :key="index"
-                      :value="item.id"
+                      :value="item.ratecard"
                     >
                       {{ item.job_description }}
                     </option>
@@ -327,7 +328,8 @@
                 <div class="form-group">
                   <label for="example-nf-email">Nominal</label>
                   <CmpInputText
-                    type="text"
+                  readonly
+                    type="number"
                     placeholder="Nominal"
                     v-model="input.ratecard_nominal"
                     :class="
@@ -526,13 +528,17 @@ export default {
     // CmpInputText,
   },
   data() {
-    return {
+    return   {
       
       access_page: this.$root.decryptData(localStorage.getItem("halaman")),
       isLogin: localStorage.getItem("token") != null ? 1 : 0,
       activemenu: null,
       grid: new Grid(),
       // grid2: new Grid(),
+
+      ratecardForm: [],
+      mstJobList: [],
+
       errorField: {
         trans_number: false,
         customer: false,
@@ -579,6 +585,7 @@ export default {
         },
       ],
     };
+    
   },
   async mounted() {
     // console.log(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate());
@@ -595,6 +602,17 @@ export default {
   },
   methods: {
     // add form
+    updateNominal(index) {
+      // Cari nilai ratecard yang sesuai berdasarkan pilihan dari dropdown
+      const selectedRatecard = this.mstJobList.find(
+        (item) => item.ratecard === this.ratecardForm[index].ratecard_id
+      );
+      // Jika ditemukan, update nilai nominal sesuai dengan ratecard
+      if (selectedRatecard) {
+        this.ratecardForm[index].ratecard_nominal = selectedRatecard.ratecard;
+      }
+    },
+    
     addSchedule() {
       this.ratecardForm.push({
         ratecard_id: "",
@@ -843,28 +861,28 @@ export default {
           "ACOUNT EXECUTIVE",
           "ACOUNT MANAGER",
           "FINANCE MANAGER",
-          {
-            name: "Action",
-            formatter: (_, row) =>
-              mythis.$root.accessRoles[mythis.access_page].update &&
-              mythis.$root.accessRoles[mythis.access_page].delete
-                ? html(
-                    `
-                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>
-                  &nbsp;&nbsp;&nbsp;
-                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>
-                `
-                  )
-                : mythis.$root.accessRoles[mythis.access_page].update
-                ? html(
-                    `
-                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>`
-                  )
-                : mythis.$root.accessRoles[mythis.access_page].delete
-                ? html(`&nbsp;&nbsp;&nbsp;
-                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>`)
-                : ``,
-          },
+          // {
+            // name: "Action",
+            // formatter: (_, row) =>
+            //   mythis.$root.accessRoles[mythis.access_page].update &&
+            //   mythis.$root.accessRoles[mythis.access_page].delete
+            //     ? html(
+            //         `
+            //       <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>
+            //       &nbsp;&nbsp;&nbsp;
+            //       <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>
+            //     `
+            //       )
+            //     : mythis.$root.accessRoles[mythis.access_page].update
+            //     ? html(
+            //         `
+            //       <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>`
+            //       )
+            //     : mythis.$root.accessRoles[mythis.access_page].delete
+            //     ? html(`&nbsp;&nbsp;&nbsp;
+            //       <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>`)
+            //     : ``,
+          // },
         ],
         style: {
           table: {
