@@ -4,9 +4,11 @@ namespace App\Models;
 
 use illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TransactionHeader extends Model
 {
+    // use SoftDeletes;
     protected $table = 'transaction_header'; 
 
     public function get_data_($search, $arr_pagination)

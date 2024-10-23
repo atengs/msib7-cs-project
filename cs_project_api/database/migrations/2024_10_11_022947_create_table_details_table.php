@@ -27,7 +27,8 @@ return new class extends Migration
             $table->foreign('trans_number')
                 ->references('trans_number')
                 ->on('transaction_header')
-                ->onDelete('set null');
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
         });
     }
 

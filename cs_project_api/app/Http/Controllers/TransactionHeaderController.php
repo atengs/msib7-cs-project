@@ -23,21 +23,50 @@ class TransactionHeaderController extends Controller
         ],200 );
     }
 
+    // public function show(String $id)
+    // {
+    //     // $data = TransactionHeader::find($id);
+    //     $data = TransactionHeader::select('transaction_header.*', 'mj.job_description', 'td.ratecard_id', 'td.ratecard_nominal')
+    //     ->leftJoin('transaction_detail AS td', 'td.trans_number','=','transaction_header.trans_number')
+    //     ->leftJoin('master_ratecard as mj','mj.id', '=', 'td.ratecard_id')
+    //     ->whereNull('transaction_header.deleted_at')
+    //     ->where('transaction_header.id', $id)
+    //     ->first();
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Berhasil',
+    //         'data' => $data
+    //     ],200 );
+    // }
+
+
     public function show(String $id)
     {
-        // $data = TransactionHeader::find($id);
-        $data = TransactionHeader::select('transaction_header.*', 'mj.job_description', 'td.ratecard_id', 'td.ratecard_nominal')
-        ->leftJoin('transaction_detail AS td', 'td.trans_number','=','transaction_header.trans_number')
-        ->leftJoin('master_ratecard as mj','mj.id', '=', 'td.ratecard_id')
-        ->whereNull('transaction_header.deleted_at')
-        ->where('transaction_header.id', $id)
-        ->first();
+        $header = TransactionHeader::whereNull('deleted_at')
+            ->where('id', $id)
+            ->first();
+    
+        if (!$header) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data not found',
+            ], 404);
+        }
+    
+        $details = TransactionDetail::select('id', 'ratecard_id', 'ratecard_nominal', 'note')
+            ->where('trans_number', $header->trans_number)
+            ->get();
+    
         return response()->json([
             'status' => true,
             'message' => 'Berhasil',
-            'data' => $data
-        ],200 );
+            'data' => [
+                'header' => $header, 
+                'ratecards' => $details 
+            ]
+        ], 200);
     }
+    
 
     public function store (Request $request)
     {
@@ -162,16 +191,17 @@ class TransactionHeaderController extends Controller
 
         foreach($request->input('ratecard') as $key => $value) {
             // $detail = new TransactionDetail;
-            $detail[] = [
+            $detail = [
                 "trans_number" => $request->input('trans_number'),
                 "ratecard_id" => $value['ratecard_id'],
                 "ratecard_nominal" => $value['ratecard_nominal'],
                 "note" => $value['note'],
                 "created_by" => $request->input('created_by')
             ];
+            $save = TransactionDetail::where('id', $value['id'])->update($detail);
         }
 
-        if($save = TransactionDetail::insert($detail)) {
+        if($save) {
             DB::commit();
             return response()->json([
                 'status' => true,
@@ -215,7 +245,9 @@ class TransactionHeaderController extends Controller
      public function destroy($id)
     {
         // Find the item by ID
-        $item = TransactionHeader::findOrFail($id);
+        $item = TransactionHeader::find($id);
+        
+        // $detail = TransactionDetail::select('id')->where('trans_number', $item->trans_number)->get();
 
         // Check if the item exists
         if (!$item) {
@@ -224,7 +256,17 @@ class TransactionHeaderController extends Controller
 
         // Delete the item
         if ($item->delete()) {
-            return response()->json(['message' => 'Item deleted successfully'], 200);
+            // foreach($detail as $key => $value) {
+            //     // $destroyDetail = [
+            //     //     'deleted_at' => Carbon::now(),
+            //     // ];
+
+            //     TransactionDetail::delete($value['id']);
+            // }
+            return response()->json([
+                'status'    => true,
+                'message'   => 'Success delete data',
+            ], 200);
         }
 
         // If delete fails, return an error

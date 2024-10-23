@@ -316,7 +316,7 @@
                     <option
                       v-for="(item, index) in mstJobList"
                       :key="index"
-                      :value="item.ratecard"
+                      :value="item.id"
                     >
                       {{ item.job_description }}
                     </option>
@@ -489,6 +489,9 @@
       <div class="block-content">
         <!------------------------>
         <!-- Button trigger modal -->
+
+        <button class="btn btn-sm btn-danger pull-left" @click="exportPdf()">
+          Export PDF</button>
         <button
           v-if="status_table && $root.accessRoles[access_page].create"
           class="btn btn-sm btn-primary pull-right"
@@ -605,7 +608,7 @@ export default {
     updateNominal(index) {
       // Cari nilai ratecard yang sesuai berdasarkan pilihan dari dropdown
       const selectedRatecard = this.mstJobList.find(
-        (item) => item.ratecard === this.ratecardForm[index].ratecard_id
+        (item) => item.id === this.ratecardForm[index].ratecard_id
       );
       // Jika ditemukan, update nilai nominal sesuai dengan ratecard
       if (selectedRatecard) {
@@ -829,100 +832,103 @@ export default {
       });
     },
     getTable() {
-      var mythis = this;
-      this.grid = new Grid();
-      this.grid.updateConfig({
-        // language: idID,
-        pagination: {
-          limit: 10,
-          server: {
-            url: (prev, page, limit) =>
-              `${prev}${prev.includes("?") ? "&" : "?"}limit=${limit}&offset=${
-                page * limit
-              }`,
-          },
-        },
-        search: {
-          server: {
-            url: (prev, keyword) => `${prev}?search=${keyword}`,
-          },
-        },
-        columns: [
-          { name: "ID", hidden: true },
-          "No",
-          "TRANS NUMBER",
-          "CUSTOMER",
-          "TRANS DATE",
-          "PAYMENT STATUS",
-          "PERSON IN CHARGE",
-          "ADDRESS",
-          "PROJECT",
-          "JOB",
-          "ACOUNT EXECUTIVE",
-          "ACOUNT MANAGER",
-          "FINANCE MANAGER",
-          {
-            name: "Action",
-            formatter: (_, row) =>
-              mythis.$root.accessRoles[mythis.access_page].update &&
-              mythis.$root.accessRoles[mythis.access_page].delete
-                ? html(
-                    `
-                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>
-                  &nbsp;&nbsp;&nbsp;
-                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>
-                `
-                  )
-                : mythis.$root.accessRoles[mythis.access_page].update
-                ? html(
-                    `
-                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>`
-                  )
-                : mythis.$root.accessRoles[mythis.access_page].delete
-                ? html(`&nbsp;&nbsp;&nbsp;
-                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>`)
-                : ``,
-          },
-        ],
-        style: {
-          table: {
-            border: "1px solid #ccc",
-          },
-          th: {
-            "background-color": "rgba(0, 55, 255, 0.1)",
-            color: "#000",
-            "border-bottom": "1px solid #ccc",
-            "text-align": "center",
-          },
-        },
-        server: {
-          url: this.$root.apiHost + this.$root.prefixApi + "trx-header/getData",
-          then: (data) =>
-            data.results.map((card) => [
-              card.id,
-              data.nomorBaris++ + 1,
-              html(`<span class="pull-left">${card.trans_number}</span>`),
-              html(`<span class="pull-left">${card.customer}</span>`),
-              html(`<span class="pull-left">${card.trans_date}</span>`),
-              html(`<span class="pull-left">${card.payment_status}</span>`),
-              html(`<span class="pull-left">${card.person_in_charge}</span>`),
-              html(`<span class="pull-left">${card.address}</span>`),
-              html(`<span class="pull-left">${card.project}</span>`),
-              html(`<span class="pull-left">${card.job}</span>`),
-              html(`<span class="pull-left">${card.acount_executive}</span>`),
-              html(`<span class="pull-left">${card.acount_manager}</span>`),
-              html(`<span class="pull-left">${card.finance_manager}</span>`),
-            ]),
-          total: (data) => data.count,
-          handle: (res) => {
-            // no matching records found
-            if (res.status === 404) return { data: [] };
-            if (res.ok) return res.json();
+  var mythis = this;
+  this.grid = new Grid();
+  this.grid.updateConfig({
+    pagination: {
+      limit: 10,
+      server: {
+        url: (prev, page, limit) =>
+          `${prev}${prev.includes("?") ? "&" : "?"}limit=${limit}&offset=${
+            page * limit
+          }`,
+      },
+    },
+    search: {
+      server: {
+        url: (prev, keyword) => `${prev}?search=${keyword}`,
+      },
+    },
+    columns: [
+      { name: "ID", hidden: true },
+      { name: "No", width: "50px" }, 
+      { name: "TRANS NUMBER", width: "150px" }, 
+      { name: "CUSTOMER", width: "150px" }, 
+      { name: "TRANS DATE", width: "150px" },
+      { name: "PAYMENT STATUS", width: "150px" },
+      { name: "PERSON IN CHARGE", width: "150px" },
+      { name: "ADDRESS", width: "200px" },
+      { name: "PROJECT", width: "150px" },
+      { name: "JOB", width: "150px" },
+      { name: "ACOUNT EXECUTIVE", width: "150px" },
+      { name: "ACOUNT MANAGER", width: "150px" },
+      { name: "FINANCE MANAGER", width: "150px" },
+      {
+        name: "Action",
+        formatter: (_, row) =>
+          mythis.$root.accessRoles[mythis.access_page].update &&
+          mythis.$root.accessRoles[mythis.access_page].delete
+            ? html(
+                
+              `<button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>
+              &nbsp;&nbsp;&nbsp;
+              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>`
+            
+              )
+            : mythis.$root.accessRoles[mythis.access_page].update
+            ? html(
+                
+              `<button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>`
+              )
+            : mythis.$root.accessRoles[mythis.access_page].delete
+            ? html(`&nbsp;&nbsp;&nbsp;
+              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>`)
+            : ``,
+      },
+    ],
+    style: {
+      table: {
+        border: "1px solid #ccc",
+        "table-layout": "auto", 
+      },
+      th: {
+        "background-color": "rgba(0, 55, 255, 0.1)",
+        color: "#000",
+        "border-bottom": "1px solid #ccc",
+        "text-align": "center",
+      },
+      td: {
+        "white-space": "normal", 
+        "word-wrap": "break-word", 
+      },
+    },
+    server: {
+      url: this.$root.apiHost + this.$root.prefixApi + "trx-header/getData",
+      then: (data) =>
+        data.results.map((card) => [
+          card.id,
+          data.nomorBaris++ + 1,
+          html(`<span class="pull-left">${card.trans_number}</span>`),
+          html(`<span class="pull-left">${card.customer}</span>`),
+          html(`<span class="pull-left">${card.trans_date}</span>`),
+          html(`<span class="pull-left">${card.payment_status}</span>`),
+          html(`<span class="pull-left">${card.person_in_charge}</span>`),
+          html(`<span class="pull-left">${card.address}</span>`),
+          html(`<span class="pull-left">${card.project}</span>`),
+          html(`<span class="pull-left">${card.job}</span>`),
+          html(`<span class="pull-left">${card.acount_executive}</span>`),
+          html(`<span class="pull-left">${card.acount_manager}</span>`),
+          html(`<span class="pull-left">${card.finance_manager}</span>`),
+        ]),
+      total: (data) => data.count,
+      handle: (res) => {
+        if (res.status === 404) return { data: [] };
+        if (res.ok) return res.json();
 
-            throw Error("oh no :(");
-          },
-        },
-      });
+        throw Error("oh no :(");
+      },
+    },
+  });
       // DOM instead of vue selector because we are using vanilla JS
       this.grid.render(document.getElementById("wrapper2"));
       this.number = 0;
@@ -1051,44 +1057,52 @@ export default {
         });
     },
     async getData(id) {
-      var mythis = this;
-      mythis.flagButtonAdd = false;
-      mythis.$root.presentLoading();
-      mythis.todo = {};
-      const AuthStr = "bearer " + localStorage.getItem("token");
-      const config = {
-        headers: {
-          Authorization: AuthStr,
-        },
-      };
-      await axios
-        .get(
-          mythis.$root.apiHost + mythis.$root.prefixApi + `trx-header/${id}`,
-          config
-        )
-        .then(async (res) => {
-          console.log(res.data.data);
-          const data = res.data.data;
-          //mythis.acuanEdit = id;
-          //mythis.todo = res.data.data;
-          mythis.todo.id = id;
-          mythis.todo.trans_number = data.trans_number;
-          mythis.todo.customer = data.customer;
-          mythis.todo.trans_date = data.trans_date;
-          mythis.todo.payment_status = data.payment_status;
-          mythis.todo.person_in_charge = data.person_in_charge;
-          mythis.todo.address = data.address;
-          mythis.todo.project = data.project;
-          mythis.todo.job = data.job;
-          mythis.todo.acount_executive = data.acount_executive;
-          mythis.todo.acount_manager = data.acount_manager;
-          mythis.todo.finance_manager = data.finance_manager;
-
-          // document.getElementById("inputA").focus(); // sets the focus on the input
-
-          mythis.$root.stopLoading();
-        });
+  var mythis = this;
+  mythis.flagButtonAdd = false;
+  mythis.$root.presentLoading();
+  mythis.todo = {};
+  const AuthStr = "bearer " + localStorage.getItem("token");
+  const config = {
+    headers: {
+      Authorization: AuthStr,
     },
+  };
+  await axios
+    .get(
+      mythis.$root.apiHost + mythis.$root.prefixApi + `trx-header/${id}`,
+      config
+    )
+    .then(async (res) => {
+      console.log(res.data.data);
+      const data = res.data.data;
+    
+      mythis.todo.id = id;
+      mythis.todo.trans_number = data.header.trans_number;
+      mythis.todo.customer = data.header.customer;
+      mythis.todo.trans_date = data.header.trans_date;
+      mythis.todo.payment_status = data.header.payment_status;
+      mythis.todo.person_in_charge = data.header.person_in_charge;
+      mythis.todo.address = data.header.address;
+      mythis.todo.project = data.header.project;
+      mythis.todo.job = data.header.job;
+      mythis.todo.acount_executive = data.header.acount_executive;
+      mythis.todo.acount_manager = data.header.acount_manager;
+      mythis.todo.finance_manager = data.header.finance_manager;
+
+      mythis.ratecardForm = data.ratecards.map((ratecard) => ({
+        id: ratecard.id,
+        ratecard_id: ratecard.ratecard_id,
+        ratecard_nominal: ratecard.ratecard_nominal,
+        note: ratecard.note,
+      }));
+
+      mythis.$root.stopLoading();
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+},
+
 
     // generate trx code
     async generateCode(id) {
