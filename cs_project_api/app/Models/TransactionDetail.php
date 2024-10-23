@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class TransactionDetail extends Model
 {
     protected $table = 'transaction_detail'; 
-    // use SoftDeletes; 
+    use SoftDeletes; 
 
     public function get_data_($search, $arr_pagination)
     {

@@ -243,35 +243,34 @@ class TransactionHeaderController extends Controller
      }
 
      public function destroy($id)
-    {
-        // Find the item by ID
-        $item = TransactionHeader::find($id);
-        
-        // $detail = TransactionDetail::select('id')->where('trans_number', $item->trans_number)->get();
+{
+    
+    $item = TransactionHeader::find($id);
 
-        // Check if the item exists
-        if (!$item) {
-            return response()->json(['message' => 'Item not found'], 404);
-        }
-
-        // Delete the item
-        if ($item->delete()) {
-            // foreach($detail as $key => $value) {
-            //     // $destroyDetail = [
-            //     //     'deleted_at' => Carbon::now(),
-            //     // ];
-
-            //     TransactionDetail::delete($value['id']);
-            // }
-            return response()->json([
-                'status'    => true,
-                'message'   => 'Success delete data',
-            ], 200);
-        }
-
-        // If delete fails, return an error
-        return response()->json(['message' => 'Failed to delete item'], 500);
+    // Pastikan data ditemukan
+    if (!$item) {
+        return response()->json(['message' => 'Item not found'], 404);
     }
+
+    // Tandai sebagai soft delete dan isi kolom deleted_by
+    $item->deleted_by = 'ADMIN'; // Ganti dengan user yang sedang login
+    $item->save();
+
+    // Lakukan soft delete
+    $item->delete();
+
+    // Hapus juga transaction_detail yang terkait secara soft delete
+    TransactionDetail::where('trans_number', $item->trans_number)->update([
+        'deleted_by' => 'ADMIN', // Ganti dengan user yang sedang login
+    ]);
+    TransactionDetail::where('trans_number', $item->trans_number)->delete();
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Success delete data',
+    ], 200);
+}
+
 
 
     public function getData(Request $request)
@@ -302,6 +301,7 @@ class TransactionHeaderController extends Controller
 
         // $count = MasterCategories::count();
         $count = TransactionHeader::whereMonth('created_at', date('m'))
+        ->withTrashed()
         ->count();
 
         if ($count > 0) {

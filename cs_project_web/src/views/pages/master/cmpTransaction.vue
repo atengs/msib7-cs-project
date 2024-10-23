@@ -523,6 +523,9 @@ import loadingBar from "@/assets/img/Moving_train.gif";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+
 export default {
   components: {
     // CmpSelect2,
@@ -587,8 +590,22 @@ export default {
           note: "",
         },
       ],
-    };
-    
+      json_fields: {
+        trans_number: "trans_number",
+        customer: "customer",
+        trans_date: "trans_date",
+        payment_status: "payment_status",
+        person_in_charge: "person_in_charge",
+        address: "address",
+        project: "project",
+        job: "job",
+        acount_executive: "acount_executive",
+        acount_manager: "acount_manager",
+        finance_manager: "finance_manager",
+      },
+
+
+    };  
   },
   async mounted() {
     // console.log(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate());
@@ -604,6 +621,183 @@ export default {
     this.userid = "ADMIN";
   },
   methods: {
+
+   async exportPdf() {
+        const mythis = this;
+        mythis.$root.presentLoading();
+
+        try {
+          let allData = [];
+          let count = 1;
+          let nn = 0;
+          const limitx = 100;
+
+          while (count > 0) {
+            const offsetx = limitx * nn;
+
+            const reqData = await axios({
+              method: 'get',
+              url: mythis.$root.apiHost + 'api/trx-header/getData?offset=' + offsetx + '&limit=' + limitx,
+            });
+
+            const resData = reqData.data;
+            allData = [...allData, ...resData.results];
+
+            if (resData.results.length === 0 || resData.results.length < limitx) {
+              count = 0;
+            }
+
+            nn++;
+            if (nn >= 100) {
+              // Safety check to prevent infinite loop
+              count = 0;
+            }
+          }
+
+          const doc = new jsPDF();
+          let totalPagesExp = '{total_pages_count_string}';
+
+          doc.setFontSize(18);
+          doc.text('Master Area Report', 14, 22);
+          doc.setFontSize(11);
+          doc.setTextColor(100);
+
+          // Add Print Date
+          doc.setFontSize(10);
+          doc.text(`Print Date: ${new Date().toLocaleString()}`, 14, 30);
+
+          doc.autoTable({
+            theme: 'striped',
+            head: [['No', 'Trans number', 'Customer', 'Trans Date', 'Payment Status', 'Person In Charge', 'Address', 'Project', 'Job', 'Acount Executive', 'Acount Manager', 'Finance Manager']],
+            body: allData.map((transaction_header, index) => [index + 1, transaction_header.trans_number, transaction_header.customer, transaction_header.trans_date, transaction_header.payment_status, transaction_header.person_in_charge, transaction_header.address, transaction_header.project, transaction_header.job, transaction_header.acount_executive, transaction_header.acount_manager, transaction_header.finance_manager.toLocaleString()]),
+            startY: 35, // Adjusted to accommodate the Print Date
+            didDrawPage: function (data) {
+              // Footer
+              let str = 'Page ' + doc.internal.getNumberOfPages();
+              if (typeof doc.putTotalPages === 'function') {
+                str = str + ' of ' + totalPagesExp;
+              }
+              doc.setFontSize(10);
+
+              let pageSize = doc.internal.pageSize;
+              let pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+              doc.text(str, data.settings.margin.left, pageHeight - 10);
+            },
+            showHead: 'everyPage',
+          });
+
+          if (typeof doc.putTotalPages === 'function') {
+            doc.putTotalPages(totalPagesExp);
+          }
+
+          const fileName = 'Master_Area_Report_' + mythis.formatDate(new Date()) + '.pdf';
+          doc.save(fileName);
+          console.log(fileName + ' generated');
+
+          mythis.$root.stopLoading();
+          Swal.fire('Success', 'PDF has been generated successfully', 'success');
+        } catch (error) {
+          console.error('Error generating PDF:', error);
+          mythis.$root.stopLoading();
+          Swal.fire('Error', 'Failed to generate PDF', 'error');
+        }
+      },
+
+      padTo2Digits(num) {
+        return num.toString().padStart(2, "0");
+      },
+      formatDate(date) {
+        return (
+          [
+            date.getFullYear(),
+            this.padTo2Digits(date.getMonth() + 1),
+            this.padTo2Digits(date.getDate()),
+          ].join("-") +
+          " " +
+          [
+            this.padTo2Digits(date.getHours()),
+            this.padTo2Digits(date.getMinutes()),
+            this.padTo2Digits(date.getSeconds()),
+          ].join(":")
+        );
+      },
+
+      async exportPdf1(id) {
+        const mythis = this;
+        mythis.$root.presentLoading();
+
+        try {
+          // Fetch specific transaction data by ID from transaction_header and transaction_detail
+          const reqData = await axios({
+            method: 'get',
+            url: mythis.$root.apiHost + `api/trx-header/${id}`,  // API ini mengirim data dari kedua tabel
+          });
+
+          const resData = reqData.data.data; // Contains both header and detail data
+          const header = resData.header;
+          const details = resData.ratecards; // Data dari transaction_detail
+
+          const doc = new jsPDF('p', 'pt', 'a4');
+
+          // Add title
+          doc.setFontSize(18);
+          doc.setFont("helvetica", "bold");
+          doc.text('PENAWARAN HARGA', 220, 40);
+
+          // Company and other info
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "normal");
+          doc.text(`Company: ${header.customer}`, 40, 70);
+          doc.text(`Person In Charge: ${header.person_in_charge}`, 40, 90);
+          doc.text(`Address: ${header.address}`, 40, 110);
+          doc.text(`Project/Produk: ${header.project}`, 40, 130);
+          doc.text(`Job: ${header.job}`, 40, 150);
+          doc.text(`No Pesanan: ${header.trans_number}`, 40, 170);
+
+          // Table headers
+          const ratecards = details.map((detail, index) => [
+            index + 1,
+            detail.ratecard_id, // Hal (Rate Card)
+            detail.ratecard_nominal.toLocaleString(), // Total
+            detail.note, // Note
+          ]);
+
+          // Add table for ratecards (detail)
+          doc.autoTable({
+            startY: 200,
+            head: [['No', 'Hal', 'Total', 'Note']],
+            body: ratecards,
+            theme: 'grid',
+            styles: { fontSize: 10 },
+            columnStyles: {
+              0: { cellWidth: 50 }, // No
+              1: { cellWidth: 180 }, // Hal
+              2: { cellWidth: 100 }, // Total
+              3: { cellWidth: 160 }, // Note
+            }
+          });
+
+          // Footer section (Signatures)
+          const finalY = doc.autoTable.previous.finalY + 40;
+          doc.text(`Account Executive: ${header.acount_executive}`, 40, finalY + 20);
+          doc.text(`Account Manager: ${header.acount_manager}`, 220, finalY + 20);
+          doc.text(`Finance Manager: ${header.finance_manager}`, 400, finalY + 20);
+
+          // Save PDF
+          const fileName = `Penawaran_${header.trans_number}.pdf`;
+          doc.save(fileName);
+
+          mythis.$root.stopLoading();
+          Swal.fire('Success', 'PDF has been generated successfully', 'success');
+        } catch (error) {
+          console.error('Error generating PDF:', error);
+          mythis.$root.stopLoading();
+          Swal.fire('Error', 'Failed to generate PDF', 'error');
+        }
+      },
+
+
+
     // add form
     updateNominal(index) {
       // Cari nilai ratecard yang sesuai berdasarkan pilihan dari dropdown
@@ -872,17 +1066,21 @@ export default {
                 
               `<button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>
               &nbsp;&nbsp;&nbsp;
-              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>`
+              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>
+               <button data-id="${row.cells[0].data}" class="btn btn-sm btn-success text-white" id="exportPdf1" data-toggle="tooltip" title="Export PDF" ><i class="fa fa-file-pdf-o"></i></button>`
             
               )
             : mythis.$root.accessRoles[mythis.access_page].update
             ? html(
                 
-              `<button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>`
+              `<button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>
+              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-success text-white" id="exportPdf1" data-toggle="tooltip" title="Export PDF" ><i class="fa fa-file-pdf-o"></i></button>`
               )
             : mythis.$root.accessRoles[mythis.access_page].delete
             ? html(`&nbsp;&nbsp;&nbsp;
-              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>`)
+              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>
+              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-success text-white" id="exportPdf1" data-toggle="tooltip" title="Export PDF" ><i class="fa fa-file-pdf-o"></i></button>
+              `)
             : ``,
       },
     ],
@@ -935,6 +1133,13 @@ export default {
 
       $(document).off("click", "#editData");
       $(document).off("click", "#deleteData");
+      $(document).off("click", "#exportPdf1");
+
+      $(document).on("click", "#exportPdf1", function () {
+        let id = $(this).data("id");
+        mythis.exportPdf1(id); // Pass the transaction ID to export PDF
+        });
+
       mythis.jqueryDelEdit();
       this.status_table = true;
     },
