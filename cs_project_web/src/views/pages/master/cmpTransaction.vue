@@ -723,77 +723,145 @@ export default {
       },
 
       async exportPdf1(id) {
-        const mythis = this;
-        mythis.$root.presentLoading();
+    const mythis = this;
+    mythis.$root.presentLoading();
 
-        try {
-          
-          const reqData = await axios({
+    try {
+        
+        const reqData = await axios({
             method: 'get',
             url: mythis.$root.apiHost + `api/trx-header/${id}`,
-          });
+        });
 
-          const resData = reqData.data.data; 
-          const header = resData.header;
-          const details = resData.ratecards; 
-          const doc = new jsPDF('p', 'pt', 'a4');
+        const resData = reqData.data.data;
+        const header = resData.header;
+        const details = resData.ratecards;
 
-         
-          doc.setFontSize(18);
-          doc.setFont("helvetica", "bold");
-          doc.text('PENAWARAN HARGA', 220, 40);
+        
+        const doc = new jsPDF('p', 'pt', 'a4');
 
-         
-          doc.setFontSize(12);
-          doc.setFont("helvetica", "normal");
-          doc.text(`Company: ${header.customer}`, 40, 70);
-          doc.text(`Person In Charge: ${header.person_in_charge}`, 40, 90);
-          doc.text(`Address: ${header.address}`, 40, 110);
-          doc.text(`Project/Produk: ${header.project}`, 40, 130);
-          doc.text(`Job: ${header.job}`, 40, 150);
-          doc.text(`No Pesanan: ${header.trans_number}`, 40, 170);
+        
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text('PENAWARAN HARGA', 220, 40);
 
-          
-          const ratecards = details.map((detail, index) => [
+        
+        const labelX = 40;
+        const colonX = 160;
+        const valueX = 170;
+
+        
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+
+        doc.text('Company', labelX, 70);
+        doc.text(':', colonX, 70);
+        doc.text(`${header.customer}`, valueX, 70);
+
+        doc.text('Person In Charge', labelX, 90);
+        doc.text(':', colonX, 90);
+        doc.text(`${header.person_in_charge}`, valueX, 90);
+
+        doc.text('Address', labelX, 110);
+        doc.text(':', colonX, 110);
+        doc.text(`${header.address}`, valueX, 110);
+
+        doc.text('Project/Produk', labelX, 130);
+        doc.text(':', colonX, 130);
+        doc.text(`${header.project}`, valueX, 130);
+
+        doc.text('Job', labelX, 150);
+        doc.text(':', colonX, 150);
+        doc.text(`${header.job}`, valueX, 150);
+
+        doc.text('No Pesanan', labelX, 170);
+        doc.text(':', colonX, 170);
+        doc.text(`${header.trans_number}`, valueX, 170);
+
+        
+        doc.line(labelX, 180, 550, 180);
+
+        
+        const ratecards = details.map((detail, index) => [
             index + 1,
-            detail.ratecard_id, 
-            detail.ratecard_nominal.toLocaleString(), 
-            detail.note, 
-          ]);
+            detail.ratecard_id,
+            `Rp. ${detail.ratecard_nominal.toLocaleString()}`, 
+            detail.note 
+        ]);
 
-          
-          doc.autoTable({
-            startY: 200,
+
+        doc.autoTable({
+            startY: 190,
             head: [['No', 'Hal', 'Total', 'Note']],
             body: ratecards,
-            theme: 'grid',
-            styles: { fontSize: 10 },
+            theme: 'plain', 
+            styles: { 
+                fontSize: 10, 
+                fillColor: [255, 255, 255],
+                textColor: [0, 0, 0] 
+            },
+            headStyles: {
+                fillColor: [255, 255, 255],
+                textColor: [0, 0, 0], 
+            },
             columnStyles: {
-              0: { cellWidth: 50 }, 
-              1: { cellWidth: 180 },
-              2: { cellWidth: 100 },
-              3: { cellWidth: 160 },
-            }
-          });
+                0: { cellWidth: 30 }, 
+                1: { cellWidth: 200 },
+                2: { cellWidth: 100 },
+                3: { cellWidth: 150 },
+            },
+            tableLineColor: [255, 255, 255], 
+        });
 
-          
-          const finalY = doc.autoTable.previous.finalY + 40;
-          doc.text(`Account Executive: ${header.acount_executive}`, 40, finalY + 20);
-          doc.text(`Account Manager: ${header.acount_manager}`, 220, finalY + 20);
-          doc.text(`Finance Manager: ${header.finance_manager}`, 400, finalY + 20);
 
-          
-          const fileName = `Penawaran_${header.trans_number}.pdf`;
-          doc.save(fileName);
+        let finalY = doc.lastAutoTable.finalY + 30;
+        doc.text(`Total Budget: Rp. 115,393,678`, labelX, finalY);
+        doc.setFillColor(255, 192, 203);
+        doc.rect(labelX, finalY + 10, 500, 20, 'F'); 
+        doc.text(`Monthly: Rp. 38,464,626`, labelX, finalY + 25);
 
-          mythis.$root.stopLoading();
-          Swal.fire('Success', 'PDF has been generated successfully', 'success');
-        } catch (error) {
-          console.error('Error generating PDF:', error);
-          mythis.$root.stopLoading();
-          Swal.fire('Error', 'Failed to generate PDF', 'error');
-        }
-      },
+        
+        doc.line(labelX, finalY + 50, 550, finalY + 50);
+
+        finalY += 70;
+        doc.setFontSize(9);
+        doc.text(`Terbilang: Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah`, labelX, finalY);
+        finalY += 15;
+        doc.text(`Sudah termasuk PPH 23`, labelX, finalY);
+        finalY += 15;
+        doc.text(`Belum termasuk PPN 11%`, labelX, finalY);
+        finalY += 30;
+        doc.text(`Pekerjaan akan dilakukan oleh CS setelah ada pembayaran DP minimal 50% dari Brand.`, labelX, finalY);
+        finalY += 15;
+        doc.text(`Bila disetujui, mohon approval dari quotation ini di email, dan dikirimkan kembali ke CS.`, labelX, finalY);
+        finalY += 15;
+        doc.text(`PO/PP segera dikeluarkan langsung setelah quotation diapprove.`, labelX, finalY);
+
+        
+        finalY += 40;
+        doc.text('Lafiana', labelX, finalY);
+        doc.text('Account Executive', labelX, finalY + 15);
+
+        doc.text('Obbi Putra Gautama', 220, finalY);
+        doc.text('Account Manager', 220, finalY + 15);
+
+        doc.text('Agus Isriyanto', 400, finalY);
+        doc.text('Finance Manager', 400, finalY + 15);
+
+        
+        const fileName = `Quotation_${header.trans_number}.pdf`;
+        doc.save(fileName);
+
+        mythis.$root.stopLoading();
+        Swal.fire('Success', 'PDF has been generated successfully', 'success');
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        mythis.$root.stopLoading();
+        Swal.fire('Error', 'Failed to generate PDF', 'error');
+    }
+},
+
+
 
 
 
