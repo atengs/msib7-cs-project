@@ -727,24 +727,23 @@ export default {
         mythis.$root.presentLoading();
 
         try {
-          // Fetch specific transaction data by ID from transaction_header and transaction_detail
+          
           const reqData = await axios({
             method: 'get',
-            url: mythis.$root.apiHost + `api/trx-header/${id}`,  // API ini mengirim data dari kedua tabel
+            url: mythis.$root.apiHost + `api/trx-header/${id}`,
           });
 
-          const resData = reqData.data.data; // Contains both header and detail data
+          const resData = reqData.data.data; 
           const header = resData.header;
-          const details = resData.ratecards; // Data dari transaction_detail
-
+          const details = resData.ratecards; 
           const doc = new jsPDF('p', 'pt', 'a4');
 
-          // Add title
+         
           doc.setFontSize(18);
           doc.setFont("helvetica", "bold");
           doc.text('PENAWARAN HARGA', 220, 40);
 
-          // Company and other info
+         
           doc.setFontSize(12);
           doc.setFont("helvetica", "normal");
           doc.text(`Company: ${header.customer}`, 40, 70);
@@ -754,15 +753,15 @@ export default {
           doc.text(`Job: ${header.job}`, 40, 150);
           doc.text(`No Pesanan: ${header.trans_number}`, 40, 170);
 
-          // Table headers
+          
           const ratecards = details.map((detail, index) => [
             index + 1,
-            detail.ratecard_id, // Hal (Rate Card)
-            detail.ratecard_nominal.toLocaleString(), // Total
-            detail.note, // Note
+            detail.ratecard_id, 
+            detail.ratecard_nominal.toLocaleString(), 
+            detail.note, 
           ]);
 
-          // Add table for ratecards (detail)
+          
           doc.autoTable({
             startY: 200,
             head: [['No', 'Hal', 'Total', 'Note']],
@@ -770,20 +769,20 @@ export default {
             theme: 'grid',
             styles: { fontSize: 10 },
             columnStyles: {
-              0: { cellWidth: 50 }, // No
-              1: { cellWidth: 180 }, // Hal
-              2: { cellWidth: 100 }, // Total
-              3: { cellWidth: 160 }, // Note
+              0: { cellWidth: 50 }, 
+              1: { cellWidth: 180 },
+              2: { cellWidth: 100 },
+              3: { cellWidth: 160 },
             }
           });
 
-          // Footer section (Signatures)
+          
           const finalY = doc.autoTable.previous.finalY + 40;
           doc.text(`Account Executive: ${header.acount_executive}`, 40, finalY + 20);
           doc.text(`Account Manager: ${header.acount_manager}`, 220, finalY + 20);
           doc.text(`Finance Manager: ${header.finance_manager}`, 400, finalY + 20);
 
-          // Save PDF
+          
           const fileName = `Penawaran_${header.trans_number}.pdf`;
           doc.save(fileName);
 
