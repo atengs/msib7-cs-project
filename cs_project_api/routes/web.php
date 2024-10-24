@@ -49,6 +49,8 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     $router->get('/trx-header/generate-code', 'TransactionHeaderController@generateCode');
     $router->get('/trx-header/{id}', 'TransactionHeaderController@show');
 
+    $router->get('/trx-header/generatePDF', 'TransactionHeaderController@generatePDF');
+
     // Transaction Detail
     $router->get('/trx-detail', 'TransactionDetailController@index');
     $router->post('/trx-detail', 'TransactionDetailController@store');

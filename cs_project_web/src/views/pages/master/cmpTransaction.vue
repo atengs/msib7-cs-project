@@ -722,12 +722,11 @@ export default {
         );
       },
 
-      async exportPdf1(id) {
+      async exportPdf1(id) { 
     const mythis = this;
     mythis.$root.presentLoading();
 
     try {
-        
         const reqData = await axios({
             method: 'get',
             url: mythis.$root.apiHost + `api/trx-header/${id}`,
@@ -737,120 +736,146 @@ export default {
         const header = resData.header;
         const details = resData.ratecards;
 
-        
         const doc = new jsPDF('p', 'pt', 'a4');
 
+      
+        const logo = new Image();
+        logo.src = '/src/assets/img/creativestyle.jpeg'; 
+        doc.addImage(logo, 'JPEG', 35, 20, 80, 80); 
+
         
-        doc.setFontSize(12);
+        doc.setFontSize(8);
         doc.setFont("helvetica", "bold");
-        doc.text('PENAWARAN HARGA', 220, 40);
+        doc.text('Scentde - launching support & social media 1', 400, 40); 
 
-        
+       
+        doc.setFontSize(8);
+        doc.text('PENAWARAN HARGA', 250, 100);
+
         const labelX = 40;
-        const colonX = 160;
-        const valueX = 170;
+        const colonX = 230;
+        const valueX = 250;
 
         
-        doc.setFontSize(10);
+        doc.setFontSize(8);
         doc.setFont("helvetica", "normal");
 
-        doc.text('Company', labelX, 70);
-        doc.text(':', colonX, 70);
-        doc.text(`${header.customer}`, valueX, 70);
-
-        doc.text('Person In Charge', labelX, 90);
-        doc.text(':', colonX, 90);
-        doc.text(`${header.person_in_charge}`, valueX, 90);
-
-        doc.text('Address', labelX, 110);
-        doc.text(':', colonX, 110);
-        doc.text(`${header.address}`, valueX, 110);
-
-        doc.text('Project/Produk', labelX, 130);
+        doc.text('Company', labelX, 130);
         doc.text(':', colonX, 130);
-        doc.text(`${header.project}`, valueX, 130);
+        doc.text(`${header.customer}`, valueX, 130);
 
-        doc.text('Job', labelX, 150);
+        doc.text('Person In Charge', labelX, 150);
         doc.text(':', colonX, 150);
-        doc.text(`${header.job}`, valueX, 150);
+        doc.text(`${header.person_in_charge}`, valueX, 150);
 
-        doc.text('No Pesanan', labelX, 170);
+        doc.text('Address', labelX, 170);
         doc.text(':', colonX, 170);
-        doc.text(`${header.trans_number}`, valueX, 170);
+        doc.text(`${header.address}`, valueX, 170);
 
-        
-        doc.line(labelX, 180, 550, 180);
+        doc.text('Project/Produk', labelX, 190);
+        doc.text(':', colonX, 190);
+        doc.text(`${header.project}`, valueX, 190);
+
+        doc.text('Job', labelX, 210);
+        doc.text(':', colonX, 210);
+        doc.text(`${header.job}`, valueX, 210);
+
+        doc.text('No Pesanan', labelX, 230);
+        doc.text(':', colonX, 230);
+        doc.text(`${header.trans_number}`, valueX, 230);
+
+       
+        doc.line(labelX, 240, 550, 240);
 
         
         const ratecards = details.map((detail, index) => [
             index + 1,
-            detail.ratecard_id,
-            `Rp. ${detail.ratecard_nominal.toLocaleString()}`,
-            detail.note 
+            detail.job_description,
+            `Rp. ${new Intl.NumberFormat('en-US').format(detail.ratecard_nominal)}`,
+            // `Rp. ${detail.ratecard_nominal.toLocaleString()}`,
+            detail.note
         ]);
 
         
-        doc.autoTable({
-            startY: 190,
-            head: [['No', 'Hal', 'Total', 'Note']],
-            body: ratecards,
-            theme: 'plain',
-            styles: {
-                fontSize: 10,
-                fillColor: [255, 255, 255],
-                textColor: [0, 0, 0]
-            },
-            headStyles: {
-                fillColor: [255, 255, 255],
-                textColor: [0, 0, 0],
-            },
-            columnStyles: {
-                0: { cellWidth: 30 },
-                1: { cellWidth: 200 },
-                2: { cellWidth: 100 },
-                3: { cellWidth: 150 },
-            },
-            tableLineColor: [255, 255, 255],
-        });
+doc.autoTable({
+    startY: 250,
+    head: [['No', 'Hal', 'Total', 'Note']],
+    body: ratecards,
+    theme: 'plain',
+    styles: {
+        fontSize: 8,
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0]
+    },
+    headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+    },
+    columnStyles: {
+        0: { cellWidth: 30 },
+        1: { cellWidth: 200 },
+        2: { cellWidth: 100 },
+        3: { cellWidth: 150 },
+    },
+    didDrawCell: function (data) {
+        if (data.section === 'head') {
+            const doc = data.doc;
+            const cell = data.cell;
+
+            // Menggambar garis di atas header
+            if (data.row.index === 0) {
+                doc.setLineWidth(1);
+                doc.setDrawColor(0, 0, 0); // Warna hitam
+                doc.line(cell.x, cell.y, cell.x + cell.width, cell.y);
+            }
+
+            // Menggambar garis di bawah header
+            if (data.row.index === 0 && data.cell.raw === 'Note') {
+                doc.setLineWidth(1);
+                doc.setDrawColor(0, 0, 0); // Warna hitam
+                doc.line(cell.x, cell.y + cell.height, cell.x + cell.width, cell.y + cell.height);
+            }
+        }
+    }
+});
 
         
+
         let finalY = doc.lastAutoTable.finalY + 30;
         const pageWidth = doc.internal.pageSize.getWidth();
 
         
         doc.text('Total Budget:', labelX, finalY);
-        
         doc.text(`Rp. 115,393,678`, pageWidth / 2, finalY, { align: 'center' });
 
         doc.setFillColor(255, 192, 203);
         doc.rect(labelX, finalY + 10, 500, 20, 'F'); 
 
-        
         doc.text('Monthly:', labelX, finalY + 25);
-        
         doc.text(`Rp. 38,464,626`, pageWidth / 2, finalY + 25, { align: 'center' });
 
-        
+        // Garis pembatas terakhir
         doc.line(labelX, finalY + 50, 550, finalY + 50);
 
+        // Bagian tambahan informasi
         finalY += 70;
-        doc.setFontSize(9);
-        doc.text(`Terbilang: Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah`, 40, finalY);
+        doc.setFontSize(8);
+        doc.text(`Terbilang: Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah`, labelX, finalY);
         finalY += 15;
-        doc.text(`Sudah termasuk PPH 23`, 40, finalY);
+        doc.text(`Sudah termasuk PPH 23`, labelX, finalY);
         finalY += 15;
-        doc.text(`Belum termasuk PPN 11%`, 40, finalY);
+        doc.text(`Belum termasuk PPN 11%`, labelX, finalY);
         finalY += 30;
-        doc.text(`Pekerjaan akan dilakukan oleh CS setelah ada pembayaran DP minimal 50% dari Brand.`, 40, finalY);
+        doc.text(`Pekerjaan akan dilakukan oleh CS setelah ada pembayaran DP minimal 50% dari Brand.`, labelX, finalY);
         finalY += 15;
-        doc.text(`Bila disetujui, mohon approval dari quotation ini di email, dan dikirimkan kembali ke CS.`, 40, finalY);
+        doc.text(`Bila disetujui, mohon approval dari quotation ini di email, dan dikirimkan kembali ke CS.`, labelX, finalY);
         finalY += 15;
-        doc.text(`PO/PP segera dikeluarkan langsung setelah quotation diapprove.`, 40, finalY);
+        doc.text(`PO/PP segera dikeluarkan langsung setelah quotation diapprove.`, labelX, finalY);
 
-        
+        // Bagian signatures
         finalY += 40;
-        doc.text('Lafiana', 40, finalY);
-        doc.text('Account Executive', 40, finalY + 15);
+        doc.text('Lafiana', labelX, finalY);
+        doc.text('Account Executive', labelX, finalY + 15);
 
         doc.text('Obbi Putra Gautama', 220, finalY);
         doc.text('Account Manager', 220, finalY + 15);
@@ -858,7 +883,7 @@ export default {
         doc.text('Agus Isriyanto', 400, finalY);
         doc.text('Finance Manager', 400, finalY + 15);
 
-        
+        // Simpan file PDF
         const fileName = `Quotation_${header.trans_number}.pdf`;
         doc.save(fileName);
 
@@ -870,6 +895,8 @@ export default {
         Swal.fire('Error', 'Failed to generate PDF', 'error');
     }
 },
+
+
 
 
     // add form

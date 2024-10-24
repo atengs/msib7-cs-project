@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Dompdf\Dompdf;
 
 class TransactionHeaderController extends Controller
 {
@@ -53,7 +54,8 @@ class TransactionHeaderController extends Controller
             ], 404);
         }
     
-        $details = TransactionDetail::select('id', 'ratecard_id', 'ratecard_nominal', 'note')
+        $details = TransactionDetail::select('transaction_detail.id', 'mr.job_description', 'ratecard_id', 'ratecard_nominal', 'note')
+            ->join('master_ratecard as mr', 'mr.id', '=','transaction_detail.ratecard_id')
             ->where('trans_number', $header->trans_number)
             ->get();
     
@@ -310,6 +312,22 @@ class TransactionHeaderController extends Controller
         } else {
             return 'EX/' . $kode . '/' . $romanMonth[date('m')] . '/' . date('Y') . '/CS';
         }
+    }
+
+    public function generatePDF()
+    {
+        ob_start();
+        include base_path('public/docs/po.php');
+        $html = ob_get_clean();
+        
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4','portrait');
+        $dompdf->render();
+
+        return response($dompdf->output(), 200)
+        ->header('Content-Type','application/pdf')
+        ->header('Content-Disposition','inline; filename="PO NAMA PERUSAHAAN.pdf"');
     }
 
 }
