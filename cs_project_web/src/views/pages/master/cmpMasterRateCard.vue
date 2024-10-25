@@ -397,7 +397,7 @@ export default {
               Authorization: AuthStr,
             },
           };
-          var url = mythis.$root.apiHost + mythis.$root.prefixApi +"master-job-list";
+          var url = mythis.$root.apiHost + mythis.$root.prefixApi +"master-ratecard";
           axios
             .post(
               url,
@@ -538,7 +538,7 @@ export default {
           },
         },
         server: {
-          url: this.$root.apiHost + this.$root.prefixApi +"master-job-list/getData",
+          url: this.$root.apiHost + this.$root.prefixApi +"master-ratecard/getData",
           then: (data) =>
             data.results.map((card) => [
               card.id,
@@ -595,7 +595,7 @@ export default {
           };
           axios
             .delete(
-              mythis.$root.apiHost + mythis.$root.prefixApi +`master-job-list/${id}`,
+              mythis.$root.apiHost + mythis.$root.prefixApi +`master-ratecard/${id}`,
               config
             )
             .then((res) => {
@@ -621,7 +621,7 @@ export default {
       };
       axios
         .put(
-          mythis.$root.apiHost + mythis.$root.prefixApi +"master-job-list/" + mythis.todo.id,
+          mythis.$root.apiHost + mythis.$root.prefixApi +"master-ratecard/" + mythis.todo.id,
           {
             category_code: mythis.todo.category_code,
             job_category_code: mythis.todo.job_category_code,
@@ -687,7 +687,7 @@ export default {
         },
       };
       await axios
-      .get(mythis.$root.apiHost + mythis.$root.prefixApi +`master-categories`, config)
+      .get(mythis.$root.apiHost + mythis.$root.prefixApi +`master-ratecard/${id}`, config)
         .then(async (res) => {
           //console.log(res.data.data);
           //mythis.acuanEdit = id;
