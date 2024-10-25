@@ -785,7 +785,7 @@ export default {
         doc.text(`${header.trans_number}`, valueX, 230);
 
        
-        doc.line(labelX, 240, 550, 240);
+        // doc.line(labelX, 240, 550, 240);
 
         
         const ratecards = details.map((detail, index) => [
@@ -815,7 +815,7 @@ doc.autoTable({
         0: { cellWidth: 30 },
         1: { cellWidth: 200 },
         2: { cellWidth: 100 },
-        3: { cellWidth: 150 },
+        3: { cellWidth: 170 },
     },
     didDrawCell: function (data) {
         if (data.section === 'head') {
@@ -830,8 +830,8 @@ doc.autoTable({
             }
 
             // Menggambar garis di bawah header
-            if (data.row.index === 0 && data.cell.raw === 'Note') {
-                doc.setLineWidth(1);
+            if (data.row.index === 0 && data.cell.raw === 'Note', 'ratecard_nominal') {
+                doc.setLineWidth(2);
                 doc.setDrawColor(0, 0, 0); // Warna hitam
                 doc.line(cell.x, cell.y + cell.height, cell.x + cell.width, cell.y + cell.height);
             }
@@ -840,7 +840,7 @@ doc.autoTable({
 });
 
         
-
+        
         let finalY = doc.lastAutoTable.finalY + 30;
         const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -853,35 +853,41 @@ doc.autoTable({
 
         doc.text('Monthly:', labelX, finalY + 25);
         doc.text(`Rp. 38,464,626`, pageWidth / 2, finalY + 25, { align: 'center' });
-
+        doc.text('Terbilang: Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah', labelX, finalY + 43);
+        
         // Garis pembatas terakhir
         doc.line(labelX, finalY + 50, 550, finalY + 50);
 
         // Bagian tambahan informasi
-        finalY += 70;
+        finalY += 45;
         doc.setFontSize(8);
-        doc.text(`Terbilang: Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah`, labelX, finalY);
+        // doc.text(`Terbilang: Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah`, labelX, finalY);
         finalY += 15;
         doc.text(`Sudah termasuk PPH 23`, labelX, finalY);
         finalY += 15;
         doc.text(`Belum termasuk PPN 11%`, labelX, finalY);
-        finalY += 30;
+        finalY += 15;
         doc.text(`Pekerjaan akan dilakukan oleh CS setelah ada pembayaran DP minimal 50% dari Brand.`, labelX, finalY);
         finalY += 15;
         doc.text(`Bila disetujui, mohon approval dari quotation ini di email, dan dikirimkan kembali ke CS.`, labelX, finalY);
         finalY += 15;
-        doc.text(`PO/PP segera dikeluarkan langsung setelah quotation diapprove.`, labelX, finalY);
+        doc.text(`PO/PP segera dikeluarkan langsung setelah quotation di approve.`, labelX, finalY);
 
         // Bagian signatures
         finalY += 40;
-        doc.text('Lafiana', labelX, finalY);
-        doc.text('Account Executive', labelX, finalY + 15);
+        doc.text('Terima Kasih', labelX, finalY );
+        doc.text('Lafiana', labelX, finalY +75);
+        doc.text('Account Executive', labelX, finalY + 85);
 
-        doc.text('Obbi Putra Gautama', 220, finalY);
-        doc.text('Account Manager', 220, finalY + 15);
+        doc.text('Obbi Putra Gautama', 200, finalY + 75);
+        doc.text('Account Manager', 200, finalY + 85);
 
-        doc.text('Agus Isriyanto', 400, finalY);
-        doc.text('Finance Manager', 400, finalY + 15);
+        doc.text('Agus Isriyanto', 300, finalY + 75);
+        doc.text('Finance Manager', 300, finalY + 85);
+
+        doc.text('Tanggal', 400, finalY );
+        doc.text('Disetujui Oleh : ', 400, finalY + 15);
+        doc.text('Klien : ', 400, finalY + 85);
 
         // Simpan file PDF
         const fileName = `Quotation_${header.trans_number}.pdf`;
