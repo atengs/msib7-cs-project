@@ -25,6 +25,10 @@ return new class extends Migration
             $table->string('acount_manager')->nullable();
             $table->string('finance_manager')->nullable();
 
+            $table->boolean('pph23')->default(true);
+            $table->boolean('ppn')->default(true);
+            $table->double('ppn_percent', 5, 2)->nullable();
+
             $table->timestamps();
             $table->softDeletes();
             $table->string('created_by')->nullable();

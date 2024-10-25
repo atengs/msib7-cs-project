@@ -275,23 +275,17 @@
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="example-nf-email">Payment Status</label>
-                  <CmpInputText
-                    type="text"
-                    placeholder="Payment Status"
+                  <select
                     v-model="todo.payment_status"
-                    :class="
-                      errorField.payment_status
-                        ? 'form-control input-lg input-error'
-                        : 'form-control input-lg'
-                    "
-                    @input="
-                      (val) =>
-                        (todo.payment_status =
-                          todo.payment_status.toUpperCase())
-                    "
-                  />
+                    :class="errorField.payment_status ? 'form-control input-lg input-error' : 'form-control input-lg'"
+                  >
+                    <option disabled value="">Pilih Status Pembayaran</option>
+                    <option value="Lunas">LUNAS</option>
+                    <option value="Belum Lunas">BELUM LUNAS</option>
+                  </select>
                 </div>
               </div>
+
             </div>
           </div>
 
@@ -940,7 +934,7 @@ doc.autoTable({
       };
       await axios
         .get(
-          mythis.$root.apiHost + mythis.$root.prefixApi + `master-job-list`,
+          mythis.$root.apiHost + mythis.$root.prefixApi + `master-ratecard`,
           config
         )
         .then(async (res) => {
