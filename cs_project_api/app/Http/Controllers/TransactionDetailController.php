@@ -25,7 +25,11 @@ class TransactionDetailController extends Controller
         $this->validate($request, [
             'trans_number' => 'required',
             'ratecard_id' => 'required',
-            'ratecard_nominal' => 'required',   
+            'ratecard_nominal' => 'required',
+            'note' => 'required',
+            'type_usaha' => 'required',
+            
+               
             // 'note' => 'required|string',
         ]);
 
@@ -34,6 +38,7 @@ class TransactionDetailController extends Controller
         $item->ratecard_id = $request->input('ratecard_id');
         $item->ratecard_nominal = $request->input('ratecard_nominal');
         $item->note = $request->input('note');
+        $item->type_usaha = $request->input('type_usaha');
         $item->created_by = $request->input('userid');
 
         if ($item->save()){
@@ -59,6 +64,8 @@ class TransactionDetailController extends Controller
             'ratecard_id' => 'required',
             'ratecard_nominal' => 'required',   
             'note' => 'required|string',
+            'type_usaha' => 'required|string',
+
         ]);
 
         // Find the item by ID
@@ -72,6 +79,8 @@ class TransactionDetailController extends Controller
         $item->ratecard_id = $request->input('ratecard_id');
         $item->ratecard_nominal = $request->input('ratecard_nominal');
         $item->note = $request->input('note');
+        $item->type_usaha = $request->input('type_usaha');
+
 
         // Save the updated item
         if ($item->save()) {

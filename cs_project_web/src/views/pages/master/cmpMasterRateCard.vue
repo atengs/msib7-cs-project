@@ -229,6 +229,26 @@
       <!-- END Block Title -->
 
       <div class="block-content">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="example-nf-email">Categories</label>
+            <select
+              style="height: 50px"
+              class="form-control"
+              v-model="categories"
+              name="categories"
+              id="categories"
+            >
+            <option
+                v-for="(item, index) in mstCategory"
+                :key="index"
+                :value="item.category_code"
+              >
+                {{ item.category_name }}
+              </option>
+            </select>
+          </div>
+        </div>
         <!------------------------>
         <!-- Button trigger modal -->
         <button

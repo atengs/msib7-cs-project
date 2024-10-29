@@ -27,9 +27,11 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     $router->put('/master-categories/{id}', 'MasterCategoriesController@update');
     $router->delete('/master-categories/{id}', 'MasterCategoriesController@destroy');
     $router->get('/generateCode', 'MasterCategoriesController@generateCode');
+    // $router->get('/master-categories/unique-categories', 'MasterCategoriesController@getUniqueCategories');
+
     
 
-    // Master Job List
+    // Master Rate Card
     $router->get('/master-ratecard', 'MasterRatecardController@index');
     $router->get('/master-ratecard/getData', 'MasterRatecardController@getData');
     $router->get('/master-ratecard/{id}', 'MasterRatecardController@show');

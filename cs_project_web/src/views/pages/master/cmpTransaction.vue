@@ -289,6 +289,53 @@
             </div>
           </div>
 
+          <div class="row">
+            <div class="col-md-12">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="example-nf-email">PPh 23</label>
+                  <select
+                    v-model="todo.pph23"
+                    :class="errorField.pph23 ? 'form-control input-lg input-error' : 'form-control input-lg'"
+                  >
+                    <option disabled value="">Pilih Status PPh</option>
+                    <option :value="true">Sudah Termasuk PPh 23</option>
+                    <option :value="false">Belum Termasuk PPh 23</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="example-nf-email">PPn</label>
+                  <select
+                    v-model="todo.ppn"
+                    :class="errorField.ppn ? 'form-control input-lg input-error' : 'form-control input-lg'"
+                  >
+                    <option disabled value="">Pilih Status PPn</option>
+                    <option :value="true">Sudah Termasuk PPn </option>
+                    <option :value="false">Belum Termasuk PPn</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="example-nf-email">PPn Percent</label>
+                  <CmpInputText
+                    type="number"
+                    placeholder="PPn Percent"
+                    v-model="todo.ppn_percent"
+                    :class="errorField.ppn_percent ? 'form-control input-lg input-error' : 'form-control input-lg'"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
 
           <br />
           <br />
@@ -296,7 +343,7 @@
 
           <div class="row" v-for="(input, k) in ratecardForm" :key="k">
             <div class="col-md-12">
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="form-group">
                   <label for="example-nf-email">Rate Card</label>
                   <select
@@ -318,7 +365,7 @@
                 </div>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-2">
                 <div class="form-group">
                   <label for="example-nf-email">Nominal</label>
                   <CmpInputText
@@ -351,24 +398,40 @@
                 </div>
               </div>
 
-            <div class="col-md-12">
-              <button
-                class="btn btn-danger btn-sm mt-3"
-                @click="removeSchedule(k)"
-                v-show="k || (!k && ratecardForm.length > 1)"
-              >
-                Hapus Form
-              </button>
-              &nbsp;
-              <button
-                class="btn btn-success btn-sm mt-3"
-                style="margin-left: -6px"
-                @click="addSchedule(k)"
-                v-show="k == ratecardForm.length - 1"
-              >
-                Tambah Form
-              </button>
-            </div>
+              <div class="col-md-2">
+                <div class="form-group">
+                  <label for="example-nf-email">Tipe Usaha</label>
+                  <CmpInputText
+                    type="text"
+                    placeholder="Tipe Usaha"
+                    v-model="input.type_usaha"
+                    :class="
+                      errorField.type_usaha
+                        ? 'form-control input-lg input-error'
+                        : 'form-control input-lg'
+                    "
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-12">
+                <button
+                  class="btn btn-danger btn-sm mt-3"
+                  @click="removeSchedule(k)"
+                  v-show="k || (!k && ratecardForm.length > 1)"
+                >
+                  Hapus Form
+                </button>
+                &nbsp;
+                <button
+                  class="btn btn-success btn-sm mt-3"
+                  style="margin-left: -6px"
+                  @click="addSchedule(k)"
+                  v-show="k == ratecardForm.length - 1"
+                >
+                  Tambah Form
+                </button>
+              </div>
             </div>
           </div>
 
@@ -404,7 +467,13 @@
                   todo.acount_manager == null ||
                   todo.acount_manager == '' ||
                   todo.finance_manager == null ||
-                  todo.finance_manager == ''
+                  todo.finance_manager == '' ||
+                  todo.pph23 == null ||
+                  // todo.pph23 == '' ||
+                  todo.ppn == null ||
+                  // todo.ppn == '' ||
+                  todo.ppn_percent == null ||
+                  todo.ppn_percent == '' 
 
                   // todo.ratecard_id == null ||
                   // todo.ratecard_id == '' ||
@@ -447,7 +516,13 @@
                   todo.acount_manager == null ||
                   todo.acount_manager == '' ||
                   todo.finance_manager == null ||
-                  todo.finance_manager == ''
+                  todo.finance_manager == '' ||
+                  todo.pph23 == null ||
+                  // todo.pph23 == '' ||
+                  todo.ppn == null ||
+                  // todo.ppn == '' ||
+                  todo.ppn_percent == null ||
+                  todo.ppn_percent == '' 
                 "
               >
                 <i
@@ -527,6 +602,7 @@ export default {
     // CmpInputText,
     // CmpInputText,
   },
+  
   data() {
     return   {
       
@@ -550,6 +626,9 @@ export default {
         acount_executive: false,
         acount_manager: false,
         finance_manager: false,
+        pph23: false,
+        ppn: false,
+        ppn_percent: false,
         ratecard: false,
         
       },
@@ -570,6 +649,9 @@ export default {
         acount_executive: "",
         acount_manager: "",
         finance_manager: "",
+        pph23: "",
+        ppn: "",
+        ppn_percent: "",
         ratecard: "",
       },
 
@@ -582,6 +664,7 @@ export default {
           ratecard_id: "",
           ratecard_nominal: "",
           note: "",
+          type_usaha: "",
         },
       ],
       json_fields: {
@@ -596,11 +679,18 @@ export default {
         acount_executive: "acount_executive",
         acount_manager: "acount_manager",
         finance_manager: "finance_manager",
+        pph23: "pph23",
+        ppn: "ppn",
+        ppn_percent: "ppn_percent",
+
       },
 
 
     };  
   },
+
+  
+
   async mounted() {
     // console.log(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate());
     // await this.$root.refreshToken(localStorage.getItem("token"));
@@ -791,46 +881,46 @@ export default {
         ]);
 
         
-doc.autoTable({
-    startY: 250,
-    head: [['No', 'Hal', 'Total', 'Note']],
-    body: ratecards,
-    theme: 'plain',
-    styles: {
-        fontSize: 8,
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0]
-    },
-    headStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-    },
-    columnStyles: {
-        0: { cellWidth: 30 },
-        1: { cellWidth: 200 },
-        2: { cellWidth: 100 },
-        3: { cellWidth: 170 },
-    },
-    didDrawCell: function (data) {
-        if (data.section === 'head') {
-            const doc = data.doc;
-            const cell = data.cell;
+        doc.autoTable({
+            startY: 250,
+            head: [['No', 'Hal', 'Total', 'Note']],
+            body: ratecards,
+            theme: 'plain',
+            styles: {
+                fontSize: 8,
+                fillColor: [255, 255, 255],
+                textColor: [0, 0, 0]
+            },
+            headStyles: {
+                fillColor: [255, 255, 255],
+                textColor: [0, 0, 0],
+            },
+            columnStyles: {
+                0: { cellWidth: 30 },
+                1: { cellWidth: 200 },
+                2: { cellWidth: 100 },
+                3: { cellWidth: 170 },
+            },
+            didDrawCell: function (data) {
+                if (data.section === 'head') {
+                    const doc = data.doc;
+                    const cell = data.cell;
 
-            // Menggambar garis di atas header
-            if (data.row.index === 0) {
-                doc.setLineWidth(1);
-                doc.setDrawColor(0, 0, 0); // Warna hitam
-                doc.line(cell.x, cell.y, cell.x + cell.width, cell.y);
-            }
+                    // Menggambar garis di atas header
+                    if (data.row.index === 0) {
+                        doc.setLineWidth(1);
+                        doc.setDrawColor(0, 0, 0); // Warna hitam
+                        doc.line(cell.x, cell.y, cell.x + cell.width, cell.y);
+                    }
 
-            // Menggambar garis di bawah header
-            if (data.row.index === 0 && data.cell.raw === 'Note', 'ratecard_nominal') {
-                doc.setLineWidth(2);
-                doc.setDrawColor(0, 0, 0); // Warna hitam
-                doc.line(cell.x, cell.y + cell.height, cell.x + cell.width, cell.y + cell.height);
+                    // Menggambar garis di bawah header
+                    if (data.row.index === 0 && data.cell.raw === 'Note', 'ratecard_nominal') {
+                        doc.setLineWidth(2);
+                        doc.setDrawColor(0, 0, 0); // Warna hitam
+                        doc.line(cell.x, cell.y + cell.height, cell.x + cell.width, cell.y + cell.height);
+                    }
+                }
             }
-        }
-    }
 });
 
         
@@ -1051,6 +1141,9 @@ doc.autoTable({
                 acount_executive: mythis.todo.acount_executive,
                 acount_manager: mythis.todo.acount_manager,
                 finance_manager: mythis.todo.finance_manager,
+                pph23: mythis.todo.pph23,
+                ppn: mythis.todo.ppn,
+                ppn_percent: mythis.todo.ppn_percent,
                 created_by: mythis.userid,
                 ratecard: mythis.ratecardForm,
                 userid: mythis.userid,
@@ -1065,6 +1158,7 @@ doc.autoTable({
                 ratecard_id: "",
                 ratecard_nominal: "",
                 note: "",
+                type_usaha: "",
               }]
               mythis.resetForm();
               mythis.generateCode();
@@ -1159,6 +1253,21 @@ doc.autoTable({
       { name: "ACOUNT MANAGER", width: "150px" },
       { name: "FINANCE MANAGER", width: "150px" },
       {
+        name: "PPh 23",
+        width: "150px",
+        formatter: (cell) => (cell === true ? "Sudah termasuk PPh 23" : "Belum termasuk PPh 23"),
+      },
+      {
+        name: "PPn",
+        width: "150px",
+        formatter: (cell) => (cell === true ? "Sudah termasuk PPn" : "Belum termasuk PPn"),
+      },
+      {
+        name: "PPn Percent",
+        width: "150px",
+        formatter: (cell) => (cell !== null ? `${cell}%` : ''),
+      },
+      {
         name: "Action",
         formatter: (_, row) =>
           mythis.$root.accessRoles[mythis.access_page].update &&
@@ -1218,6 +1327,9 @@ doc.autoTable({
           html(`<span class="pull-left">${card.acount_executive}</span>`),
           html(`<span class="pull-left">${card.acount_manager}</span>`),
           html(`<span class="pull-left">${card.finance_manager}</span>`),
+          card.pph23,
+          card.ppn,
+          card.ppn_percent?.value || card.ppn_percent,
         ]),
       total: (data) => data.count,
       handle: (res) => {
@@ -1314,6 +1426,9 @@ doc.autoTable({
             acount_executive: mythis.todo.acount_executive,
             acount_manager: mythis.todo.acount_manager,
             finance_manager: mythis.todo.finance_manager,
+            pph23: mythis.todo.pph23,
+            ppn: mythis.todo.ppn,
+            ppn_percent: mythis.todo.ppn_percent,
             created_by: mythis.userid,
             ratecard: mythis.ratecardForm,
             userid: mythis.userid,
@@ -1394,12 +1509,16 @@ doc.autoTable({
       mythis.todo.acount_executive = data.header.acount_executive;
       mythis.todo.acount_manager = data.header.acount_manager;
       mythis.todo.finance_manager = data.header.finance_manager;
+      mythis.todo.pph23 = data.header.pph23;
+      mythis.todo.ppn = data.header.ppn;
+      mythis.todo.ppn_percent = data.header.ppn_percent;
 
       mythis.ratecardForm = data.ratecards.map((ratecard) => ({
         id: ratecard.id,
         ratecard_id: ratecard.ratecard_id,
         ratecard_nominal: ratecard.ratecard_nominal,
         note: ratecard.note,
+        type_usaha: ratecard.type_usaha,
       }));
 
       mythis.$root.stopLoading();
