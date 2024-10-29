@@ -164,21 +164,34 @@ class MasterRatecardController extends Controller
 
     public function getData(Request $request)
     {
-        $URL =  URL::current();
-
-        if (!isset($request->search)) {
-            $count = (new MasterRatecard)->count();
-            $arr_pagination = (new PublicModel())->pagination_without_search($URL, $request->limit, $request->offset);
-            $todos = (new MasterRatecard)->get_data_($request->search, $arr_pagination);
-        } else {
-            $arr_pagination = (new PublicModel)->pagination_without_search($URL, $request->limit, $request->offset, $request->search);
-            $todos =  (new MasterRatecard)->get_data_($request->search, $arr_pagination);
+        try {
+            $URL = URL::current();
+            $category_code = $request->category_code; 
+            $search = $request->search;               
+    
+            
+            if (empty($search)) {
+                $count = (new MasterRatecard)->count();
+                $arr_pagination = (new PublicModel())->pagination_without_search($URL, $request->limit, $request->offset);
+            } else {
+            
+                $arr_pagination = (new PublicModel())->pagination_without_search($URL, $request->limit, $request->offset, $search);
+            }
+    
+            
+            $todos = (new MasterRatecard)->get_data_($search, $arr_pagination, $category_code);
             $count = $todos->count();
+    
+            return response()->json(
+                (new PublicModel())->array_respon_200_table($todos, $count, $arr_pagination),
+                200
+            );
+        } catch (\Exception $e) {
+            
+            \Log::error("Error in getData: " . $e->getMessage());
+            return response()->json(['status' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
-
-        return response()->json(
-            (new PublicModel())->array_respon_200_table($todos, $count, $arr_pagination),
-            200
-        );
     }
+    
 }
+

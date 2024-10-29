@@ -229,15 +229,15 @@
       <!-- END Block Title -->
 
       <div class="block-content">
-        <div class="col-md-6">
+        <div class="col-md-3">
           <div class="form-group">
             <label for="example-nf-email">Categories</label>
             <select
               style="height: 50px"
               class="form-control"
-              v-model="categories"
-              name="categories"
-              id="categories"
+              v-model="selectedCategory"
+              @change="filterByCategory"
+              id="categorySelect"
             >
             <option
                 v-for="(item, index) in mstCategory"
@@ -322,6 +322,7 @@ export default {
       flagButtonAdd: true,
       mstCategory: [],
       mstJobCategory: [],
+      selectedCategory: "",
     };
   },
   async mounted() {
@@ -334,6 +335,32 @@ export default {
     this.userid = 'ADMIN';
   },
   methods: {
+
+    filterByCategory() {
+    const selectedCategory = this.selectedCategory;
+    if (selectedCategory) {
+      // Ubah URL Grid.js untuk menyertakan filter category_code
+      this.grid.updateConfig({
+        server: {
+          url: `${this.$root.apiHost + this.$root.prefixApi}master-ratecard/getData?category_code=${selectedCategory}`,
+          then: (data) => data.results.map((card) => [
+            card.id,
+            data.nomorBaris++ + 1,
+            html(`<span class="pull-left">${card.category_name}</span>`),
+            html(`<span class="pull-left">${card.job_category_name}</span>`),
+            html(`<span class="pull-left">${card.job_description}</span>`),
+            html(`<span class="pull-right">${new Intl.NumberFormat('en-US').format(card.ratecard)}</span>`),
+            html(`<span class="pull-left">${card.remarks}</span>`),
+            html(`<span class="pull-left">${card.status == true ? '<i class="fa fa-check-square-o" aria-hidden="true"></i>' : '<i class="fa fa-times" aria-hidden="true"></i>'}</span>`),
+          ]),
+          total: (data) => data.count,
+        },
+      }).forceRender();
+    } else {
+      // Jika tidak ada kategori yang dipilih, tampilkan semua data
+      this.getTable();
+    }
+  },
     async getMasterCategory() {
       var mythis = this;
       mythis.$root.presentLoading();

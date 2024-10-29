@@ -820,6 +820,9 @@ export default {
         const header = resData.header;
         const details = resData.ratecards;
 
+        const pph23Text = header.pph23 ? "Sudah termasuk PPh 23" : "Belum termasuk PPh 23";
+        const ppnText = header.ppn ? "Sudah termasuk PPN" : "Belum termasuk PPN";
+
         const doc = new jsPDF('p', 'pt', 'a4');
 
       
@@ -830,7 +833,8 @@ export default {
         
         doc.setFontSize(8);
         doc.setFont("helvetica", "bold");
-        doc.text('Scentde - launching support & social media 1', 400, 40); 
+        // doc.text('Scentde - launching support & social media 1', 400, 40); 
+        doc.text(`${header.job}`, 400, 40);
 
        
         doc.setFontSize(8);
@@ -929,15 +933,27 @@ export default {
         const pageWidth = doc.internal.pageSize.getWidth();
 
         
+
+        
         doc.text('Total Budget:', labelX, finalY);
         doc.text(`Rp. 115,393,678`, pageWidth / 2, finalY, { align: 'center' });
 
-        doc.setFillColor(255, 192, 203);
-        doc.rect(labelX, finalY + 10, 500, 20, 'F'); 
+        doc.setDrawColor(0, 0, 0);
 
-        doc.text('Monthly:', labelX, finalY + 25);
-        doc.text(`Rp. 38,464,626`, pageWidth / 2, finalY + 25, { align: 'center' });
-        doc.text('Terbilang: Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah', labelX, finalY + 43);
+
+        doc.line(labelX, finalY + 10, labelX + 500, finalY + 10); // Garis di atas
+
+
+        doc.setFillColor(295, 192, 203);
+        doc.rect(labelX, finalY + 10, 500, 20, 'F'); 
+        doc.line(labelX, finalY + 30, labelX + 500, finalY + 30);
+
+        
+
+
+        doc.text('Monthly:', labelX, finalY + 24);
+        doc.text(`Rp. 38,464,626`, pageWidth / 2, finalY + 24, { align: 'center' });
+        doc.text('Terbilang : Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah', labelX, finalY + 43);
         
         // Garis pembatas terakhir
         doc.line(labelX, finalY + 50, 550, finalY + 50);
@@ -947,9 +963,14 @@ export default {
         doc.setFontSize(8);
         // doc.text(`Terbilang: Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah`, labelX, finalY);
         finalY += 15;
-        doc.text(`Sudah termasuk PPH 23`, labelX, finalY);
+        // doc.text(`Sudah termasuk PPH 23`, labelX, finalY);
+        // doc.text(`${header.pph23}`, labelX, finalY);
+
+        doc.text(pph23Text, labelX, finalY); 
+        
         finalY += 15;
-        doc.text(`Belum termasuk PPN 11%`, labelX, finalY);
+        doc.text(ppnText, labelX, finalY); 
+        
         finalY += 15;
         doc.text(`Pekerjaan akan dilakukan oleh CS setelah ada pembayaran DP minimal 50% dari Brand.`, labelX, finalY);
         finalY += 15;
