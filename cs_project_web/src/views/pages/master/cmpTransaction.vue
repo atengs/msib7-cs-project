@@ -830,13 +830,35 @@ export default {
         logo.src = '/src/assets/img/creativestyle.jpeg'; 
         doc.addImage(logo, 'JPEG', 35, 20, 80, 80); 
 
-        
-        doc.setFontSize(8);
-        doc.setFont("helvetica", "bold");
-        // doc.text('Scentde - launching support & social media 1', 400, 40); 
-        doc.text(`${header.job}`, 400, 40);
 
-       
+        const boxX = 340;
+        const boxY = 27;
+        const boxWidth = 200; 
+        const boxHeight = 15;
+
+        doc.setFillColor(255, 153, 203); 
+        doc.rect(boxX, boxY, boxWidth, boxHeight, 'F'); 
+
+        doc.setFontSize(5);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0); 
+
+        
+        const jobText = `${header.job}`;
+        let textX;
+
+        
+        if (jobText.length ) {
+            
+            textX = boxX + boxWidth / 2 - doc.getTextWidth(jobText) / 2;
+        } else {
+            
+            textX = boxX + 10;
+        }
+
+
+        doc.text(jobText, textX, boxY + 10);
+        
         doc.setFontSize(8);
         doc.text('PENAWARAN HARGA', 250, 100);
 
@@ -872,8 +894,6 @@ export default {
         doc.text(':', colonX, 230);
         doc.text(`${header.trans_number}`, valueX, 230);
 
-       
-        // doc.line(labelX, 240, 550, 240);
 
         
         const ratecards = details.map((detail, index) => [
@@ -900,10 +920,10 @@ export default {
                 textColor: [0, 0, 0],
             },
             columnStyles: {
-                0: { cellWidth: 30 },
+                0: { cellWidth: 20 },
                 1: { cellWidth: 200 },
-                2: { cellWidth: 100 },
-                3: { cellWidth: 170 },
+                2: { cellWidth: 80 },
+                3: { cellWidth: 200 },
             },
             didDrawCell: function (data) {
                 if (data.section === 'head') {
@@ -913,15 +933,15 @@ export default {
                     // Menggambar garis di atas header
                     if (data.row.index === 0) {
                         doc.setLineWidth(1);
-                        doc.setDrawColor(0, 0, 0); // Warna hitam
+                        doc.setDrawColor(0, 0, 0); 
                         doc.line(cell.x, cell.y, cell.x + cell.width, cell.y);
                     }
 
                     // Menggambar garis di bawah header
                     if (data.row.index === 0 && data.cell.raw === 'Note', 'ratecard_nominal') {
                         doc.setLineWidth(2);
-                        doc.setDrawColor(0, 0, 0); // Warna hitam
-                        doc.line(cell.x, cell.y + cell.height, cell.x + cell.width, cell.y + cell.height);
+                        doc.setDrawColor(0, 0, 0); 
+                        doc.line(cell.x, cell.y + cell.height, cell.x + cell.width  , cell.y + cell.height);
                     }
                 }
             }
@@ -933,44 +953,39 @@ export default {
         const pageWidth = doc.internal.pageSize.getWidth();
 
         
-
+        doc.line(labelX, finalY + -12, labelX + 500, finalY + -12);
         
-        doc.text('Total Budget:', labelX, finalY);
+        doc.text(' Total Budget:', labelX, finalY);
         doc.text(`Rp. 115,393,678`, pageWidth / 2, finalY, { align: 'center' });
 
         doc.setDrawColor(0, 0, 0);
 
 
-        doc.line(labelX, finalY + 10, labelX + 500, finalY + 10); // Garis di atas
+        doc.setFillColor (255, 153, 203);
+        doc.rect(labelX, finalY + 11, 500, 20, 'F');
 
+        doc.line(labelX, finalY + 10, labelX + 500, finalY + 10); 
+        doc.line(labelX, finalY + 11, labelX + 500, finalY + 11); 
 
-        doc.setFillColor(295, 192, 203);
-        doc.rect(labelX, finalY + 10, 500, 20, 'F'); 
-        doc.line(labelX, finalY + 30, labelX + 500, finalY + 30);
+        doc.line(labelX, finalY + 31, labelX + 500, finalY + 31);
+        doc.line(labelX, finalY + 32, labelX + 500, finalY + 32);
 
         
-
-
-        doc.text('Monthly:', labelX, finalY + 24);
-        doc.text(`Rp. 38,464,626`, pageWidth / 2, finalY + 24, { align: 'center' });
+        doc.text('  Monthly:', labelX, finalY + 23);
+        doc.text(`Rp. 38,464,626`, pageWidth / 2, finalY + 23, { align: 'center' });
         doc.text('Terbilang : Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah', labelX, finalY + 43);
         
-        // Garis pembatas terakhir
-        doc.line(labelX, finalY + 50, 550, finalY + 50);
+        doc.line(labelX, finalY + 50, 540, finalY + 50);
+        doc.line(labelX, finalY + 51, 540, finalY + 51);
 
-        // Bagian tambahan informasi
+       
         finalY += 45;
         doc.setFontSize(8);
-        // doc.text(`Terbilang: Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah`, labelX, finalY);
-        finalY += 15;
-        // doc.text(`Sudah termasuk PPH 23`, labelX, finalY);
-        // doc.text(`${header.pph23}`, labelX, finalY);
-
-        doc.text(pph23Text, labelX, finalY); 
         
+        finalY += 15;
+        doc.text(pph23Text, labelX, finalY); 
         finalY += 15;
         doc.text(ppnText, labelX, finalY); 
-        
         finalY += 15;
         doc.text(`Pekerjaan akan dilakukan oleh CS setelah ada pembayaran DP minimal 50% dari Brand.`, labelX, finalY);
         finalY += 15;
@@ -978,18 +993,28 @@ export default {
         finalY += 15;
         doc.text(`PO/PP segera dikeluarkan langsung setelah quotation di approve.`, labelX, finalY);
 
-        // Bagian signatures
+
+
+        function capitalizeEachWord(text) {
+          return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+        }
+
         finalY += 40;
         doc.text('Terima Kasih', labelX, finalY );
-        doc.text('Lafiana', labelX, finalY +75);
+
+        doc.setFontSize(8);
+        
+        doc.text(capitalizeEachWord(`${header.acount_executive}`), labelX, finalY + 75);
         doc.text('Account Executive', labelX, finalY + 85);
 
-        doc.text('Obbi Putra Gautama', 200, finalY + 75);
+        doc.text(capitalizeEachWord(`${header.acount_manager}`), 200, finalY + 75);
         doc.text('Account Manager', 200, finalY + 85);
 
-        doc.text('Agus Isriyanto', 300, finalY + 75);
+        doc.text(capitalizeEachWord(`${header.finance_manager}`), 300, finalY + 75);
         doc.text('Finance Manager', 300, finalY + 85);
 
+
+        doc.setFontSize(8);
         doc.text('Tanggal', 400, finalY );
         doc.text('Disetujui Oleh : ', 400, finalY + 15);
         doc.text('Klien : ', 400, finalY + 85);
