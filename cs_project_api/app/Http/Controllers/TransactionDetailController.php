@@ -27,7 +27,9 @@ class TransactionDetailController extends Controller
             'ratecard_id' => 'required',
             'ratecard_nominal' => 'required',
             'note' => 'required',
-            'type_usaha' => 'required',
+            'business_type' => 'required',
+            'agency_fee' => 'required',
+
             
                
             // 'note' => 'required|string',
@@ -38,7 +40,8 @@ class TransactionDetailController extends Controller
         $item->ratecard_id = $request->input('ratecard_id');
         $item->ratecard_nominal = $request->input('ratecard_nominal');
         $item->note = $request->input('note');
-        $item->type_usaha = $request->input('type_usaha');
+        $item->business_type = $request->input('business_type');
+        $item->agency_fee = $request->input('agency_fee');
         $item->created_by = $request->input('userid');
 
         if ($item->save()){
@@ -64,7 +67,8 @@ class TransactionDetailController extends Controller
             'ratecard_id' => 'required',
             'ratecard_nominal' => 'required',   
             'note' => 'required|string',
-            'type_usaha' => 'required|string',
+            'business_type' => 'required',
+            'agency_fee' => 'required',
 
         ]);
 
@@ -79,7 +83,8 @@ class TransactionDetailController extends Controller
         $item->ratecard_id = $request->input('ratecard_id');
         $item->ratecard_nominal = $request->input('ratecard_nominal');
         $item->note = $request->input('note');
-        $item->type_usaha = $request->input('type_usaha');
+        $item->business_type = $request->input('business_type');
+        $item->agency_fee = $request->input('agency_fee');
 
 
         // Save the updated item

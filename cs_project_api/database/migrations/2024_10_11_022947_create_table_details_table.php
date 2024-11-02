@@ -18,7 +18,8 @@ return new class extends Migration
             $table->double('ratecard_nominal',15,2)->nullable();
             $table->text('note')->nullable();
 
-            $table->string('type_usaha', 50)->nullable();
+            $table->string('business_type', 50)->nullable();
+            $table->string('agency_fee', 50)->nullable();
  
             $table->timestamps();
             $table->softDeletes();

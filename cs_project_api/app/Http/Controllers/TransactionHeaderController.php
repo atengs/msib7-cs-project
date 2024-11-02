@@ -54,7 +54,7 @@ class TransactionHeaderController extends Controller
             ], 404);
         }
     
-        $details = TransactionDetail::select('transaction_detail.id', 'mr.job_description', 'ratecard_id', 'ratecard_nominal', 'note', 'type_usaha')
+        $details = TransactionDetail::select('transaction_detail.id', 'mr.job_description', 'ratecard_id', 'ratecard_nominal', 'note', 'business_type', 'agency_fee')
             ->join('master_ratecard as mr', 'mr.id', '=','transaction_detail.ratecard_id')
             ->where('trans_number', $header->trans_number)
             ->get();
@@ -129,7 +129,8 @@ class TransactionHeaderController extends Controller
                     "ratecard_id" => $value['ratecard_id'],
                     "ratecard_nominal" => $value['ratecard_nominal'],
                     "note" => $value['note'],
-                    "type_usaha" => $value['type_usaha'],
+                    "business_type" => $value['business_type'],
+                    "agency_fee" => $value['agency_fee'],
                     "created_by" => $request->input('created_by')
                 ];
             }
@@ -215,7 +216,8 @@ class TransactionHeaderController extends Controller
                 "ratecard_id" => $value['ratecard_id'],
                 "ratecard_nominal" => $value['ratecard_nominal'],
                 "note" => $value['note'],
-                "type_usaha" => $value['type_usaha'],
+                "business_type" => $value['business_type'],
+                "agency_fee" => $value['agency_fee'],
                 "created_by" => $request->input('created_by')
             ];
             $save = TransactionDetail::where('id', $value['id'])->update($detail);
@@ -267,21 +269,16 @@ class TransactionHeaderController extends Controller
     
     $item = TransactionHeader::find($id);
 
-    // Pastikan data ditemukan
     if (!$item) {
         return response()->json(['message' => 'Item not found'], 404);
     }
 
-    // Tandai sebagai soft delete dan isi kolom deleted_by
-    $item->deleted_by = 'ADMIN'; // Ganti dengan user yang sedang login
+    $item->deleted_by = 'ADMIN';
     $item->save();
-
-    // Lakukan soft delete
     $item->delete();
 
-    // Hapus juga transaction_detail yang terkait secara soft delete
     TransactionDetail::where('trans_number', $item->trans_number)->update([
-        'deleted_by' => 'ADMIN', // Ganti dengan user yang sedang login
+        'deleted_by' => 'ADMIN',
     ]);
     TransactionDetail::where('trans_number', $item->trans_number)->delete();
 

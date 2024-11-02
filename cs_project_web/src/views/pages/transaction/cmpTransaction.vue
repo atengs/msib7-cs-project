@@ -334,6 +334,23 @@
                   />
                 </div>
               </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="example-nf-email">Agency Fee</label>
+                  <CmpInputText
+                    type="text"
+                    placeholder="Agency Fee"
+                    v-model="ratecardForm[0].agency_fee" 
+                    :class="
+                      errorField.agency_fee
+                        ? 'form-control input-lg input-error'
+                        : 'form-control input-lg'
+                    "
+                  />
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -359,7 +376,7 @@
                       :key="index"
                       :value="item.id"
                     >
-                      {{ item.job_description }}
+                    ({{ item.category_name }}) - {{ item.job_description }}
                     </option>
                   </select>
                 </div>
@@ -398,23 +415,24 @@
                 </div>
               </div>
 
-              <div class="col-md-2">
+              <div class="col-md-3">
                 <div class="form-group">
                   <label for="example-nf-email">Tipe Usaha</label>
                   <CmpInputText
                     type="text"
                     placeholder="Tipe Usaha"
-                    v-model="input.type_usaha"
+                    v-model="input.business_type"
                     :class="
-                      errorField.type_usaha
+                      errorField.business_type
                         ? 'form-control input-lg input-error'
                         : 'form-control input-lg'
                     "
                   />
                 </div>
               </div>
+            </div>
 
-              <div class="col-md-12">
+            <div class="col-md-12">
                 <button
                   class="btn btn-danger btn-sm mt-3"
                   @click="removeSchedule(k)"
@@ -432,7 +450,7 @@
                   Tambah Form
                 </button>
               </div>
-            </div>
+
           </div>
 
           <!-- END Wizards Row -->
@@ -664,7 +682,8 @@ export default {
           ratecard_id: "",
           ratecard_nominal: "",
           note: "",
-          type_usaha: "",
+          business_type: "",
+          agency_fee: "",
         },
       ],
       json_fields: {
@@ -945,7 +964,7 @@ export default {
                     }
                 }
             }
-});
+          });
 
         
         
@@ -1015,7 +1034,7 @@ export default {
 
 
         doc.setFontSize(8);
-        doc.text('Tanggal', 400, finalY );
+        doc.text('Tanggal', 400, finalY ); 
         doc.text('Disetujui Oleh : ', 400, finalY + 15);
         doc.text('Klien : ', 400, finalY + 85);
 
@@ -1052,6 +1071,8 @@ export default {
         ratecard_id: "",
         ratecard_nominal: "",
         note: "",
+        business_type: "",
+        agency_fee: "",
       });
     },
     // remove form
@@ -1204,7 +1225,8 @@ export default {
                 ratecard_id: "",
                 ratecard_nominal: "",
                 note: "",
-                type_usaha: "",
+                business_type: "",
+                agency_fee: "",
               }]
               mythis.resetForm();
               mythis.generateCode();
@@ -1564,7 +1586,8 @@ export default {
         ratecard_id: ratecard.ratecard_id,
         ratecard_nominal: ratecard.ratecard_nominal,
         note: ratecard.note,
-        type_usaha: ratecard.type_usaha,
+        business_type: ratecard.business_type,
+        agency_fee: ratecard.agency_fee,
       }));
 
       mythis.$root.stopLoading();

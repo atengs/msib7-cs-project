@@ -92,7 +92,7 @@ import cmpMasterDocStatus from "@/views/pages/test/cmpMasterDocStatus.vue";
 import cmpHalRoute from "@/views/pages/cmpHalRoute.vue";
 import cmpMasterCategories from "./views/pages/master/cmpMasterCategories.vue";
 import cmpMasterRateCard from "./views/pages/master/cmpMasterRateCard.vue";
-import cmpTransaction from "./views/pages/master/cmpTransaction.vue";
+import cmpTransaction from "./views/pages/transaction/cmpTransaction.vue";
 
 
 
@@ -353,20 +353,22 @@ export default {
       menuHeader: {
         "NAMA MENU": {
           MASTER: {
-            cmpMasterDocStatus: "MENU TEST 1",
+            // cmpMasterDocStatus: "MENU TEST 1",
             cmpMasterCategories: "MASTER CATEGORY",
             cmpMasterRateCard: "MASTER RATECARD",
-            cmpTransaction: "TRANSACTION",
+            
             "SUB MENU": {
               cmpHalDashboard1: "DASHBOARD1",
               cmpHalDashboard2: "DASHBOARD2",
               cmpHalDashboard3: "DASHBOARD3",
             },
           },
+
+          cmpTransaction: "TRANSACTION",
         },
       },
       menuUserHtml: {
-        cmpMasterDocStatus: "MENU TEST 1",
+        // cmpMasterDocStatus: "MENU TEST 1",
         cmpMasterCategories: "MASTER CATEGORY",
         cmpMasterRateCard: "MASTER RATECARD",
         cmpTransaction: "TRANSACTION",
