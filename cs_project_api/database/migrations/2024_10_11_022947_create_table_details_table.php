@@ -19,7 +19,6 @@ return new class extends Migration
             $table->text('note')->nullable();
 
             $table->string('business_type', 50)->nullable();
-            $table->string('agency_fee', 50)->nullable();
  
             $table->timestamps();
             $table->softDeletes();

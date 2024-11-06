@@ -93,6 +93,7 @@ import cmpHalRoute from "@/views/pages/cmpHalRoute.vue";
 import cmpMasterCategories from "./views/pages/master/cmpMasterCategories.vue";
 import cmpMasterRateCard from "./views/pages/master/cmpMasterRateCard.vue";
 import cmpTransaction from "./views/pages/transaction/cmpTransaction.vue";
+import cmpApproval from "./views/pages/approval/cmpApproval.vue";
 
 
 
@@ -130,6 +131,9 @@ const routeComponent = {
   cmpMasterCategories: markRaw(cmpMasterCategories),
   cmpMasterRateCard: markRaw(cmpMasterRateCard),
   cmpTransaction: markRaw(cmpTransaction),
+  cmpApproval: markRaw(cmpApproval),
+
+
   Login: markRaw(_Login),
   _logout: markRaw(_logout),
   _header: markRaw(_header),
@@ -363,14 +367,16 @@ export default {
               cmpHalDashboard3: "DASHBOARD3",
             },
           },
-
+          cmpApproval: "APPROVAL",
           cmpTransaction: "TRANSACTION",
+
         },
       },
       menuUserHtml: {
         // cmpMasterDocStatus: "MENU TEST 1",
         cmpMasterCategories: "MASTER CATEGORY",
         cmpMasterRateCard: "MASTER RATECARD",
+        cmpApproval: "APPROVAL",
         cmpTransaction: "TRANSACTION",
         cmpHalDashboard1: "DASHBOARD1",
         cmpHalDashboard2: "DASHBOARD2",
@@ -395,6 +401,11 @@ export default {
           delete: true,
         },
         cmpMasterRateCard: {
+          create: true,
+          update: true,
+          delete: true,
+        },
+        cmpApproval: {
           create: true,
           update: true,
           delete: true,

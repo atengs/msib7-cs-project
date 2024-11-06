@@ -28,6 +28,9 @@ return new class extends Migration
             $table->boolean('pph23')->nullable();
             $table->boolean('ppn')->nullable();
             $table->double('ppn_percent', 5, 2)->nullable();
+            $table->string('agency_fee', 50)->nullable();
+
+            $table->string('status')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

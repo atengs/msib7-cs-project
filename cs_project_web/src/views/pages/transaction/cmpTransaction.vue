@@ -339,14 +339,10 @@
                 <div class="form-group">
                   <label for="example-nf-email">Agency Fee</label>
                   <CmpInputText
-                    type="text"
+                    type="number"
                     placeholder="Agency Fee"
-                    v-model="ratecardForm[0].agency_fee" 
-                    :class="
-                      errorField.agency_fee
-                        ? 'form-control input-lg input-error'
-                        : 'form-control input-lg'
-                    "
+                    v-model="todo.agency_fee"
+                    :class="errorField.agency_fee ? 'form-control input-lg input-error' : 'form-control input-lg'"
                   />
                 </div>
               </div>
@@ -491,7 +487,9 @@
                   todo.ppn == null ||
                   // todo.ppn == '' ||
                   todo.ppn_percent == null ||
-                  todo.ppn_percent == '' 
+                  todo.ppn_percent == '' ||
+                  todo.agency_fee == null ||
+                  todo.agency_fee == '' 
 
                   // todo.ratecard_id == null ||
                   // todo.ratecard_id == '' ||
@@ -540,7 +538,9 @@
                   todo.ppn == null ||
                   // todo.ppn == '' ||
                   todo.ppn_percent == null ||
-                  todo.ppn_percent == '' 
+                  todo.ppn_percent == '' ||
+                  todo.agency_fee == null ||
+                  todo.agency_fee == '' 
                 "
               >
                 <i
@@ -647,6 +647,7 @@ export default {
         pph23: false,
         ppn: false,
         ppn_percent: false,
+        agency_fee: false,
         ratecard: false,
         
       },
@@ -670,6 +671,7 @@ export default {
         pph23: "",
         ppn: "",
         ppn_percent: "",
+        agency_fee: "",
         ratecard: "",
       },
 
@@ -683,9 +685,9 @@ export default {
           ratecard_nominal: "",
           note: "",
           business_type: "",
-          agency_fee: "",
         },
       ],
+
       json_fields: {
         trans_number: "trans_number",
         customer: "customer",
@@ -701,6 +703,7 @@ export default {
         pph23: "pph23",
         ppn: "ppn",
         ppn_percent: "ppn_percent",
+        agency_fee: "agency_fee",
 
       },
 
@@ -878,7 +881,7 @@ export default {
 
         doc.text(jobText, textX, boxY + 10);
         
-        doc.setFontSize(8);
+        doc.setFontSize(7);
         doc.text('PENAWARAN HARGA', 250, 100);
 
         const labelX = 40;
@@ -886,7 +889,7 @@ export default {
         const valueX = 250;
 
         
-        doc.setFontSize(8);
+        doc.setFontSize(7);
         doc.setFont("helvetica", "normal");
 
         doc.text('Company', labelX, 130);
@@ -899,8 +902,9 @@ export default {
 
         doc.text('Address', labelX, 170);
         doc.text(':', colonX, 170);
-        doc.text(`${header.address}`, valueX, 170);
-
+        const addressText = doc.splitTextToSize(`${header.address}`, 260); 
+        doc.text(addressText, valueX, 170);
+        
         doc.text('Project/Produk', labelX, 190);
         doc.text(':', colonX, 190);
         doc.text(`${header.project}`, valueX, 190);
@@ -923,14 +927,34 @@ export default {
             detail.note
         ]);
 
+
+        const totalBudget = details.reduce((sum, detail) => {
+        const nominal = parseFloat(detail.ratecard_nominal) || 0; 
+        return sum + nominal;
+        }, 0);
+
+        const totalBudgetTerbilang = convertToTerbilang(totalBudget) + " Rupiah";
+        const monthlyValue = Math.floor(totalBudget / 3);
+        const agencyFeePercentage = header.agency_fee;
+        const agencyFeeValue = (totalBudget * agencyFeePercentage) / 100;
+
         
+        ratecards.push([
+            ratecards.length + 1,
+            `AGENCY FEE ${header.agency_fee}%`,
+            `Rp. ${new Intl.NumberFormat('id-ID').format(agencyFeeValue)}`,
+            "",
+            
+        ]);
+
+
         doc.autoTable({
-            startY: 250,
+            startY: 240,
             head: [['No', 'Hal', 'Total', 'Note']],
             body: ratecards,
             theme: 'plain',
             styles: {
-                fontSize: 8,
+                fontSize: 7,
                 fillColor: [255, 255, 255],
                 textColor: [0, 0, 0]
             },
@@ -941,22 +965,20 @@ export default {
             columnStyles: {
                 0: { cellWidth: 20 },
                 1: { cellWidth: 200 },
-                2: { cellWidth: 80 },
-                3: { cellWidth: 200 },
+                2: { cellWidth: 67, halign: 'right' },
+                3: { cellWidth: 213 },
             },
             didDrawCell: function (data) {
                 if (data.section === 'head') {
                     const doc = data.doc;
                     const cell = data.cell;
 
-                    // Menggambar garis di atas header
                     if (data.row.index === 0) {
                         doc.setLineWidth(1);
                         doc.setDrawColor(0, 0, 0); 
                         doc.line(cell.x, cell.y, cell.x + cell.width, cell.y);
                     }
 
-                    // Menggambar garis di bawah header
                     if (data.row.index === 0 && data.cell.raw === 'Note', 'ratecard_nominal') {
                         doc.setLineWidth(2);
                         doc.setDrawColor(0, 0, 0); 
@@ -966,45 +988,45 @@ export default {
             }
           });
 
-        
-        
-        let finalY = doc.lastAutoTable.finalY + 30;
+          
+        let finalY = doc.lastAutoTable.finalY + 5;
         const pageWidth = doc.internal.pageSize.getWidth();
 
-        
-        doc.line(labelX, finalY + -12, labelX + 500, finalY + -12);
-        
-        doc.text(' Total Budget:', labelX, finalY);
-        doc.text(`Rp. 115,393,678`, pageWidth / 2, finalY, { align: 'center' });
+        doc.line(40, finalY -5, 540, finalY -5);
 
+        doc.text(' Total Budget:', 40, finalY + 5);
+        doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(totalBudget)}`, pageWidth / 2, finalY + 5, { align: 'center' });
+        
         doc.setDrawColor(0, 0, 0);
 
-
         doc.setFillColor (255, 153, 203);
-        doc.rect(labelX, finalY + 11, 500, 20, 'F');
+        doc.rect(labelX, finalY + 11, 500, 15, 'F');
 
         doc.line(labelX, finalY + 10, labelX + 500, finalY + 10); 
         doc.line(labelX, finalY + 11, labelX + 500, finalY + 11); 
 
-        doc.line(labelX, finalY + 31, labelX + 500, finalY + 31);
-        doc.line(labelX, finalY + 32, labelX + 500, finalY + 32);
-
+        doc.line(labelX, finalY + 26, labelX + 500, finalY + 26);
+        doc.line(labelX, finalY + 27, labelX + 500, finalY + 27);
         
-        doc.text('  Monthly:', labelX, finalY + 23);
-        doc.text(`Rp. 38,464,626`, pageWidth / 2, finalY + 23, { align: 'center' });
-        doc.text('Terbilang : Seratus lima belas juta tiga ratus sembilan puluh tiga ribu enam ratus tujuh puluh delapan rupiah', labelX, finalY + 43);
         
-        doc.line(labelX, finalY + 50, 540, finalY + 50);
-        doc.line(labelX, finalY + 51, 540, finalY + 51);
+        doc.text('  Monthly:', labelX, finalY + 20);
+        doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(monthlyValue)}`,pageWidth / 2,finalY + 20,{ align: 'center' });
 
-       
+        doc.text(`  Terbilang : ${totalBudgetTerbilang}`, labelX, finalY + 37);
+        
+        doc.line(labelX, finalY + 42, 540, finalY + 42);
+        doc.line(labelX, finalY + 43, 540, finalY + 43);
+
+      
         finalY += 45;
-        doc.setFontSize(8);
+        doc.setFontSize(7);
         
         finalY += 15;
         doc.text(pph23Text, labelX, finalY); 
         finalY += 15;
-        doc.text(ppnText, labelX, finalY); 
+        const ppnTextWithPercent = `${ppnText} ${header.ppn_percent}%`;
+        doc.text(ppnTextWithPercent, labelX, finalY);
+        
         finalY += 15;
         doc.text(`Pekerjaan akan dilakukan oleh CS setelah ada pembayaran DP minimal 50% dari Brand.`, labelX, finalY);
         finalY += 15;
@@ -1012,7 +1034,19 @@ export default {
         finalY += 15;
         doc.text(`PO/PP segera dikeluarkan langsung setelah quotation di approve.`, labelX, finalY);
 
-
+        // FUNCTION
+        function convertToTerbilang(num) {
+        const satuan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+        if (num < 12) return satuan[num];
+        if (num < 20) return satuan[num - 10] + " Belas";
+        if (num < 100) return satuan[Math.floor(num / 10)] + " Puluh " + satuan[num % 10];
+        if (num < 200) return "Seratus " + convertToTerbilang(num - 100);
+        if (num < 1000) return satuan[Math.floor(num / 100)] + " Ratus " + convertToTerbilang(num % 100);
+        if (num < 2000) return "Seribu " + convertToTerbilang(num - 1000);
+        if (num < 1000000) return convertToTerbilang(Math.floor(num / 1000)) + " Ribu " + convertToTerbilang(num % 1000);
+        if (num < 1000000000) return convertToTerbilang(Math.floor(num / 1000000)) + " Juta " + convertToTerbilang(num % 1000000);
+        return convertToTerbilang(Math.floor(num / 1000000000)) + " Milyar " + convertToTerbilang(num % 1000000000);
+        } 
 
         function capitalizeEachWord(text) {
           return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
@@ -1021,7 +1055,7 @@ export default {
         finalY += 40;
         doc.text('Terima Kasih', labelX, finalY );
 
-        doc.setFontSize(8);
+        doc.setFontSize(7);
         
         doc.text(capitalizeEachWord(`${header.acount_executive}`), labelX, finalY + 75);
         doc.text('Account Executive', labelX, finalY + 85);
@@ -1033,7 +1067,7 @@ export default {
         doc.text('Finance Manager', 300, finalY + 85);
 
 
-        doc.setFontSize(8);
+        doc.setFontSize(7);
         doc.text('Tanggal', 400, finalY ); 
         doc.text('Disetujui Oleh : ', 400, finalY + 15);
         doc.text('Klien : ', 400, finalY + 85);
@@ -1072,7 +1106,7 @@ export default {
         ratecard_nominal: "",
         note: "",
         business_type: "",
-        agency_fee: "",
+        
       });
     },
     // remove form
@@ -1211,6 +1245,7 @@ export default {
                 pph23: mythis.todo.pph23,
                 ppn: mythis.todo.ppn,
                 ppn_percent: mythis.todo.ppn_percent,
+                agency_fee: mythis.todo.agency_fee,
                 created_by: mythis.userid,
                 ratecard: mythis.ratecardForm,
                 userid: mythis.userid,
@@ -1226,7 +1261,6 @@ export default {
                 ratecard_nominal: "",
                 note: "",
                 business_type: "",
-                agency_fee: "",
               }]
               mythis.resetForm();
               mythis.generateCode();
@@ -1321,20 +1355,21 @@ export default {
       { name: "ACOUNT MANAGER", width: "150px" },
       { name: "FINANCE MANAGER", width: "150px" },
       {
-        name: "PPh 23",
+        name: "PPH 23",
         width: "150px",
         formatter: (cell) => (cell === true ? "Sudah termasuk PPh 23" : "Belum termasuk PPh 23"),
       },
       {
-        name: "PPn",
+        name: "PPN",
         width: "150px",
         formatter: (cell) => (cell === true ? "Sudah termasuk PPn" : "Belum termasuk PPn"),
       },
       {
-        name: "PPn Percent",
+        name: "PPN PERCENT",
         width: "150px",
         formatter: (cell) => (cell !== null ? `${cell}%` : ''),
       },
+      { name: "AGENCY FEE", width: "150px" },
       {
         name: "Action",
         formatter: (_, row) =>
@@ -1398,6 +1433,7 @@ export default {
           card.pph23,
           card.ppn,
           card.ppn_percent?.value || card.ppn_percent,
+          html(`<span class="pull-left">${card.agency_fee}</span>`),
         ]),
       total: (data) => data.count,
       handle: (res) => {
@@ -1497,6 +1533,7 @@ export default {
             pph23: mythis.todo.pph23,
             ppn: mythis.todo.ppn,
             ppn_percent: mythis.todo.ppn_percent,
+            agency_fee: mythis.todo.agency_fee,
             created_by: mythis.userid,
             ratecard: mythis.ratecardForm,
             userid: mythis.userid,
@@ -1545,57 +1582,58 @@ export default {
           }
         });
     },
+
     async getData(id) {
-  var mythis = this;
-  mythis.flagButtonAdd = false;
-  mythis.$root.presentLoading();
-  mythis.todo = {};
-  const AuthStr = "bearer " + localStorage.getItem("token");
-  const config = {
-    headers: {
-      Authorization: AuthStr,
+      var mythis = this;
+      mythis.flagButtonAdd = false;
+      mythis.$root.presentLoading();
+      mythis.todo = {};
+      const AuthStr = "bearer " + localStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: AuthStr,
+        },
+      };
+      await axios
+        .get(
+          mythis.$root.apiHost + mythis.$root.prefixApi + `trx-header/${id}`,
+          config
+        )
+        .then(async (res) => {
+          console.log(res.data.data);
+          const data = res.data.data;
+        
+          mythis.todo.id = id;
+          mythis.todo.trans_number = data.header.trans_number;
+          mythis.todo.customer = data.header.customer;
+          mythis.todo.trans_date = data.header.trans_date;
+          mythis.todo.payment_status = data.header.payment_status;
+          mythis.todo.person_in_charge = data.header.person_in_charge;
+          mythis.todo.address = data.header.address;
+          mythis.todo.project = data.header.project;
+          mythis.todo.job = data.header.job;
+          mythis.todo.acount_executive = data.header.acount_executive;
+          mythis.todo.acount_manager = data.header.acount_manager;
+          mythis.todo.finance_manager = data.header.finance_manager;
+          mythis.todo.pph23 = data.header.pph23;
+          mythis.todo.ppn = data.header.ppn;
+          mythis.todo.ppn_percent = data.header.ppn_percent;
+          mythis.todo.agency_fee = data.header.agency_fee;
+
+          mythis.ratecardForm = data.ratecards.map((ratecard) => ({
+            id: ratecard.id,
+            ratecard_id: ratecard.ratecard_id,
+            ratecard_nominal: ratecard.ratecard_nominal,
+            note: ratecard.note,
+            business_type: ratecard.business_type,
+          }));
+
+          mythis.$root.stopLoading();
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
     },
-  };
-  await axios
-    .get(
-      mythis.$root.apiHost + mythis.$root.prefixApi + `trx-header/${id}`,
-      config
-    )
-    .then(async (res) => {
-      console.log(res.data.data);
-      const data = res.data.data;
-    
-      mythis.todo.id = id;
-      mythis.todo.trans_number = data.header.trans_number;
-      mythis.todo.customer = data.header.customer;
-      mythis.todo.trans_date = data.header.trans_date;
-      mythis.todo.payment_status = data.header.payment_status;
-      mythis.todo.person_in_charge = data.header.person_in_charge;
-      mythis.todo.address = data.header.address;
-      mythis.todo.project = data.header.project;
-      mythis.todo.job = data.header.job;
-      mythis.todo.acount_executive = data.header.acount_executive;
-      mythis.todo.acount_manager = data.header.acount_manager;
-      mythis.todo.finance_manager = data.header.finance_manager;
-      mythis.todo.pph23 = data.header.pph23;
-      mythis.todo.ppn = data.header.ppn;
-      mythis.todo.ppn_percent = data.header.ppn_percent;
-
-      mythis.ratecardForm = data.ratecards.map((ratecard) => ({
-        id: ratecard.id,
-        ratecard_id: ratecard.ratecard_id,
-        ratecard_nominal: ratecard.ratecard_nominal,
-        note: ratecard.note,
-        business_type: ratecard.business_type,
-        agency_fee: ratecard.agency_fee,
-      }));
-
-      mythis.$root.stopLoading();
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
-},
 
 
     // generate trx code

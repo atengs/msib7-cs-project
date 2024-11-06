@@ -54,7 +54,7 @@ class TransactionHeaderController extends Controller
             ], 404);
         }
     
-        $details = TransactionDetail::select('transaction_detail.id', 'mr.job_description', 'ratecard_id', 'ratecard_nominal', 'note', 'business_type', 'agency_fee')
+        $details = TransactionDetail::select('transaction_detail.id', 'mr.job_description', 'ratecard_id', 'ratecard_nominal', 'note', 'business_type')
             ->join('master_ratecard as mr', 'mr.id', '=','transaction_detail.ratecard_id')
             ->where('trans_number', $header->trans_number)
             ->get();
@@ -88,6 +88,8 @@ class TransactionHeaderController extends Controller
             'pph23' => 'required|boolean', 
             'ppn' => 'required|boolean', 
             'ppn_percent' => 'nullable|numeric|min:0|max:100',
+            'agency_fee' => 'required|string',
+            // 'status' => 'required|string',
 
             
         ]);
@@ -110,6 +112,8 @@ class TransactionHeaderController extends Controller
         $item->pph23 = $request->input('pph23');
         $item->ppn = $request->input('ppn');
         $item->ppn_percent = $request->input('ppn_percent');
+        $item->agency_fee = $request->input('agency_fee');
+        $item->status = $request->input('status');
         
 
 
@@ -130,7 +134,6 @@ class TransactionHeaderController extends Controller
                     "ratecard_nominal" => $value['ratecard_nominal'],
                     "note" => $value['note'],
                     "business_type" => $value['business_type'],
-                    "agency_fee" => $value['agency_fee'],
                     "created_by" => $request->input('created_by')
                 ];
             }
@@ -176,6 +179,8 @@ class TransactionHeaderController extends Controller
             'pph23' => 'required|boolean', 
             'ppn' => 'required|boolean', 
             'ppn_percent' => 'nullable|numeric|min:0|max:100',
+            'agency_fee' => 'required|string',
+            // 'status' => 'required|string',
             
         ]);
 
@@ -200,6 +205,8 @@ class TransactionHeaderController extends Controller
         $item->pph23 = $request->input('pph23');
         $item->ppn = $request->input('ppn');
         $item->ppn_percent = $request->input('ppn_percent');
+        $item->agency_fee = $request->input('agency_fee');
+        $item->status = $request->input('status');
 
         // Save the updated item
         if ($item->save()) {if (!is_array($request->input('ratecard'))) {
@@ -217,7 +224,6 @@ class TransactionHeaderController extends Controller
                 "ratecard_nominal" => $value['ratecard_nominal'],
                 "note" => $value['note'],
                 "business_type" => $value['business_type'],
-                "agency_fee" => $value['agency_fee'],
                 "created_by" => $request->input('created_by')
             ];
             $save = TransactionDetail::where('id', $value['id'])->update($detail);
