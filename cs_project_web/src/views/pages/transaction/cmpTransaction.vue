@@ -1018,7 +1018,7 @@ export default {
         doc.line(labelX, finalY + 43, 540, finalY + 43);
 
       
-        finalY += 45;
+        finalY += 40;
         doc.setFontSize(7);
         
         finalY += 15;
@@ -1369,7 +1369,11 @@ export default {
         width: "150px",
         formatter: (cell) => (cell !== null ? `${cell}%` : ''),
       },
-      { name: "AGENCY FEE", width: "150px" },
+      {
+        name: "AGENCY FEE",
+        width: "150px",
+        formatter: (cell) => (cell !== null ? `${cell}%` : ''),
+      },
       {
         name: "Action",
         formatter: (_, row) =>
@@ -1433,7 +1437,7 @@ export default {
           card.pph23,
           card.ppn,
           card.ppn_percent?.value || card.ppn_percent,
-          html(`<span class="pull-left">${card.agency_fee}</span>`),
+          card.agency_fee
         ]),
       total: (data) => data.count,
       handle: (res) => {
