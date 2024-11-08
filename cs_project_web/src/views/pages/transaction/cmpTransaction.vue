@@ -293,6 +293,50 @@
             <div class="col-md-12">
               <div class="col-md-6">
                 <div class="form-group">
+                  <label for="example-nf-email">Jenis Pembayaran</label>
+                  <select
+                    v-model="todo.jenis_pembayaran"
+                    :class="errorField.jenis_pembayaran ? 'form-control input-lg input-error' : 'form-control input-lg'"
+                    @change="periksaJenisPembayaran"
+                  >
+                    <option disabled value="">Pilih Jenis Pembayaran</option>
+                    <option value="Retainer">Retainer</option>
+                    <option value="One Shoot Project">One Shoot Project</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="example-nf-email">Term</label>
+                  <select
+                    v-model="todo.term"
+                    :disabled="isTermDisabled"
+                    :class="errorField.term ? 'form-control input-lg input-error' : 'form-control input-lg'"
+                  >
+                    <option disabled value="">Pilih Jangka Waktu</option>
+                    <option value="1">1 Bulan</option>
+                    <option value="2">2 Bulan</option>
+                    <option value="3"> 3 Month </option>
+                    <option value="4"> 4 Month </option>
+                    <option value="5"> 5 Month </option>
+                    <option value="6"> 6 Month </option>
+                    <option value="7"> 7 Month </option>
+                    <option value="8"> 8 Month </option>
+                    <option value="9"> 9 Month </option>
+                    <option value="10"> 10 Month </option>
+                    <option value="11"> 11 Month </option>
+                    <option value="12"> 12 Month </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="col-md-6">
+                <div class="form-group">
                   <label for="example-nf-email">PPh 23</label>
                   <select
                     v-model="todo.pph23"
@@ -468,8 +512,6 @@
                   todo.customer == '' ||
                   // todo.trans_date == null ||
                   // todo.trans_date == '' ||
-                  todo.payment_status == null ||
-                  todo.payment_status == '' ||
                   todo.person_in_charge == null ||
                   todo.person_in_charge == '' ||
                   todo.project == null ||
@@ -482,6 +524,12 @@
                   todo.acount_manager == '' ||
                   todo.finance_manager == null ||
                   todo.finance_manager == '' ||
+                  todo.payment_status == null ||
+                  todo.payment_status == '' ||
+                  todo.jenis_pembayaran == null ||
+                  todo.jenis_pembayaran == '' ||
+                  // todo.term == null ||
+                  // todo.term == '' ||
                   todo.pph23 == null ||
                   // todo.pph23 == '' ||
                   todo.ppn == null ||
@@ -519,8 +567,6 @@
                   todo.customer == '' ||
                   todo.trans_date == null ||
                   todo.trans_date == '' ||
-                  todo.payment_status == null ||
-                  todo.payment_status == '' ||
                   todo.person_in_charge == null ||
                   todo.person_in_charge == '' ||
                   todo.project == null ||
@@ -533,6 +579,10 @@
                   todo.acount_manager == '' ||
                   todo.finance_manager == null ||
                   todo.finance_manager == '' ||
+                  todo.jenis_pembayaran == null ||
+                  todo.jenis_pembayaran == '' ||
+                  // todo.term == null ||
+                  // todo.term == '' ||
                   todo.pph23 == null ||
                   // todo.pph23 == '' ||
                   todo.ppn == null ||
@@ -637,13 +687,15 @@ export default {
         trans_number: false,
         customer: false,
         trans_date: false,
-        payment_status: false,
         person_in_charge: false,
         project: false,
         job: false,
         acount_executive: false,
         acount_manager: false,
         finance_manager: false,
+        payment_status: false,
+        jenis_pembayaran: false,
+        term: false,
         pph23: false,
         ppn: false,
         ppn_percent: false,
@@ -661,13 +713,16 @@ export default {
         trans_number: "",
         customer: "",
         trans_date: "",
-        payment_status: "",
+      
         person_in_charge: "",
         project: "",
         job: "",
         acount_executive: "",
         acount_manager: "",
         finance_manager: "",
+        payment_status: "",
+        jenis_pembayaran: "",
+        term: "",
         pph23: "",
         ppn: "",
         ppn_percent: "",
@@ -692,7 +747,6 @@ export default {
         trans_number: "trans_number",
         customer: "customer",
         trans_date: "trans_date",
-        payment_status: "payment_status",
         person_in_charge: "person_in_charge",
         address: "address",
         project: "project",
@@ -700,6 +754,9 @@ export default {
         acount_executive: "acount_executive",
         acount_manager: "acount_manager",
         finance_manager: "finance_manager",
+        payment_status: "payment_status",
+        jenis_pembayaran: "jenis_pembayaran",
+        term: "term",
         pph23: "pph23",
         ppn: "ppn",
         ppn_percent: "ppn_percent",
@@ -710,6 +767,13 @@ export default {
 
     };  
   },
+
+    computed: {
+      // Properti computed untuk disable/enable field term
+      isTermDisabled() {
+        return this.todo.jenis_pembayaran !== 'Retainer';
+      },
+    },
 
   
 
@@ -728,362 +792,370 @@ export default {
   },
   methods: {
 
-   async exportPdf() {
+      periksaJenisPembayaran() {
+        // Reset nilai term jika jenis_pembayaran adalah "One Shoot Project"
+        if (this.todo.jenis_pembayaran === 'One Shoot Project') {
+          this.todo.term = '';
+        }
+      },
+
+    async exportPdf() {
+          const mythis = this;
+          mythis.$root.presentLoading();
+
+          try {
+            let allData = [];
+            let count = 1;
+            let nn = 0;
+            const limitx = 100;
+
+            while (count > 0) {
+              const offsetx = limitx * nn;
+
+              const reqData = await axios({
+                method: 'get',
+                url: mythis.$root.apiHost + 'api/trx-header/getData?offset=' + offsetx + '&limit=' + limitx,
+              });
+
+              const resData = reqData.data;
+              allData = [...allData, ...resData.results];
+
+              if (resData.results.length === 0 || resData.results.length < limitx) {
+                count = 0;
+              }
+
+              nn++;
+              if (nn >= 100) {
+                // Safety check to prevent infinite loop
+                count = 0;
+              }
+            }
+
+            const doc = new jsPDF();
+            let totalPagesExp = '{total_pages_count_string}';
+
+            doc.setFontSize(18);
+            doc.text('Master Area Report', 14, 22);
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+
+            // Add Print Date
+            doc.setFontSize(10);
+            doc.text(`Print Date: ${new Date().toLocaleString()}`, 14, 30);
+
+            doc.autoTable({
+              theme: 'striped',
+              head: [['No', 'Trans number', 'Customer', 'Trans Date', 'Payment Status', 'Person In Charge', 'Address', 'Project', 'Job', 'Acount Executive', 'Acount Manager', 'Finance Manager']],
+              body: allData.map((transaction_header, index) => [index + 1, transaction_header.trans_number, transaction_header.customer, transaction_header.trans_date, transaction_header.payment_status, transaction_header.person_in_charge, transaction_header.address, transaction_header.project, transaction_header.job, transaction_header.acount_executive, transaction_header.acount_manager, transaction_header.finance_manager.toLocaleString()]),
+              startY: 35, // Adjusted to accommodate the Print Date
+              didDrawPage: function (data) {
+                // Footer
+                let str = 'Page ' + doc.internal.getNumberOfPages();
+                if (typeof doc.putTotalPages === 'function') {
+                  str = str + ' of ' + totalPagesExp;
+                }
+                doc.setFontSize(10);
+
+                let pageSize = doc.internal.pageSize;
+                let pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+                doc.text(str, data.settings.margin.left, pageHeight - 10);
+              },
+              showHead: 'everyPage',
+            });
+
+            if (typeof doc.putTotalPages === 'function') {
+              doc.putTotalPages(totalPagesExp);
+            }
+
+            const fileName = 'Master_Area_Report_' + mythis.formatDate(new Date()) + '.pdf';
+            doc.save(fileName);
+            console.log(fileName + ' generated');
+
+            mythis.$root.stopLoading();
+            Swal.fire('Success', 'PDF has been generated successfully', 'success');
+          } catch (error) {
+            console.error('Error generating PDF:', error);
+            mythis.$root.stopLoading();
+            Swal.fire('Error', 'Failed to generate PDF', 'error');
+          }
+        },
+
+        padTo2Digits(num) {
+          return num.toString().padStart(2, "0");
+        },
+        formatDate(date) {
+          return (
+            [
+              date.getFullYear(),
+              this.padTo2Digits(date.getMonth() + 1),
+              this.padTo2Digits(date.getDate()),
+            ].join("-") +
+            " " +
+            [
+              this.padTo2Digits(date.getHours()),
+              this.padTo2Digits(date.getMinutes()),
+              this.padTo2Digits(date.getSeconds()),
+            ].join(":")
+          );
+        },
+
+      async exportPdf1(id) { 
         const mythis = this;
         mythis.$root.presentLoading();
 
-        try {
-          let allData = [];
-          let count = 1;
-          let nn = 0;
-          const limitx = 100;
-
-          while (count > 0) {
-            const offsetx = limitx * nn;
-
-            const reqData = await axios({
+      try {
+          const reqData = await axios({
               method: 'get',
-              url: mythis.$root.apiHost + 'api/trx-header/getData?offset=' + offsetx + '&limit=' + limitx,
-            });
-
-            const resData = reqData.data;
-            allData = [...allData, ...resData.results];
-
-            if (resData.results.length === 0 || resData.results.length < limitx) {
-              count = 0;
-            }
-
-            nn++;
-            if (nn >= 100) {
-              // Safety check to prevent infinite loop
-              count = 0;
-            }
-          }
-
-          const doc = new jsPDF();
-          let totalPagesExp = '{total_pages_count_string}';
-
-          doc.setFontSize(18);
-          doc.text('Master Area Report', 14, 22);
-          doc.setFontSize(11);
-          doc.setTextColor(100);
-
-          // Add Print Date
-          doc.setFontSize(10);
-          doc.text(`Print Date: ${new Date().toLocaleString()}`, 14, 30);
-
-          doc.autoTable({
-            theme: 'striped',
-            head: [['No', 'Trans number', 'Customer', 'Trans Date', 'Payment Status', 'Person In Charge', 'Address', 'Project', 'Job', 'Acount Executive', 'Acount Manager', 'Finance Manager']],
-            body: allData.map((transaction_header, index) => [index + 1, transaction_header.trans_number, transaction_header.customer, transaction_header.trans_date, transaction_header.payment_status, transaction_header.person_in_charge, transaction_header.address, transaction_header.project, transaction_header.job, transaction_header.acount_executive, transaction_header.acount_manager, transaction_header.finance_manager.toLocaleString()]),
-            startY: 35, // Adjusted to accommodate the Print Date
-            didDrawPage: function (data) {
-              // Footer
-              let str = 'Page ' + doc.internal.getNumberOfPages();
-              if (typeof doc.putTotalPages === 'function') {
-                str = str + ' of ' + totalPagesExp;
-              }
-              doc.setFontSize(10);
-
-              let pageSize = doc.internal.pageSize;
-              let pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
-              doc.text(str, data.settings.margin.left, pageHeight - 10);
-            },
-            showHead: 'everyPage',
+              url: mythis.$root.apiHost + `api/trx-header/${id}`,
           });
 
-          if (typeof doc.putTotalPages === 'function') {
-            doc.putTotalPages(totalPagesExp);
+          const resData = reqData.data.data;
+          const header = resData.header;
+          const details = resData.ratecards;
+
+          const pph23Text = header.pph23 ? "Sudah termasuk PPh 23" : "Belum termasuk PPh 23";
+          const ppnText = header.ppn ? "Sudah termasuk PPN" : "Belum termasuk PPN";
+
+          const doc = new jsPDF('p', 'pt', 'a4');
+
+        
+          const logo = new Image();
+          logo.src = '/src/assets/img/creativestyle.jpeg'; 
+          doc.addImage(logo, 'JPEG', 35, 20, 80, 80); 
+
+
+          const boxX = 340;
+          const boxY = 27;
+          const boxWidth = 200; 
+          const boxHeight = 15;
+
+          doc.setFillColor(255, 153, 203); 
+          doc.rect(boxX, boxY, boxWidth, boxHeight, 'F'); 
+
+          doc.setFontSize(5);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(0, 0, 0); 
+
+          
+          const jobText = `${header.job}`;
+          let textX;
+
+          
+          if (jobText.length ) {
+              
+              textX = boxX + boxWidth / 2 - doc.getTextWidth(jobText) / 2;
+          } else {
+              
+              textX = boxX + 10;
           }
 
-          const fileName = 'Master_Area_Report_' + mythis.formatDate(new Date()) + '.pdf';
+
+          doc.text(jobText, textX, boxY + 10);
+          
+          doc.setFontSize(7);
+          doc.text('PENAWARAN HARGA', 250, 100);
+
+          const labelX = 40;
+          const colonX = 230;
+          const valueX = 250;
+
+          
+          doc.setFontSize(7);
+          doc.setFont("helvetica", "normal");
+
+          doc.text('Company', labelX, 130);
+          doc.text(':', colonX, 130);
+          doc.text(`${header.customer}`, valueX, 130);
+
+          doc.text('Person In Charge', labelX, 150);
+          doc.text(':', colonX, 150);
+          doc.text(`${header.person_in_charge}`, valueX, 150);
+
+          doc.text('Address', labelX, 170);
+          doc.text(':', colonX, 170);
+          const addressText = doc.splitTextToSize(`${header.address}`, 260); 
+          doc.text(addressText, valueX, 170);
+          
+          doc.text('Project/Produk', labelX, 190);
+          doc.text(':', colonX, 190);
+          doc.text(`${header.project}`, valueX, 190);
+
+          doc.text('Job', labelX, 210);
+          doc.text(':', colonX, 210);
+          doc.text(`${header.job}`, valueX, 210);
+
+          doc.text('No Pesanan', labelX, 230);
+          doc.text(':', colonX, 230);
+          doc.text(`${header.trans_number}`, valueX, 230);
+
+
+          
+          const ratecards = details.map((detail, index) => [
+              index + 1,
+              detail.job_description,
+              `Rp. ${new Intl.NumberFormat('en-US').format(detail.ratecard_nominal)}`,
+              // `Rp. ${detail.ratecard_nominal.toLocaleString()}`,
+              detail.note
+          ]);
+
+
+          const totalBudget = details.reduce((sum, detail) => {
+          const nominal = parseFloat(detail.ratecard_nominal) || 0; 
+          return sum + nominal;
+          }, 0);
+
+          const term = header.term || 1; // Default ke 1 jika term tidak ada
+          const monthlyValue = Math.floor(totalBudget / term);
+          
+          const totalBudgetTerbilang = convertToTerbilang(totalBudget) + " Rupiah";
+          const agencyFeePercentage = header.agency_fee;
+          const agencyFeeValue = (totalBudget * agencyFeePercentage) / 100;
+          
+          ratecards.push([
+              ratecards.length + 1,
+              `AGENCY FEE ${header.agency_fee}%`,
+              `Rp. ${new Intl.NumberFormat('id-ID').format(agencyFeeValue)}`,
+              ` `,
+              
+          ]);
+
+
+          doc.autoTable({
+              startY: 240,
+              head: [['No', 'Hal', 'Total', 'Note']],
+              body: ratecards,
+              theme: 'plain',
+              styles: {
+                  fontSize: 7,
+                  fillColor: [255, 255, 255],
+                  textColor: [0, 0, 0]
+              },
+              headStyles: {
+                  fillColor: [255, 255, 255],
+                  textColor: [0, 0, 0],
+              },
+              columnStyles: {
+                  0: { cellWidth: 20 },
+                  1: { cellWidth: 200 },
+                  2: { cellWidth: 67, halign: 'right' },
+                  3: { cellWidth: 213 },
+              },
+              didDrawCell: function (data) {
+                  if (data.section === 'head') {
+                      const doc = data.doc;
+                      const cell = data.cell;
+
+                      if (data.row.index === 0) {
+                          doc.setLineWidth(1);
+                          doc.setDrawColor(0, 0, 0); 
+                          doc.line(cell.x, cell.y, cell.x + cell.width, cell.y);
+                      }
+
+                      if (data.row.index === 0 && data.cell.raw === 'Note', 'ratecard_nominal') {
+                          doc.setLineWidth(2);
+                          doc.setDrawColor(0, 0, 0); 
+                          doc.line(cell.x, cell.y + cell.height, cell.x + cell.width  , cell.y + cell.height);
+                      }
+                  }
+              }
+            });
+
+            
+          let finalY = doc.lastAutoTable.finalY + 5;
+          const pageWidth = doc.internal.pageSize.getWidth();
+
+          doc.line(40, finalY -5, 540, finalY -5);
+
+          doc.text(' Total Budget:', 40, finalY + 5);
+          doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(totalBudget)}`, pageWidth / 2, finalY + 5, { align: 'center' });
+          
+          doc.setDrawColor(0, 0, 0);
+
+          doc.setFillColor (255, 153, 203);
+          doc.rect(labelX, finalY + 11, 500, 15, 'F');
+
+          doc.line(labelX, finalY + 10, labelX + 500, finalY + 10); 
+          doc.line(labelX, finalY + 11, labelX + 500, finalY + 11); 
+
+          doc.line(labelX, finalY + 26, labelX + 500, finalY + 26);
+          doc.line(labelX, finalY + 27, labelX + 500, finalY + 27);
+          
+          
+          doc.text(`Monthly : ${header.term} Month `, labelX, finalY + 20);
+          doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(monthlyValue)}`,pageWidth / 2,finalY + 20,{ align: 'center' });
+
+          doc.text(`  Terbilang : ${totalBudgetTerbilang}`, labelX, finalY + 37);
+          
+          doc.line(labelX, finalY + 42, 540, finalY + 42);
+          doc.line(labelX, finalY + 43, 540, finalY + 43);
+
+        
+          finalY += 40;
+          doc.setFontSize(7);
+          
+          finalY += 15;
+          doc.text(pph23Text, labelX, finalY); 
+          finalY += 15;
+          const ppnTextWithPercent = `${ppnText} ${header.ppn_percent}%`;
+          doc.text(ppnTextWithPercent, labelX, finalY);
+          
+          finalY += 15;
+          doc.text(`Pekerjaan akan dilakukan oleh CS setelah ada pembayaran DP minimal 50% dari Brand.`, labelX, finalY);
+          finalY += 15;
+          doc.text(`Bila disetujui, mohon approval dari quotation ini di email, dan dikirimkan kembali ke CS.`, labelX, finalY);
+          finalY += 15;
+          doc.text(`PO/PP segera dikeluarkan langsung setelah quotation di approve.`, labelX, finalY);
+
+          // FUNCTION
+          function convertToTerbilang(num) {
+          const satuan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+          if (num < 12) return satuan[num];
+          if (num < 20) return satuan[num - 10] + " Belas";
+          if (num < 100) return satuan[Math.floor(num / 10)] + " Puluh " + satuan[num % 10];
+          if (num < 200) return "Seratus " + convertToTerbilang(num - 100);
+          if (num < 1000) return satuan[Math.floor(num / 100)] + " Ratus " + convertToTerbilang(num % 100);
+          if (num < 2000) return "Seribu " + convertToTerbilang(num - 1000);
+          if (num < 1000000) return convertToTerbilang(Math.floor(num / 1000)) + " Ribu " + convertToTerbilang(num % 1000);
+          if (num < 1000000000) return convertToTerbilang(Math.floor(num / 1000000)) + " Juta " + convertToTerbilang(num % 1000000);
+          return convertToTerbilang(Math.floor(num / 1000000000)) + " Miliar " + convertToTerbilang(num % 1000000000);
+          } 
+
+          function capitalizeEachWord(text) {
+            return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+          }
+
+          finalY += 40;
+          doc.text('Terima Kasih', labelX, finalY );
+
+          doc.setFontSize(7);
+          
+          doc.text(capitalizeEachWord(`${header.acount_executive}`), labelX, finalY + 75);
+          doc.text('Account Executive', labelX, finalY + 85);
+
+          doc.text(capitalizeEachWord(`${header.acount_manager}`), 200, finalY + 75);
+          doc.text('Account Manager', 200, finalY + 85);
+
+          doc.text(capitalizeEachWord(`${header.finance_manager}`), 300, finalY + 75);
+          doc.text('Finance Manager', 300, finalY + 85);
+
+
+          doc.setFontSize(7);
+          doc.text('Tanggal', 400, finalY ); 
+          doc.text('Disetujui Oleh : ', 400, finalY + 15);
+          doc.text('Klien : ', 400, finalY + 85);
+
+          // Simpan file PDF
+          const fileName = `Quotation_${header.trans_number}.pdf`;
           doc.save(fileName);
-          console.log(fileName + ' generated');
 
           mythis.$root.stopLoading();
           Swal.fire('Success', 'PDF has been generated successfully', 'success');
-        } catch (error) {
+      } catch (error) {
           console.error('Error generating PDF:', error);
           mythis.$root.stopLoading();
           Swal.fire('Error', 'Failed to generate PDF', 'error');
-        }
-      },
-
-      padTo2Digits(num) {
-        return num.toString().padStart(2, "0");
-      },
-      formatDate(date) {
-        return (
-          [
-            date.getFullYear(),
-            this.padTo2Digits(date.getMonth() + 1),
-            this.padTo2Digits(date.getDate()),
-          ].join("-") +
-          " " +
-          [
-            this.padTo2Digits(date.getHours()),
-            this.padTo2Digits(date.getMinutes()),
-            this.padTo2Digits(date.getSeconds()),
-          ].join(":")
-        );
-      },
-
-      async exportPdf1(id) { 
-    const mythis = this;
-    mythis.$root.presentLoading();
-
-    try {
-        const reqData = await axios({
-            method: 'get',
-            url: mythis.$root.apiHost + `api/trx-header/${id}`,
-        });
-
-        const resData = reqData.data.data;
-        const header = resData.header;
-        const details = resData.ratecards;
-
-        const pph23Text = header.pph23 ? "Sudah termasuk PPh 23" : "Belum termasuk PPh 23";
-        const ppnText = header.ppn ? "Sudah termasuk PPN" : "Belum termasuk PPN";
-
-        const doc = new jsPDF('p', 'pt', 'a4');
-
-      
-        const logo = new Image();
-        logo.src = '/src/assets/img/creativestyle.jpeg'; 
-        doc.addImage(logo, 'JPEG', 35, 20, 80, 80); 
-
-
-        const boxX = 340;
-        const boxY = 27;
-        const boxWidth = 200; 
-        const boxHeight = 15;
-
-        doc.setFillColor(255, 153, 203); 
-        doc.rect(boxX, boxY, boxWidth, boxHeight, 'F'); 
-
-        doc.setFontSize(5);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(0, 0, 0); 
-
-        
-        const jobText = `${header.job}`;
-        let textX;
-
-        
-        if (jobText.length ) {
-            
-            textX = boxX + boxWidth / 2 - doc.getTextWidth(jobText) / 2;
-        } else {
-            
-            textX = boxX + 10;
-        }
-
-
-        doc.text(jobText, textX, boxY + 10);
-        
-        doc.setFontSize(7);
-        doc.text('PENAWARAN HARGA', 250, 100);
-
-        const labelX = 40;
-        const colonX = 230;
-        const valueX = 250;
-
-        
-        doc.setFontSize(7);
-        doc.setFont("helvetica", "normal");
-
-        doc.text('Company', labelX, 130);
-        doc.text(':', colonX, 130);
-        doc.text(`${header.customer}`, valueX, 130);
-
-        doc.text('Person In Charge', labelX, 150);
-        doc.text(':', colonX, 150);
-        doc.text(`${header.person_in_charge}`, valueX, 150);
-
-        doc.text('Address', labelX, 170);
-        doc.text(':', colonX, 170);
-        const addressText = doc.splitTextToSize(`${header.address}`, 260); 
-        doc.text(addressText, valueX, 170);
-        
-        doc.text('Project/Produk', labelX, 190);
-        doc.text(':', colonX, 190);
-        doc.text(`${header.project}`, valueX, 190);
-
-        doc.text('Job', labelX, 210);
-        doc.text(':', colonX, 210);
-        doc.text(`${header.job}`, valueX, 210);
-
-        doc.text('No Pesanan', labelX, 230);
-        doc.text(':', colonX, 230);
-        doc.text(`${header.trans_number}`, valueX, 230);
-
-
-        
-        const ratecards = details.map((detail, index) => [
-            index + 1,
-            detail.job_description,
-            `Rp. ${new Intl.NumberFormat('en-US').format(detail.ratecard_nominal)}`,
-            // `Rp. ${detail.ratecard_nominal.toLocaleString()}`,
-            detail.note
-        ]);
-
-
-        const totalBudget = details.reduce((sum, detail) => {
-        const nominal = parseFloat(detail.ratecard_nominal) || 0; 
-        return sum + nominal;
-        }, 0);
-
-        const totalBudgetTerbilang = convertToTerbilang(totalBudget) + " Rupiah";
-        const monthlyValue = Math.floor(totalBudget / 3);
-        const agencyFeePercentage = header.agency_fee;
-        const agencyFeeValue = (totalBudget * agencyFeePercentage) / 100;
-
-        
-        ratecards.push([
-            ratecards.length + 1,
-            `AGENCY FEE ${header.agency_fee}%`,
-            `Rp. ${new Intl.NumberFormat('id-ID').format(agencyFeeValue)}`,
-            "",
-            
-        ]);
-
-
-        doc.autoTable({
-            startY: 240,
-            head: [['No', 'Hal', 'Total', 'Note']],
-            body: ratecards,
-            theme: 'plain',
-            styles: {
-                fontSize: 7,
-                fillColor: [255, 255, 255],
-                textColor: [0, 0, 0]
-            },
-            headStyles: {
-                fillColor: [255, 255, 255],
-                textColor: [0, 0, 0],
-            },
-            columnStyles: {
-                0: { cellWidth: 20 },
-                1: { cellWidth: 200 },
-                2: { cellWidth: 67, halign: 'right' },
-                3: { cellWidth: 213 },
-            },
-            didDrawCell: function (data) {
-                if (data.section === 'head') {
-                    const doc = data.doc;
-                    const cell = data.cell;
-
-                    if (data.row.index === 0) {
-                        doc.setLineWidth(1);
-                        doc.setDrawColor(0, 0, 0); 
-                        doc.line(cell.x, cell.y, cell.x + cell.width, cell.y);
-                    }
-
-                    if (data.row.index === 0 && data.cell.raw === 'Note', 'ratecard_nominal') {
-                        doc.setLineWidth(2);
-                        doc.setDrawColor(0, 0, 0); 
-                        doc.line(cell.x, cell.y + cell.height, cell.x + cell.width  , cell.y + cell.height);
-                    }
-                }
-            }
-          });
-
-          
-        let finalY = doc.lastAutoTable.finalY + 5;
-        const pageWidth = doc.internal.pageSize.getWidth();
-
-        doc.line(40, finalY -5, 540, finalY -5);
-
-        doc.text(' Total Budget:', 40, finalY + 5);
-        doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(totalBudget)}`, pageWidth / 2, finalY + 5, { align: 'center' });
-        
-        doc.setDrawColor(0, 0, 0);
-
-        doc.setFillColor (255, 153, 203);
-        doc.rect(labelX, finalY + 11, 500, 15, 'F');
-
-        doc.line(labelX, finalY + 10, labelX + 500, finalY + 10); 
-        doc.line(labelX, finalY + 11, labelX + 500, finalY + 11); 
-
-        doc.line(labelX, finalY + 26, labelX + 500, finalY + 26);
-        doc.line(labelX, finalY + 27, labelX + 500, finalY + 27);
-        
-        
-        doc.text('  Monthly:', labelX, finalY + 20);
-        doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(monthlyValue)}`,pageWidth / 2,finalY + 20,{ align: 'center' });
-
-        doc.text(`  Terbilang : ${totalBudgetTerbilang}`, labelX, finalY + 37);
-        
-        doc.line(labelX, finalY + 42, 540, finalY + 42);
-        doc.line(labelX, finalY + 43, 540, finalY + 43);
-
-      
-        finalY += 40;
-        doc.setFontSize(7);
-        
-        finalY += 15;
-        doc.text(pph23Text, labelX, finalY); 
-        finalY += 15;
-        const ppnTextWithPercent = `${ppnText} ${header.ppn_percent}%`;
-        doc.text(ppnTextWithPercent, labelX, finalY);
-        
-        finalY += 15;
-        doc.text(`Pekerjaan akan dilakukan oleh CS setelah ada pembayaran DP minimal 50% dari Brand.`, labelX, finalY);
-        finalY += 15;
-        doc.text(`Bila disetujui, mohon approval dari quotation ini di email, dan dikirimkan kembali ke CS.`, labelX, finalY);
-        finalY += 15;
-        doc.text(`PO/PP segera dikeluarkan langsung setelah quotation di approve.`, labelX, finalY);
-
-        // FUNCTION
-        function convertToTerbilang(num) {
-        const satuan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
-        if (num < 12) return satuan[num];
-        if (num < 20) return satuan[num - 10] + " Belas";
-        if (num < 100) return satuan[Math.floor(num / 10)] + " Puluh " + satuan[num % 10];
-        if (num < 200) return "Seratus " + convertToTerbilang(num - 100);
-        if (num < 1000) return satuan[Math.floor(num / 100)] + " Ratus " + convertToTerbilang(num % 100);
-        if (num < 2000) return "Seribu " + convertToTerbilang(num - 1000);
-        if (num < 1000000) return convertToTerbilang(Math.floor(num / 1000)) + " Ribu " + convertToTerbilang(num % 1000);
-        if (num < 1000000000) return convertToTerbilang(Math.floor(num / 1000000)) + " Juta " + convertToTerbilang(num % 1000000);
-        return convertToTerbilang(Math.floor(num / 1000000000)) + " Milyar " + convertToTerbilang(num % 1000000000);
-        } 
-
-        function capitalizeEachWord(text) {
-          return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
-        }
-
-        finalY += 40;
-        doc.text('Terima Kasih', labelX, finalY );
-
-        doc.setFontSize(7);
-        
-        doc.text(capitalizeEachWord(`${header.acount_executive}`), labelX, finalY + 75);
-        doc.text('Account Executive', labelX, finalY + 85);
-
-        doc.text(capitalizeEachWord(`${header.acount_manager}`), 200, finalY + 75);
-        doc.text('Account Manager', 200, finalY + 85);
-
-        doc.text(capitalizeEachWord(`${header.finance_manager}`), 300, finalY + 75);
-        doc.text('Finance Manager', 300, finalY + 85);
-
-
-        doc.setFontSize(7);
-        doc.text('Tanggal', 400, finalY ); 
-        doc.text('Disetujui Oleh : ', 400, finalY + 15);
-        doc.text('Klien : ', 400, finalY + 85);
-
-        // Simpan file PDF
-        const fileName = `Quotation_${header.trans_number}.pdf`;
-        doc.save(fileName);
-
-        mythis.$root.stopLoading();
-        Swal.fire('Success', 'PDF has been generated successfully', 'success');
-    } catch (error) {
-        console.error('Error generating PDF:', error);
-        mythis.$root.stopLoading();
-        Swal.fire('Error', 'Failed to generate PDF', 'error');
-    }
-},
+      }
+  },
 
 
 
@@ -1234,7 +1306,6 @@ export default {
                 trans_number: mythis.todo.trans_number,
                 customer: mythis.todo.customer,
                 // trans_date: mythis.todo.trans_date,
-                payment_status: mythis.todo.payment_status,
                 person_in_charge: mythis.todo.person_in_charge,
                 address: mythis.todo.address,
                 project: mythis.todo.project,
@@ -1242,6 +1313,9 @@ export default {
                 acount_executive: mythis.todo.acount_executive,
                 acount_manager: mythis.todo.acount_manager,
                 finance_manager: mythis.todo.finance_manager,
+                payment_status: mythis.todo.payment_status,
+                jenis_pembayaran: mythis.todo.jenis_pembayaran,
+                term: mythis.todo.term,
                 pph23: mythis.todo.pph23,
                 ppn: mythis.todo.ppn,
                 ppn_percent: mythis.todo.ppn_percent,
@@ -1346,7 +1420,6 @@ export default {
       { name: "TRANS NUMBER", width: "150px" }, 
       { name: "CUSTOMER", width: "150px" }, 
       { name: "TRANS DATE", width: "150px" },
-      { name: "PAYMENT STATUS", width: "150px" },
       { name: "PERSON IN CHARGE", width: "150px" },
       { name: "ADDRESS", width: "200px" },
       { name: "PROJECT", width: "150px" },
@@ -1354,6 +1427,13 @@ export default {
       { name: "ACOUNT EXECUTIVE", width: "150px" },
       { name: "ACOUNT MANAGER", width: "150px" },
       { name: "FINANCE MANAGER", width: "150px" },
+      { name: "PAYMENT STATUS", width: "150px" },
+      { name: "JENIS PEMBAYARAN", width: "150px" },
+      {
+        name: "TERM",
+        width: "150px",
+        formatter: (cell) => cell ? html(`<span class="pull-left">${cell} Month</span>`) : html(`<span class="pull-left"></span>`),
+      },
       {
         name: "PPH 23",
         width: "150px",
@@ -1426,7 +1506,6 @@ export default {
           html(`<span class="pull-left">${card.trans_number}</span>`),
           html(`<span class="pull-left">${card.customer}</span>`),
           html(`<span class="pull-left">${card.trans_date}</span>`),
-          html(`<span class="pull-left">${card.payment_status}</span>`),
           html(`<span class="pull-left">${card.person_in_charge}</span>`),
           html(`<span class="pull-left">${card.address}</span>`),
           html(`<span class="pull-left">${card.project}</span>`),
@@ -1434,6 +1513,9 @@ export default {
           html(`<span class="pull-left">${card.acount_executive}</span>`),
           html(`<span class="pull-left">${card.acount_manager}</span>`),
           html(`<span class="pull-left">${card.finance_manager}</span>`),
+          html(`<span class="pull-left">${card.payment_status}</span>`),
+          html(`<span class="pull-left">${card.jenis_pembayaran}</span>`),
+          card.term,
           card.pph23,
           card.ppn,
           card.ppn_percent?.value || card.ppn_percent,
@@ -1526,7 +1608,6 @@ export default {
             trans_number: mythis.todo.trans_number,
             customer: mythis.todo.customer,
             trans_date: mythis.todo.trans_date,
-            payment_status: mythis.todo.payment_status,
             person_in_charge: mythis.todo.person_in_charge,
             address: mythis.todo.address,
             project: mythis.todo.project,
@@ -1534,6 +1615,9 @@ export default {
             acount_executive: mythis.todo.acount_executive,
             acount_manager: mythis.todo.acount_manager,
             finance_manager: mythis.todo.finance_manager,
+            payment_status: mythis.todo.payment_status,
+            jenis_pembayaran: mythis.todo.jenis_pembayaran,
+            term: mythis.todo.term,
             pph23: mythis.todo.pph23,
             ppn: mythis.todo.ppn,
             ppn_percent: mythis.todo.ppn_percent,
@@ -1611,7 +1695,6 @@ export default {
           mythis.todo.trans_number = data.header.trans_number;
           mythis.todo.customer = data.header.customer;
           mythis.todo.trans_date = data.header.trans_date;
-          mythis.todo.payment_status = data.header.payment_status;
           mythis.todo.person_in_charge = data.header.person_in_charge;
           mythis.todo.address = data.header.address;
           mythis.todo.project = data.header.project;
@@ -1619,6 +1702,9 @@ export default {
           mythis.todo.acount_executive = data.header.acount_executive;
           mythis.todo.acount_manager = data.header.acount_manager;
           mythis.todo.finance_manager = data.header.finance_manager;
+          mythis.todo.payment_status = data.header.payment_status;
+          mythis.todo.jenis_pembayaran = data.header.jenis_pembayaran;
+          mythis.todo.term = data.header.term;
           mythis.todo.pph23 = data.header.pph23;
           mythis.todo.ppn = data.header.ppn;
           mythis.todo.ppn_percent = data.header.ppn_percent;

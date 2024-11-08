@@ -77,7 +77,6 @@ class TransactionHeaderController extends Controller
             'trans_number' => 'required|string',
             'customer' => 'required|string',
             // 'trans_date' => 'required|date',
-            'payment_status' => 'required|string',
             'person_in_charge' => 'required|string',
             'address' => 'required|string',
             'project' => 'required|string',
@@ -85,10 +84,16 @@ class TransactionHeaderController extends Controller
             'acount_executive' => 'required|string',
             'acount_manager' => 'required|string',
             'finance_manager' => 'required|string',
+            
+            'payment_status' => 'required|string',
+            'jenis_pembayaran' => 'required|string',
+            // 'term' => 'required|string',
+
             'pph23' => 'required|boolean', 
             'ppn' => 'required|boolean', 
             'ppn_percent' => 'nullable|numeric|min:0|max:100',
             'agency_fee' => 'required|string',
+            
             // 'status' => 'required|string',
 
             
@@ -100,7 +105,7 @@ class TransactionHeaderController extends Controller
         $item->customer = $request->input('customer');
         // $item->trans_date = $request->input('trans_date');
         $item->trans_date = date('Y-m-d');
-        $item->payment_status = $request->input('payment_status');
+       
         $item->person_in_charge = $request->input('person_in_charge');
         $item->address = $request->input('address');
         $item->project = $request->input('project');
@@ -108,12 +113,18 @@ class TransactionHeaderController extends Controller
         $item->acount_executive = $request->input('acount_executive');
         $item->acount_manager = $request->input('acount_manager');
         $item->finance_manager = $request->input('finance_manager');
-        $item->created_by = $request->input('created_by');
+
+        $item->payment_status = $request->input('payment_status');
+        $item->jenis_pembayaran = $request->input('jenis_pembayaran');
+        $item->term = $request->input('term');
+
         $item->pph23 = $request->input('pph23');
         $item->ppn = $request->input('ppn');
         $item->ppn_percent = $request->input('ppn_percent');
         $item->agency_fee = $request->input('agency_fee');
+        
         $item->status = $request->input('status');
+        $item->created_by = $request->input('created_by');
         
 
 
@@ -168,7 +179,6 @@ class TransactionHeaderController extends Controller
             'trans_number' => 'required|string',
             'customer' => 'required|string',
             'trans_date' => 'required|date',
-            'payment_status' => 'required|string',
             'person_in_charge' => 'required|string',
             'address' => 'required|string',
             'project' => 'required|string',
@@ -176,6 +186,11 @@ class TransactionHeaderController extends Controller
             'acount_executive' => 'required|string',
             'acount_manager' => 'required|string',
             'finance_manager' => 'required|string',
+
+            'payment_status' => 'required|string',
+            'jenis_pembayaran' => 'required|string',
+            // 'term' => 'required|string',
+
             'pph23' => 'required|boolean', 
             'ppn' => 'required|boolean', 
             'ppn_percent' => 'nullable|numeric|min:0|max:100',
@@ -194,7 +209,6 @@ class TransactionHeaderController extends Controller
         $item->trans_number = $request->input('trans_number');
         $item->customer = $request->input('customer');
         $item->trans_date = $request->input('trans_date');
-        $item->payment_status = $request->input('payment_status');
         $item->person_in_charge = $request->input('person_in_charge');
         $item->address = $request->input('address');
         $item->project = $request->input('project');
@@ -202,6 +216,11 @@ class TransactionHeaderController extends Controller
         $item->acount_executive = $request->input('acount_executive');
         $item->acount_manager = $request->input('acount_manager');
         $item->finance_manager = $request->input('finance_manager');
+
+        $item->payment_status = $request->input('payment_status');
+        $item->jenis_pembayaran = $request->input('jenis_pembayaran');
+        $item->term = $request->input('term');
+
         $item->pph23 = $request->input('pph23');
         $item->ppn = $request->input('ppn');
         $item->ppn_percent = $request->input('ppn_percent');

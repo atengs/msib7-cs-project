@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('trans_number')->unique();
             $table->string('customer')->nullable();
             $table->date('trans_date')->nullable();
-            $table->string('payment_status')->nullable();
             $table->string('person_in_charge')->nullable();
             $table->string('address')->nullable();
             $table->string('project')->nullable();
@@ -24,6 +23,11 @@ return new class extends Migration
             $table->string('acount_executive')->nullable();
             $table->string('acount_manager')->nullable();
             $table->string('finance_manager')->nullable();
+            $table->string('payment_status')->nullable();
+            $table->string('jenis_pembayaran')->nullable();
+            $table->string('term')->nullable();
+
+
 
             $table->boolean('pph23')->nullable();
             $table->boolean('ppn')->nullable();
