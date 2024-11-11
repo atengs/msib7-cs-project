@@ -309,25 +309,22 @@
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="example-nf-email">Term</label>
-                  <select
-                    v-model="todo.term"
+                  <CmpInputText
+                    type="number"
+                    placeholder="Term"
                     :disabled="isTermDisabled"
-                    :class="errorField.term ? 'form-control input-lg input-error' : 'form-control input-lg'"
-                  >
-                    <option disabled value="">Pilih Jangka Waktu</option>
-                    <option value="1">1 Bulan</option>
-                    <option value="2">2 Bulan</option>
-                    <option value="3"> 3 Month </option>
-                    <option value="4"> 4 Month </option>
-                    <option value="5"> 5 Month </option>
-                    <option value="6"> 6 Month </option>
-                    <option value="7"> 7 Month </option>
-                    <option value="8"> 8 Month </option>
-                    <option value="9"> 9 Month </option>
-                    <option value="10"> 10 Month </option>
-                    <option value="11"> 11 Month </option>
-                    <option value="12"> 12 Month </option>
-                  </select>
+                    v-model="todo.term"
+                    :class="
+                      errorField.term
+                        ? 'form-control input-lg input-error'
+                        : 'form-control input-lg'
+                    "
+                    @input="
+                      (val) =>
+                        (todo.term =
+                          todo.term.toUpperCase())
+                    "
+                  />
                 </div>
               </div>
             </div>
@@ -458,16 +455,13 @@
               <div class="col-md-3">
                 <div class="form-group">
                   <label for="example-nf-email">Tipe Usaha</label>
-                  <CmpInputText
-                    type="text"
-                    placeholder="Tipe Usaha"
-                    v-model="input.business_type"
-                    :class="
-                      errorField.business_type
-                        ? 'form-control input-lg input-error'
-                        : 'form-control input-lg'
-                    "
-                  />
+                  <select
+                    v-model="todo.business_type"
+                    :class="errorField.business_type ? 'form-control input-lg input-error' : 'form-control input-lg'"
+                  >
+                    <option value="Perorangan">Perorangan </option>
+                    <option value="Badan Usaha">Badan Usaha</option>
+                  </select>
                 </div>
               </div>
             </div>
