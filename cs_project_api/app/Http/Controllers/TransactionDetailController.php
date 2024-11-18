@@ -41,6 +41,7 @@ class TransactionDetailController extends Controller
         $item->ratecard_nominal = $request->input('ratecard_nominal');
         $item->note = $request->input('note');
         $item->business_type = $request->input('business_type');
+        $item->qty = $request->input('qty');
         $item->created_by = $request->input('userid');
 
         if ($item->save()){
@@ -82,6 +83,7 @@ class TransactionDetailController extends Controller
         $item->ratecard_nominal = $request->input('ratecard_nominal');
         $item->note = $request->input('note');
         $item->business_type = $request->input('business_type');
+        $item->qty = $request->input('qty');
 
         // Save the updated item
         if ($item->save()) {

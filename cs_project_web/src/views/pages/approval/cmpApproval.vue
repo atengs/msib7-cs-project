@@ -335,14 +335,12 @@
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="example-nf-email">PPh 23</label>
-                  <select
-                    v-model="todo.pph23"
-                    :class="errorField.pph23 ? 'form-control input-lg input-error' : 'form-control input-lg'"
-                  >
-                    <option disabled value="">Pilih Status PPh</option>
-                    <option :value="true">Sudah Termasuk PPh 23</option>
-                    <option :value="false">Belum Termasuk PPh 23</option>
-                  </select>
+                  <input
+                      type="text"
+                      class="form-control input-lg"
+                      placeholder="Sudah Termasuk PPh 23"
+                      disabled
+                    />
                 </div>
               </div>
 
@@ -364,7 +362,7 @@
 
           <div class="row">
             <div class="col-md-12">
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <div class="form-group">
                   <label for="example-nf-email">PPn Percent</label>
                   <CmpInputText
@@ -374,7 +372,7 @@
                     :class="errorField.ppn_percent ? 'form-control input-lg input-error' : 'form-control input-lg'"
                   />
                 </div>
-              </div>
+              </div> -->
 
               <div class="col-md-6">
                 <div class="form-group">
@@ -419,6 +417,22 @@
                 </div>
               </div>
 
+              <div class="col-md-1">
+                <div class="form-group">
+                  <label for="example-nf-email">Quantity</label>
+                  <CmpInputText
+                    type="number"
+                    placeholder="Nominal"
+                    v-model="input.qty"
+                    :class="
+                      errorField.qty
+                        ? 'form-control input-lg input-error'
+                        : 'form-control input-lg'
+                    "
+                  />
+                </div>
+              </div>
+
               <div class="col-md-2">
                 <div class="form-group">
                   <label for="example-nf-email">Nominal</label>
@@ -452,11 +466,11 @@
                 </div>
               </div>
 
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <div class="form-group">
                   <label for="example-nf-email">Tipe Usaha</label>
                   <select
-                    v-model="todo.business_type"
+                    v-model="ratecardForm[k].business_type"
                     :class="errorField.business_type ? 'form-control input-lg input-error' : 'form-control input-lg'"
                   >
                     <option value="Perorangan">Perorangan </option>
@@ -466,7 +480,7 @@
               </div>
             </div>
 
-            <div class="col-md-12">
+            <!-- <div class="col-md-12">
                 <button
                   class="btn btn-danger btn-sm mt-3"
                   @click="removeSchedule(k)"
@@ -483,7 +497,7 @@
                 >
                   Tambah Form
                 </button>
-              </div>
+              </div> -->
 
           </div>
 
@@ -524,12 +538,12 @@
                   todo.jenis_pembayaran == '' ||
                   // todo.term == null ||
                   // todo.term == '' ||
-                  todo.pph23 == null ||
+                  // todo.pph23 == null ||
                   // todo.pph23 == '' ||
                   todo.ppn == null ||
                   // todo.ppn == '' ||
-                  todo.ppn_percent == null ||
-                  todo.ppn_percent == '' ||
+                  // todo.ppn_percent == null ||
+                  // todo.ppn_percent == '' ||
                   todo.agency_fee == null ||
                   todo.agency_fee == '' 
 
@@ -548,7 +562,7 @@
                 SAVE DATA
               </button>
 
-              <button
+              <!-- <button
                 v-if="!flagButtonAdd"
                 @click="editTodo()"
                 type="button"
@@ -581,8 +595,8 @@
                   // todo.pph23 == '' ||
                   todo.ppn == null ||
                   // todo.ppn == '' ||
-                  todo.ppn_percent == null ||
-                  todo.ppn_percent == '' ||
+                  // todo.ppn_percent == null ||
+                  // todo.ppn_percent == '' ||
                   todo.agency_fee == null ||
                   todo.agency_fee == '' 
                 "
@@ -592,7 +606,7 @@
                   class="fa fa-spinner fa-spin text-default"
                 ></i>
                 UPDATE DATA
-              </button>
+              </button> -->
             </div>
           </div>
         </div>
@@ -623,13 +637,14 @@
 
         <button class="btn btn-sm btn-danger pull-left" @click="exportPdf()">
           Export PDF</button>
-        <button
+
+        <!-- <button
           v-if="status_table && $root.accessRoles[access_page].create"
           class="btn btn-sm btn-primary pull-right"
           @click="show_modal()"
         >
           ADD DATA
-        </button>
+        </button> -->
 
         <!------------------------>
         <div id="wrapper2"></div>
@@ -694,6 +709,7 @@ export default {
         ppn: false,
         ppn_percent: false,
         agency_fee: false,
+        status: false,
         ratecard: false,
         
       },
@@ -707,7 +723,6 @@ export default {
         trans_number: "",
         customer: "",
         trans_date: "",
-      
         person_in_charge: "",
         project: "",
         job: "",
@@ -721,6 +736,7 @@ export default {
         ppn: "",
         ppn_percent: "",
         agency_fee: "",
+        status: "",
         ratecard: "",
       },
 
@@ -734,6 +750,7 @@ export default {
           ratecard_nominal: "",
           note: "",
           business_type: "",
+          qty: "",
         },
       ],
 
@@ -757,8 +774,6 @@ export default {
         agency_fee: "agency_fee",
 
       },
-
-
     };  
   },
 
@@ -784,10 +799,45 @@ export default {
     // this.userid = localStorage.getItem("userid");
     this.userid = "ADMIN";
   },
+
+
   methods: {
 
+        async handleStatusUpdate(id, statusValue, alertTitle) {
+        const confirmation = await Swal.fire({
+          title: alertTitle,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes",
+          cancelButtonText: "No",
+        });
+
+        if (confirmation.isConfirmed) {
+          try {
+            await axios.put(`${this.$root.apiHost}/api/trx-header/${id}`, {
+              status: statusValue,
+            });
+            Swal.fire("Success", `Status updated to ${statusValue === 1 ? "Approved" : "Rejected"}`, "success");
+            this.refreshTable();
+          } catch (error) {
+            Swal.fire("Error", "Failed to update status", "error");
+          }
+        }
+      },
+
+      getStatusText(status) {
+          return ["Pending", "Approved", "Rejected", "Canceled"][status];
+        },
+
+        // Refresh table to reload updated data
+        refreshTable() {
+        this.grid.updateConfig({ data: [] }); // Clear previous data
+        this.grid.forceRender(); // Reload table data if necessary
+        this.getTable(); // Fetch new data
+      },
+
+
       periksaJenisPembayaran() {
-        // Reset nilai term jika jenis_pembayaran adalah "One Shoot Project"
         if (this.todo.jenis_pembayaran === 'One Shoot Project') {
           this.todo.term = '';
         }
@@ -933,8 +983,6 @@ export default {
           
           const jobText = `${header.job}`;
           let textX;
-
-          
           if (jobText.length ) {
               
               textX = boxX + boxWidth / 2 - doc.getTextWidth(jobText) / 2;
@@ -942,8 +990,6 @@ export default {
               
               textX = boxX + 10;
           }
-
-
           doc.text(jobText, textX, boxY + 10);
           
           doc.setFontSize(7);
@@ -952,9 +998,7 @@ export default {
           const labelX = 40;
           const colonX = 230;
           const valueX = 250;
-
-          
-          doc.setFontSize(7);
+          doc.setFontSize(6);
           doc.setFont("helvetica", "normal");
 
           doc.text('Company', labelX, 130);
@@ -984,43 +1028,81 @@ export default {
 
 
           
-          const ratecards = details.map((detail, index) => [
-              index + 1,
-              detail.job_description,
-              `Rp. ${new Intl.NumberFormat('en-US').format(detail.ratecard_nominal)}`,
-              // `Rp. ${detail.ratecard_nominal.toLocaleString()}`,
-              detail.note
-          ]);
+          const ratecards = details.map((detail, index) => {
+          const totalAwal = parseFloat(detail.ratecard_nominal); // Tetap 15 juta misalnya
+          const totalAwalDenganQty = totalAwal * parseInt(detail.qty); // Hitung total awal berdasarkan qty
+          let totalAkhir;
 
+          if  (detail.business_type === 'Perorangan') {
+          totalAkhir = Math.floor(totalAwalDenganQty / 0.97 / 0.98);
+          } 
+          else if (detail.business_type === 'Badan Usaha') {
+          totalAkhir = Math.floor(totalAwalDenganQty / 0.98);
+          }
 
-          const totalBudget = details.reduce((sum, detail) => {
-          const nominal = parseFloat(detail.ratecard_nominal) || 0; 
-          return sum + nominal;
-          }, 0);
+          return [
+          index + 1,
+          detail.job_description,
+          `${detail.qty} master`,
+          `Rp. ${new Intl.NumberFormat('en-US').format(totalAwal)}`,
+          `Rp. ${new Intl.NumberFormat('en-US').format(totalAkhir)}    `,
+          detail.note
+      ];
+    });
+
+       // const ratecards = details.map((detail, index) => [
+          //     index + 1,
+          //     detail.job_description,
+          //     '2 Derivative (HC)',
+          //     `Rp. ${new Intl.NumberFormat('en-US').format(detail.ratecard_nominal)}`,
+              
+          //     '12.653.061 (HardCore)    ',
+          //     detail.note
+          // ]);
+
+          const totalAkhirSum = details.reduce((sum, detail) => {
+          const totalAwal = parseFloat(detail.ratecard_nominal) * parseInt(detail.qty);
+          let totalAkhir;
+
+          if (detail.business_type === 'Perorangan') {
+              totalAkhir = Math.floor(totalAwal / 0.97 / 0.98);
+          } else if (detail.business_type === 'Badan Usaha') {
+              totalAkhir = Math.floor(totalAwal / 0.98);
+          }
+
+          return sum + totalAkhir;
+        }, 0);
+
+          const agencyFeePercentage = header.agency_fee;
+          const agencyFeeValue = Math.floor((totalAkhirSum * agencyFeePercentage) / 100);
+          
+          const totalBudget = totalAkhirSum + agencyFeeValue;
 
           const term = header.term || 1; // Default ke 1 jika term tidak ada
           const monthlyValue = Math.floor(totalBudget / term);
-          
           const totalBudgetTerbilang = convertToTerbilang(totalBudget) + " Rupiah";
-          const agencyFeePercentage = header.agency_fee;
-          const agencyFeeValue = (totalBudget * agencyFeePercentage) / 100;
+          
+
+        
           
           ratecards.push([
-              ratecards.length + 1,
-              `AGENCY FEE ${header.agency_fee}%`,
-              `Rp. ${new Intl.NumberFormat('id-ID').format(agencyFeeValue)}`,
-              ` `,
-              
-          ]);
+          ratecards.length + 1,
+          `AGENCY FEE ${header.agency_fee}%`,
+          ``, 
+          ``, 
+          `Rp. ${new Intl.NumberFormat('id-ID').format(agencyFeeValue)}    `, 
+          ``
+      ]);
+          
 
 
           doc.autoTable({
               startY: 240,
-              head: [['No', 'Hal', 'Total', 'Note']],
+              head: [['No', '              Hal','','total awal', '           Total akhir ', '                        Note']],
               body: ratecards,
               theme: 'plain',
               styles: {
-                  fontSize: 7,
+                  fontSize: 6,
                   fillColor: [255, 255, 255],
                   textColor: [0, 0, 0]
               },
@@ -1028,12 +1110,17 @@ export default {
                   fillColor: [255, 255, 255],
                   textColor: [0, 0, 0],
               },
+              tableWidth: 500, 
               columnStyles: {
-                  0: { cellWidth: 20 },
-                  1: { cellWidth: 200 },
-                  2: { cellWidth: 67, halign: 'right' },
-                  3: { cellWidth: 213 },
+                    0: { cellWidth: 20 },       
+                    1: { cellWidth: 130 },   
+                    2: { cellWidth: 50 },     
+                    3: { cellWidth: 60, halign: 'right' },       
+                    4: { cellWidth: 70 , halign: 'right' }, 
+                    // 3: { cellWidth: 70, halign: 'right' }, 
+                    5: { cellWidth: 170 },      
               },
+
               didDrawCell: function (data) {
                   if (data.section === 'head') {
                       const doc = data.doc;
@@ -1049,7 +1136,7 @@ export default {
                           doc.setLineWidth(2);
                           doc.setDrawColor(0, 0, 0); 
                           doc.line(cell.x, cell.y + cell.height, cell.x + cell.width  , cell.y + cell.height);
-                      }
+                      } 
                   }
               }
             });
@@ -1060,9 +1147,8 @@ export default {
 
           doc.line(40, finalY -5, 540, finalY -5);
 
-          doc.text(' Total Budget:', 40, finalY + 5);
-          doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(totalBudget)}`, pageWidth / 2, finalY + 5, { align: 'center' });
-          
+          doc.text('  Total Budget:', 40, finalY + 5);
+          doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(totalBudget)}`,pageWidth - 237,  finalY + 5,{ align: 'right' });
           doc.setDrawColor(0, 0, 0);
 
           doc.setFillColor (255, 153, 203);
@@ -1075,8 +1161,8 @@ export default {
           doc.line(labelX, finalY + 27, labelX + 500, finalY + 27);
           
           
-          doc.text(`Monthly : ${header.term} Month `, labelX, finalY + 20);
-          doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(monthlyValue)}`,pageWidth / 2,finalY + 20,{ align: 'center' });
+          doc.text(`  Monthly : ${header.term} Month `, labelX, finalY + 20);
+          doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(monthlyValue)}`,pageWidth - 237,  finalY + 20,{ align: 'right' });
 
           doc.text(`  Terbilang : ${totalBudgetTerbilang}`, labelX, finalY + 37);
           
@@ -1152,8 +1238,6 @@ export default {
   },
 
 
-
-
     // add form
     updateNominal(index) {
       // Cari nilai ratecard yang sesuai berdasarkan pilihan dari dropdown
@@ -1172,6 +1256,7 @@ export default {
         ratecard_nominal: "",
         note: "",
         business_type: "",
+        qty: "",
         
       });
     },
@@ -1291,6 +1376,10 @@ export default {
               Authorization: AuthStr,
             },
           };
+
+          mythis.todo.ppn_percent = 11;
+          mythis.todo.pph23 = true;
+
           var url =
             mythis.$root.apiHost + mythis.$root.prefixApi + "trx-header";
           axios
@@ -1314,6 +1403,7 @@ export default {
                 ppn: mythis.todo.ppn,
                 ppn_percent: mythis.todo.ppn_percent,
                 agency_fee: mythis.todo.agency_fee,
+                status: mythis.todo.status,
                 created_by: mythis.userid,
                 ratecard: mythis.ratecardForm,
                 userid: mythis.userid,
@@ -1329,6 +1419,7 @@ export default {
                 ratecard_nominal: "",
                 note: "",
                 business_type: "",
+                qty: "",
               }]
               mythis.resetForm();
               mythis.generateCode();
@@ -1391,16 +1482,16 @@ export default {
       });
     },
     getTable() {
-  var mythis = this;
-  this.grid = new Grid();
-  this.grid.updateConfig({
-    pagination: {
-      limit: 10,
-      server: {
-        url: (prev, page, limit) =>
-          `${prev}${prev.includes("?") ? "&" : "?"}limit=${limit}&offset=${
-            page * limit
-          }`,
+      var mythis = this;
+      this.grid = new Grid();
+      this.grid.updateConfig({
+        pagination: {
+          limit: 10,
+          server: {
+            url: (prev, page, limit) =>
+              `${prev}${prev.includes("?") ? "&" : "?"}limit=${limit}&offset=${
+                page * limit
+              }`,
       },
     },
     search: {
@@ -1418,119 +1509,134 @@ export default {
       { name: "ADDRESS", width: "200px" },
       { name: "PROJECT", width: "150px" },
       { name: "JOB", width: "150px" },
-      { name: "ACOUNT EXECUTIVE", width: "150px" },
-      { name: "ACOUNT MANAGER", width: "150px" },
-      { name: "FINANCE MANAGER", width: "150px" },
+      // { name: "ACOUNT EXECUTIVE", width: "150px" },
+      // { name: "ACOUNT MANAGER", width: "150px" },
+      // { name: "FINANCE MANAGER", width: "150px" },
       { name: "PAYMENT STATUS", width: "150px" },
-      { name: "JENIS PEMBAYARAN", width: "150px" },
+      // { name: "JENIS PEMBAYARAN", width: "150px" },
       {
         name: "TERM",
         width: "150px",
         formatter: (cell) => cell ? html(`<span class="pull-left">${cell} Month</span>`) : html(`<span class="pull-left"></span>`),
       },
-      {
-        name: "PPH 23",
-        width: "150px",
-        formatter: (cell) => (cell === true ? "Sudah termasuk PPh 23" : "Belum termasuk PPh 23"),
-      },
-      {
-        name: "PPN",
-        width: "150px",
-        formatter: (cell) => (cell === true ? "Sudah termasuk PPn" : "Belum termasuk PPn"),
-      },
-      {
-        name: "PPN PERCENT",
-        width: "150px",
-        formatter: (cell) => (cell !== null ? `${cell}%` : ''),
-      },
+      // {
+      //   name: "PPH 23",
+      //   width: "150px",
+      //   formatter: (cell) => (cell === true ? "Sudah termasuk PPh 23" : "Belum termasuk PPh 23"),
+      // },
+      // {
+      //   name: "PPN",
+      //   width: "150px",
+      //   formatter: (cell) => (cell === true ? "Sudah termasuk PPn" : "Belum termasuk PPn"),
+      // },
+      // {
+      //   name: "PPN PERCENT",
+      //   width: "150px",
+      //   formatter: (cell) => (cell !== null ? `${cell}%` : ''),
+      // },
       {
         name: "AGENCY FEE",
         width: "150px",
         formatter: (cell) => (cell !== null ? `${cell}%` : ''),
       },
       {
-        name: "Action",
-        formatter: (_, row) =>
-          mythis.$root.accessRoles[mythis.access_page].update &&
-          mythis.$root.accessRoles[mythis.access_page].delete
-            ? html(
-                
-              `<button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>
-              &nbsp;&nbsp;&nbsp;
-              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>
-               <button data-id="${row.cells[0].data}" class="btn btn-sm btn-success text-white" id="exportPdf1" data-toggle="tooltip" title="Export PDF" ><i class="fa fa-file-pdf-o"></i></button>`
-            
-              )
-            : mythis.$root.accessRoles[mythis.access_page].update
-            ? html(
-                
-              `<button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="editData" data-toggle="tooltip" title="Edit" ><i class="fa fa-pencil-square-o"></i></button>
-              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-success text-white" id="exportPdf1" data-toggle="tooltip" title="Export PDF" ><i class="fa fa-file-pdf-o"></i></button>`
-              )
-            : mythis.$root.accessRoles[mythis.access_page].delete
-            ? html(`&nbsp;&nbsp;&nbsp;
-              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger text-white" id="deleteData" data-toggle="tooltip" title="Delete" ><i class="fa fa-trash-o"></i></button>
-              <button data-id="${row.cells[0].data}" class="btn btn-sm btn-success text-white" id="exportPdf1" data-toggle="tooltip" title="Export PDF" ><i class="fa fa-file-pdf-o"></i></button>
-              `)
-            : ``,
+      name: "Status",
+        formatter: (cell) => this.getStatusText(cell),
       },
+      {
+          name: "Action",
+          formatter: (_, row) =>
+            html(`
+              <div style="display: flex; flex-direction: column; align-items: center;">
+                <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-success approve-btn" title="Approve">
+                    <i class="fa fa-check"></i>
+                  </button>
+                  <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning reject-btn" title="Reject">
+                    <i class="fa fa-times"></i>
+                  </button>
+                </div>
+                <div style="display: flex; gap: 5px;">
+            <button data-id="${row.cells[0].data}" class="btn btn-sm btn-primary" id="editData" data-toggle="tooltip" title="Show">
+              <i class="fa fa-eye"></i>
+            </button>
+            <button data-id="${row.cells[0].data}" class="btn btn-sm btn-danger" id="deleteData" data-toggle="tooltip" title="Delete">
+              <i class="fa fa-trash"></i>
+            </button>
+                </div>
+              </div>
+            `),
+        },
     ],
-    style: {
-      table: {
-        border: "1px solid #ccc",
-        "table-layout": "auto", 
+      style: {
+        table: {
+          border: "1px solid #ccc",
+          "table-layout": "auto", 
+        },
+        th: {
+          "background-color": "rgba(0, 55, 255, 0.1)",
+          color: "#000",
+          "border-bottom": "1px solid #ccc",
+          "text-align": "center",
+        },
+        td: {
+          "white-space": "normal", 
+          "word-wrap": "break-word", 
+        },
       },
-      th: {
-        "background-color": "rgba(0, 55, 255, 0.1)",
-        color: "#000",
-        "border-bottom": "1px solid #ccc",
-        "text-align": "center",
-      },
-      td: {
-        "white-space": "normal", 
-        "word-wrap": "break-word", 
-      },
-    },
-    server: {
-      url: this.$root.apiHost + this.$root.prefixApi + "trx-header/getData",
-      then: (data) =>
-        data.results.map((card) => [
-          card.id,
-          data.nomorBaris++ + 1,
-          html(`<span class="pull-left">${card.trans_number}</span>`),
-          html(`<span class="pull-left">${card.customer}</span>`),
-          html(`<span class="pull-left">${card.trans_date}</span>`),
-          html(`<span class="pull-left">${card.person_in_charge}</span>`),
-          html(`<span class="pull-left">${card.address}</span>`),
-          html(`<span class="pull-left">${card.project}</span>`),
-          html(`<span class="pull-left">${card.job}</span>`),
-          html(`<span class="pull-left">${card.acount_executive}</span>`),
-          html(`<span class="pull-left">${card.acount_manager}</span>`),
-          html(`<span class="pull-left">${card.finance_manager}</span>`),
-          html(`<span class="pull-left">${card.payment_status}</span>`),
-          html(`<span class="pull-left">${card.jenis_pembayaran}</span>`),
-          card.term,
-          card.pph23,
-          card.ppn,
-          card.ppn_percent?.value || card.ppn_percent,
-          card.agency_fee
-        ]),
-      total: (data) => data.count,
-      handle: (res) => {
-        if (res.status === 404) return { data: [] };
-        if (res.ok) return res.json();
+      server: {
+        url: this.$root.apiHost + this.$root.prefixApi + "trx-header/getData",
+        then: (data) =>
+          data.results.map((card) => [
+            card.id,
+            data.nomorBaris++ + 1,
+            html(`<span class="pull-left">${card.trans_number}</span>`),
+            html(`<span class="pull-left">${card.customer}</span>`),
+            html(`<span class="pull-left">${card.trans_date}</span>`),
+            html(`<span class="pull-left">${card.person_in_charge}</span>`),
+            html(`<span class="pull-left">${card.address}</span>`),
+            html(`<span class="pull-left">${card.project}</span>`),
+            html(`<span class="pull-left">${card.job}</span>`),
+            // html(`<span class="pull-left">${card.acount_executive}</span>`),
+            // html(`<span class="pull-left">${card.acount_manager}</span>`),
+            // html(`<span class="pull-left">${card.finance_manager}</span>`),
+            html(`<span class="pull-left">${card.payment_status}</span>`),
+            // html(`<span class="pull-left">${card.jenis_pembayaran}</span>`),
+            card.term,
+            // card.pph23,
+            // card.ppn,
+            // card.ppn_percent?.value || card.ppn_percent,
+            card.agency_fee,
+            card.status,
+          ]),
+        total: (data) => data.count,
+        handle: (res) => {
+          if (res.status === 404) return { data: [] };
+          if (res.ok) return res.json();
 
-        throw Error("oh no :(");
+          throw Error("oh no :(");
+        },
       },
-    },
-  });
+    });
       // DOM instead of vue selector because we are using vanilla JS
       this.grid.render(document.getElementById("wrapper2"));
       this.number = 0;
 
+      $(document).off("click", ".approve-btn");
+      $(document).off("click", ".reject-btn");
       $(document).off("click", "#editData");
       $(document).off("click", "#deleteData");
       $(document).off("click", "#exportPdf1");
+
+      $(document).on("click", ".approve-btn", function () {
+      const id = $(this).data("id");
+      mythis.handleStatusUpdate(id, 1, "Approve?");
+    });
+
+    $(document).on("click", ".reject-btn", function () {
+      const id = $(this).data("id");
+      mythis.handleStatusUpdate(id, 2, "Reject?");
+    });
 
       $(document).on("click", "#exportPdf1", function () {
         let id = $(this).data("id");
@@ -1616,6 +1722,7 @@ export default {
             ppn: mythis.todo.ppn,
             ppn_percent: mythis.todo.ppn_percent,
             agency_fee: mythis.todo.agency_fee,
+            status: mythis.todo.status,
             created_by: mythis.userid,
             ratecard: mythis.ratecardForm,
             userid: mythis.userid,
@@ -1703,6 +1810,7 @@ export default {
           mythis.todo.ppn = data.header.ppn;
           mythis.todo.ppn_percent = data.header.ppn_percent;
           mythis.todo.agency_fee = data.header.agency_fee;
+          mythis.todo.status = data.header.status;
 
           mythis.ratecardForm = data.ratecards.map((ratecard) => ({
             id: ratecard.id,
@@ -1710,6 +1818,7 @@ export default {
             ratecard_nominal: ratecard.ratecard_nominal,
             note: ratecard.note,
             business_type: ratecard.business_type,
+            qty: ratecard.qty,
           }));
 
           mythis.$root.stopLoading();

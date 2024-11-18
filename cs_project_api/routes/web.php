@@ -50,6 +50,7 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     $router->get('/trx-header/getData', 'TransactionHeaderController@getData');
     $router->get('/trx-header/generate-code', 'TransactionHeaderController@generateCode');
     $router->get('/trx-header/{id}', 'TransactionHeaderController@show');
+    $router->put('/trx-header/{id}/status', 'TransactionHeaderController@updateStatus');
 
     // $router->get('/trx-header/generatePDF', 'TransactionHeaderController@generatePDF');
 

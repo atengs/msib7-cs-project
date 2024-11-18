@@ -17,8 +17,8 @@ return new class extends Migration
             $table->integer('ratecard_id')->nullable();
             $table->double('ratecard_nominal',15,2)->nullable();
             $table->text('note')->nullable();
-
             $table->string('business_type', 50)->nullable();
+            $table->integer('qty')->default(1);
  
             $table->timestamps();
             $table->softDeletes();
