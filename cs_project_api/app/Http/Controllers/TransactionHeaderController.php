@@ -40,7 +40,6 @@ class TransactionHeaderController extends Controller
     //     ],200 );
     // }
 
-
     public function show(String $id)
     {
         $header = TransactionHeader::whereNull('deleted_at')
@@ -92,7 +91,6 @@ class TransactionHeaderController extends Controller
             'ppn_percent' => 'nullable|numeric|min:0|max:100',
             'agency_fee' => 'required|string',
             // 'status' => 'required|string',
-
             
         ]);
         
@@ -101,8 +99,7 @@ class TransactionHeaderController extends Controller
         $item->trans_number = $request->input('trans_number');
         $item->customer = $request->input('customer');
         // $item->trans_date = $request->input('trans_date');
-        $item->trans_date = date('Y-m-d');
-       
+        $item->trans_date = date('Y-m-d'); 
         $item->person_in_charge = $request->input('person_in_charge');
         $item->address = $request->input('address');
         $item->project = $request->input('project');
@@ -110,21 +107,17 @@ class TransactionHeaderController extends Controller
         $item->acount_executive = $request->input('acount_executive');
         $item->acount_manager = $request->input('acount_manager');
         $item->finance_manager = $request->input('finance_manager');
-
         $item->payment_status = $request->input('payment_status');
         $item->jenis_pembayaran = $request->input('jenis_pembayaran');
         $item->term = $request->input('term');
-
         $item->pph23 = $request->input('pph23');
         $item->ppn = $request->input('ppn');
         $item->ppn_percent = $request->input('ppn_percent');
         $item->agency_fee = $request->input('agency_fee');
-        
         $item->status = $request->input('status');
+        $item->discount = $request->input('discount');
         $item->created_by = $request->input('created_by');
         
-
-
         if ($item->save()){ 
 
             if (!is_array($request->input('ratecard'))) {
@@ -184,11 +177,9 @@ class TransactionHeaderController extends Controller
             'acount_executive' => 'required|string',
             'acount_manager' => 'required|string',
             'finance_manager' => 'required|string',
-
             'payment_status' => 'required|string',
             'jenis_pembayaran' => 'required|string',
             // 'term' => 'required|string',
-
             'pph23' => 'required|boolean', 
             'ppn' => 'required|boolean', 
             'ppn_percent' => 'nullable|numeric|min:0|max:100',
@@ -197,7 +188,6 @@ class TransactionHeaderController extends Controller
             
         ]);
 
-        // Find the item by ID
         $item = TransactionHeader::findOrFail($id);
 
         if (!$item) {
@@ -214,7 +204,6 @@ class TransactionHeaderController extends Controller
         $item->acount_executive = $request->input('acount_executive');
         $item->acount_manager = $request->input('acount_manager');
         $item->finance_manager = $request->input('finance_manager');
-
         $item->payment_status = $request->input('payment_status');
         $item->jenis_pembayaran = $request->input('jenis_pembayaran');
         $item->term = $request->input('term');
@@ -223,43 +212,49 @@ class TransactionHeaderController extends Controller
         $item->ppn_percent = $request->input('ppn_percent');
         $item->agency_fee = $request->input('agency_fee');
         $item->status = $request->input('status');
-
-       
-        if ($item->save()) {if (!is_array($request->input('ratecard'))) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Ratecard must be an array',
-            ], 400);
-        }
-
-        foreach ($request->input('ratecard') as $key => $value) {
-            if (isset($value['id']) && !empty($value['id'])) {
-               
-                $detail = [
-                    "trans_number" => $request->input('trans_number'),
-                    "ratecard_id" => $value['ratecard_id'],
-                    "ratecard_nominal" => $value['ratecard_nominal'],
-                    "note" => $value['note'],
-                    "business_type" => $value['business_type'],
-                    "qty" => $value['qty'],
-                    "updated_by" => $request->input('created_by')
-                ];
-                TransactionDetail::where('id', $value['id'])->update($detail);
-            } else {
-                
-                $newDetail = new TransactionDetail();
-                $newDetail->trans_number = $request->input('trans_number');
-                $newDetail->ratecard_id = $value['ratecard_id'];
-                $newDetail->ratecard_nominal = $value['ratecard_nominal'];
-                $newDetail->note = $value['note'];
-                $newDetail->business_type = $value['business_type'];
-                $newDetail->qty = $value['qty'];
-                $newDetail->created_by = $request->input('created_by');
-                $newDetail->save();
+        $item->discount = $request->input('discount');
+    
+        if ($item->save()) {
+            foreach ($request->input('ratecard') as $value) {
+                if (isset($value['id']) && !empty($value['id'])) {
+                    $detail = [
+                        "trans_number" => $request->input('trans_number'),
+                        "ratecard_id" => $value['ratecard_id'],
+                        "ratecard_nominal" => $value['ratecard_nominal'],
+                        "note" => $value['note'],
+                        "business_type" => $value['business_type'],
+                        "qty" => $value['qty'],
+                        "updated_by" => $request->input('userid'),
+                    ];
+                    TransactionDetail::where('id', $value['id'])->update($detail);
+                } else {
+                    $newDetail = new TransactionDetail();
+                    $newDetail->trans_number = $request->input('trans_number');
+                    $newDetail->ratecard_id = $value['ratecard_id'];
+                    $newDetail->ratecard_nominal = $value['ratecard_nominal'];
+                    $newDetail->note = $value['note'];
+                    $newDetail->business_type = $value['business_type'];
+                    $newDetail->qty = $value['qty'];
+                    $newDetail->created_by = $request->input('userid');
+                    $newDetail->save();
+                }
             }
-        }
+    
+            if ($request->has('deletedRatecards')) {
+                foreach ($request->input('deletedRatecards') as $deletedId) {
+                   
+                    TransactionDetail::where('id', $deletedId)->update([
+                        'deleted_by' => $request->input('userid') 
+                    ]);
 
-      }
+                    TransactionDetail::where('id', $deletedId)->delete();
+                }
+            }
+    
+            return response()->json(['message' => 'Data updated successfully'], 200);
+        }
+    
+        return response()->json(['message' => 'Failed to update data'], 500);
     }
 
     public function edit($id)

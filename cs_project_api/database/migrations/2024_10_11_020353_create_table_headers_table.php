@@ -30,6 +30,9 @@ return new class extends Migration
             $table->boolean('ppn')->nullable();
             $table->double('ppn_percent', 5, 2)->nullable();
             $table->string('agency_fee', 50)->nullable();
+            $table->integer('discount')->nullable();
+
+
 
             $table->integer('status')->nullable()->comment('0 = pending, 1 = approved, 2 = rejected, 3 = canceled');
 

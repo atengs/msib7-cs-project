@@ -119,48 +119,6 @@
             </div>
           </div>
 
-          <!-- <div class="row">
-            <div class="col-md-12">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="example-nf-email">Trans Date</label>
-                  <CmpInputText
-                    type="Date"
-                    placeholder="Trans Date"
-                    v-model="todo.trans_date"
-                    :class="
-                      errorField.trans_date
-                        ? 'form-control input-lg input-error'
-                        : 'form-control input-lg'
-                    "
-                    @input="
-                      (val) => (todo.trans_date = todo.trans_date.toUpperCase())
-                    "
-                  />
-                </div>
-              </div>
-
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="example-nf-email">Project</label>
-                  <CmpInputText
-                    type="text"
-                    placeholder="Project"
-                    v-model="todo.project"
-                    :class="
-                      errorField.project
-                        ? 'form-control input-lg input-error'
-                        : 'form-control input-lg'
-                    "
-                    @input="
-                      (val) => (todo.project = todo.project.toUpperCase())
-                    "
-                  />
-                </div>
-              </div>
-            </div>
-          </div> -->
-
           <div class="row">
             <div class="col-md-12">
               <div class="col-md-6">
@@ -362,18 +320,6 @@
 
           <div class="row">
             <div class="col-md-12">
-              <!-- <div class="col-md-6">
-                <div class="form-group">
-                  <label for="example-nf-email">PPn Percent</label>
-                  <CmpInputText
-                    type="number"
-                    placeholder="PPn Percent"
-                    v-model="todo.ppn_percent"
-                    :class="errorField.ppn_percent ? 'form-control input-lg input-error' : 'form-control input-lg'"
-                  />
-                </div>
-              </div> -->
-
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="example-nf-email">Agency Fee</label>
@@ -385,6 +331,36 @@
                   />
                 </div>
               </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="example-nf-email">Discount</label>
+                  <CmpInputText
+                    type="number"
+                    placeholder="Discount"
+                    v-model="todo.discount"
+                    :class="errorField.discount ? 'form-control input-lg input-error' : 'form-control input-lg'"
+                    min="1"
+                    max="100"
+                    @input="validateDiscount"
+                  />
+                  <!-- Pesan Validasi -->
+                  <span v-if="todo.discount < 1 || todo.discount > 100" style="color: red; font-size: 12px;">
+                    Discount harus di antara 1 dan 100.
+                  </span>
+                </div>
+              </div>
+
+                 <!-- <div class="col-md-6">
+                <div class="form-group">
+                  <label for="example-nf-email">PPn Percent</label>
+                  <CmpInputText
+                    type="number"
+                    placeholder="PPn Percent"
+                    v-model="todo.ppn_percent"
+                    :class="errorField.ppn_percent ? 'form-control input-lg input-error' : 'form-control input-lg'"
+                  />
+                </div>
+              </div> -->
 
             </div>
           </div>
@@ -662,12 +638,9 @@ import { markRaw } from "vue";
 import { Grid, h, html } from "gridjs";
 import "gridjs/dist/theme/mermaid.css";
 import { idID } from "gridjs/l10n";
-
 import loadingBar from "@/assets/img/Moving_train.gif";
-
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -709,6 +682,7 @@ export default {
         ppn_percent: false,
         agency_fee: false,
         status: false,
+        discount: false,
         ratecard: false,
         
       },
@@ -736,6 +710,7 @@ export default {
         ppn_percent: "",
         agency_fee: "",
         status: "",
+        discount: "",
         ratecard: "",
       },
 
@@ -744,14 +719,16 @@ export default {
       mstJobCategory: [],
       mstJobList: [],
       ratecardForm: [
-        {
-          ratecard_id: "",
-          ratecard_nominal: "",
-          note: "",
-          business_type: "",
-          qty: "",
-        },
-      ],
+      {
+        id: "",
+        ratecard_id: "",
+        ratecard_nominal: "",
+        note: "",
+        business_type: "",
+        qty: "",
+      },
+    ],
+    deletedRatecards: [],
 
       json_fields: {
         trans_number: "trans_number",
@@ -772,6 +749,7 @@ export default {
         ppn_percent: "ppn_percent",
         agency_fee: "agency_fee",
         status: "status",
+        discount: "discount",
 
       },
     };  
@@ -800,6 +778,15 @@ export default {
     this.userid = "ADMIN";
   },
   methods: {
+
+      // Pembatasan maks 100 pada input discount
+      validateDiscount() {
+          if (this.todo.discount < 1) {
+            this.todo.discount = null;
+          } else if (this.todo.discount > 100) {
+            this.todo.discount = null;
+          }
+        },
 
       periksaJenisPembayaran() {
         // Reset nilai term jika jenis_pembayaran adalah "One Shoot Project"
@@ -864,7 +851,7 @@ export default {
                   str = str + ' of ' + totalPagesExp;
                 }
                 doc.setFontSize(10);
-
+                
                 let pageSize = doc.internal.pageSize;
                 let pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
                 doc.text(str, data.settings.margin.left, pageHeight - 10);
@@ -912,298 +899,327 @@ export default {
         const mythis = this;
         mythis.$root.presentLoading();
 
-      try {
-          const reqData = await axios({
-              method: 'get',
-              url: mythis.$root.apiHost + `api/trx-header/${id}`,
-          });
+          try {
+              const reqData = await axios({
+                  method: 'get',
+                  url: mythis.$root.apiHost + `api/trx-header/${id}`,
+              });
 
-          const resData = reqData.data.data;
-          const header = resData.header;
-          const details = resData.ratecards;
+              const resData = reqData.data.data;
+              const header = resData.header;
+              const details = resData.ratecards;
 
-          const pph23Text = header.pph23 ? "Sudah termasuk PPh 23" : "Belum termasuk PPh 23";
-          const ppnText = header.ppn ? "Sudah termasuk PPN" : "Belum termasuk PPN";
+              const pph23Text = header.pph23 ? "Sudah termasuk PPh 23" : "Belum termasuk PPh 23";
+              const ppnText = header.ppn ? "Sudah termasuk PPN" : "Belum termasuk PPN";
 
-          const doc = new jsPDF('p', 'pt', 'a4');
-
-        
-          const logo = new Image();
-          logo.src = '/src/assets/img/creativestyle.jpeg'; 
-          doc.addImage(logo, 'JPEG', 35, 20, 80, 80); 
-
-
-          const boxX = 340;
-          const boxY = 27;
-          const boxWidth = 200; 
-          const boxHeight = 15;
-
-          doc.setFillColor(255, 153, 203); 
-          doc.rect(boxX, boxY, boxWidth, boxHeight, 'F'); 
-
-          doc.setFontSize(5);
-          doc.setFont("helvetica", "bold");
-          doc.setTextColor(0, 0, 0); 
-
-          
-          const jobText = `${header.job}`;
-          let textX;
-          if (jobText.length ) {
-              
-              textX = boxX + boxWidth / 2 - doc.getTextWidth(jobText) / 2;
-          } else {
-              
-              textX = boxX + 10;
-          }
-          doc.text(jobText, textX, boxY + 10);
-          
-          doc.setFontSize(7);
-          doc.text('PENAWARAN HARGA', 250, 100);
-
-          const labelX = 40;
-          const colonX = 230;
-          const valueX = 250;
-          doc.setFontSize(6);
-          doc.setFont("helvetica", "normal");
-
-          doc.text('Company', labelX, 130);
-          doc.text(':', colonX, 130);
-          doc.text(`${header.customer}`, valueX, 130);
-
-          doc.text('Person In Charge', labelX, 150);
-          doc.text(':', colonX, 150);
-          doc.text(`${header.person_in_charge}`, valueX, 150);
-
-          doc.text('Address', labelX, 170);
-          doc.text(':', colonX, 170);
-          const addressText = doc.splitTextToSize(`${header.address}`, 260); 
-          doc.text(addressText, valueX, 170);
-          
-          doc.text('Project/Produk', labelX, 190);
-          doc.text(':', colonX, 190);
-          doc.text(`${header.project}`, valueX, 190);
-
-          doc.text('Job', labelX, 210);
-          doc.text(':', colonX, 210);
-          doc.text(`${header.job}`, valueX, 210);
-
-          doc.text('No Pesanan', labelX, 230);
-          doc.text(':', colonX, 230);
-          doc.text(`${header.trans_number}`, valueX, 230);
-
-
-          
-          const ratecards = details.map((detail, index) => {
-          const totalAwal = parseFloat(detail.ratecard_nominal); // Tetap 15 juta misalnya
-          const totalAwalDenganQty = totalAwal * parseInt(detail.qty); // Hitung total awal berdasarkan qty
-          let totalAkhir;
-
-          if  (detail.business_type === 'Perorangan') {
-          totalAkhir = Math.floor(totalAwalDenganQty / 0.97 / 0.98);
-          } 
-          else if (detail.business_type === 'Badan Usaha') {
-          totalAkhir = Math.floor(totalAwalDenganQty / 0.98);
-          }
-
-          return [
-          index + 1,
-          detail.job_description,
-          `${detail.qty} master`,
-          `Rp. ${new Intl.NumberFormat('en-US').format(totalAwal)}`,
-          `Rp. ${new Intl.NumberFormat('en-US').format(totalAkhir)}    `,
-          detail.note
-      ];
-    });
-
-       // const ratecards = details.map((detail, index) => [
-          //     index + 1,
-          //     detail.job_description,
-          //     '2 Derivative (HC)',
-          //     `Rp. ${new Intl.NumberFormat('en-US').format(detail.ratecard_nominal)}`,
-              
-          //     '12.653.061 (HardCore)    ',
-          //     detail.note
-          // ]);
-
-          const totalAkhirSum = details.reduce((sum, detail) => {
-          const totalAwal = parseFloat(detail.ratecard_nominal) * parseInt(detail.qty);
-          let totalAkhir;
-
-          if (detail.business_type === 'Perorangan') {
-              totalAkhir = Math.floor(totalAwal / 0.97 / 0.98);
-          } else if (detail.business_type === 'Badan Usaha') {
-              totalAkhir = Math.floor(totalAwal / 0.98);
-          }
-
-          return sum + totalAkhir;
-        }, 0);
-
-          const agencyFeePercentage = header.agency_fee;
-          const agencyFeeValue = Math.floor((totalAkhirSum * agencyFeePercentage) / 100);
-          
-          const totalBudget = totalAkhirSum + agencyFeeValue;
-
-          const term = header.term || 1; // Default ke 1 jika term tidak ada
-          const monthlyValue = Math.floor(totalBudget / term);
-          const totalBudgetTerbilang = convertToTerbilang(totalBudget) + " Rupiah";
-          
-
-        
-          
-          ratecards.push([
-          ratecards.length + 1,
-          `AGENCY FEE ${header.agency_fee}%`,
-          ``, 
-          ``, 
-          `Rp. ${new Intl.NumberFormat('id-ID').format(agencyFeeValue)}    `, 
-          ``
-      ]);
-          
-
-
-          doc.autoTable({
-              startY: 240,
-              head: [['No', '              Hal','','', '           Total  ', '                        Note']],
-              body: ratecards,
-              theme: 'plain',
-              styles: {
-                  fontSize: 6,
-                  fillColor: [255, 255, 255],
-                  textColor: [0, 0, 0]
-              },
-              headStyles: {
-                  fillColor: [255, 255, 255],
-                  textColor: [0, 0, 0],
-              },
-              tableWidth: 500, 
-              columnStyles: {
-                    0: { cellWidth: 20 },       
-                    1: { cellWidth: 130 },   
-                    2: { cellWidth: 50 },     
-                    3: { cellWidth: 60, halign: 'right' },       
-                    4: { cellWidth: 70 , halign: 'right' }, 
-                    // 3: { cellWidth: 70, halign: 'right' }, 
-                    5: { cellWidth: 170 },      
-              },
-
-              didDrawCell: function (data) {
-                  if (data.section === 'head') {
-                      const doc = data.doc;
-                      const cell = data.cell;
-
-                      if (data.row.index === 0) {
-                          doc.setLineWidth(1);
-                          doc.setDrawColor(0, 0, 0); 
-                          doc.line(cell.x, cell.y, cell.x + cell.width, cell.y);
-                      }
-
-                      if (data.row.index === 0 && data.cell.raw === 'Note', 'ratecard_nominal') {
-                          doc.setLineWidth(2);
-                          doc.setDrawColor(0, 0, 0); 
-                          doc.line(cell.x, cell.y + cell.height, cell.x + cell.width  , cell.y + cell.height);
-                      } 
-                  }
-              }
-            });
+              const doc = new jsPDF('p', 'pt', 'a4');
 
             
-          let finalY = doc.lastAutoTable.finalY + 5;
-          const pageWidth = doc.internal.pageSize.getWidth();
+              const logo = new Image();
+              logo.src = '/src/assets/img/creativestyle.jpeg'; 
+              doc.addImage(logo, 'JPEG', 35, 20, 80, 80); 
 
-          doc.line(40, finalY -5, 540, finalY -5);
 
-          doc.text('  Total Budget:', 40, finalY + 5);
-          doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(totalBudget)}`,pageWidth - 237,  finalY + 5,{ align: 'right' });
-          doc.setDrawColor(0, 0, 0);
+              const boxX = 340;
+              const boxY = 27;
+              const boxWidth = 200; 
+              const boxHeight = 15;
 
-          doc.setFillColor (255, 153, 203);
-          doc.rect(labelX, finalY + 11, 500, 15, 'F');
+              doc.setFillColor(255, 153, 203); 
+              doc.rect(boxX, boxY, boxWidth, boxHeight, 'F'); 
 
-          doc.line(labelX, finalY + 10, labelX + 500, finalY + 10); 
-          doc.line(labelX, finalY + 11, labelX + 500, finalY + 11); 
+              doc.setFontSize(5);
+              doc.setFont("helvetica", "bold");
+              doc.setTextColor(0, 0, 0); 
 
-          doc.line(labelX, finalY + 26, labelX + 500, finalY + 26);
-          doc.line(labelX, finalY + 27, labelX + 500, finalY + 27);
-          
-          // doc.text(`  Monthly : ${header.term} Month `, labelX, finalY + 20);
-          doc.text(`  Monthly : `, labelX, finalY + 20);
-          doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(monthlyValue)}`,pageWidth - 237,  finalY + 20,{ align: 'right' });
+              
+              const jobText = `${header.job}`;
+              let textX;
+              if (jobText.length ) {
+                  
+                  textX = boxX + boxWidth / 2 - doc.getTextWidth(jobText) / 2;
+              } else {
+                  
+                  textX = boxX + 10;
+              }
+              doc.text(jobText, textX, boxY + 10);
+              
+              doc.setFontSize(7);
+              doc.text('PENAWARAN HARGA', 250, 100);
 
-          doc.text(`  Terbilang : ${totalBudgetTerbilang}`, labelX, finalY + 37);
-          
-          doc.line(labelX, finalY + 42, 540, finalY + 42);
-          doc.line(labelX, finalY + 43, 540, finalY + 43);
+              const labelX = 40;
+              const colonX = 230;
+              const valueX = 250;
+              doc.setFontSize(6);
+              doc.setFont("helvetica", "normal");
 
-        
-          finalY += 40;
-          doc.setFontSize(7);
-          
-          finalY += 15;
-          doc.text(pph23Text, labelX, finalY); 
-          finalY += 15;
-          const ppnTextWithPercent = `${ppnText} ${header.ppn_percent}%`;
-          doc.text(ppnTextWithPercent, labelX, finalY);
-          
-          finalY += 15;
-          doc.text(`Pekerjaan akan dilakukan oleh CS setelah ada pembayaran DP minimal 50% dari Brand.`, labelX, finalY);
-          finalY += 15;
-          doc.text(`Bila disetujui, mohon approval dari quotation ini di email, dan dikirimkan kembali ke CS.`, labelX, finalY);
-          finalY += 15;
-          doc.text(`PO/PP segera dikeluarkan langsung setelah quotation di approve.`, labelX, finalY);
+              doc.text('Company', labelX, 130);
+              doc.text(':', colonX, 130);
+              doc.text(`${header.customer}`, valueX, 130);
 
-          // FUNCTION
-          function convertToTerbilang(num) {
-          const satuan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
-          if (num < 12) return satuan[num];
-          if (num < 20) return satuan[num - 10] + " Belas";
-          if (num < 100) return satuan[Math.floor(num / 10)] + " Puluh " + satuan[num % 10];
-          if (num < 200) return "Seratus " + convertToTerbilang(num - 100);
-          if (num < 1000) return satuan[Math.floor(num / 100)] + " Ratus " + convertToTerbilang(num % 100);
-          if (num < 2000) return "Seribu " + convertToTerbilang(num - 1000);
-          if (num < 1000000) return convertToTerbilang(Math.floor(num / 1000)) + " Ribu " + convertToTerbilang(num % 1000);
-          if (num < 1000000000) return convertToTerbilang(Math.floor(num / 1000000)) + " Juta " + convertToTerbilang(num % 1000000);
-          return convertToTerbilang(Math.floor(num / 1000000000)) + " Miliar " + convertToTerbilang(num % 1000000000);
-          } 
+              doc.text('Person In Charge', labelX, 150);
+              doc.text(':', colonX, 150);
+              doc.text(`${header.person_in_charge}`, valueX, 150);
 
-          function capitalizeEachWord(text) {
-            return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+              doc.text('Address', labelX, 170);
+              doc.text(':', colonX, 170);
+              const addressText = doc.splitTextToSize(`${header.address}`, 260); 
+              doc.text(addressText, valueX, 170);
+              
+              doc.text('Project/Produk', labelX, 190);
+              doc.text(':', colonX, 190);
+              doc.text(`${header.project}`, valueX, 190);
+
+              doc.text('Job', labelX, 210);
+              doc.text(':', colonX, 210);
+              doc.text(`${header.job}`, valueX, 210);
+
+              doc.text('No Pesanan', labelX, 230);
+              doc.text(':', colonX, 230);
+              doc.text(`${header.trans_number}`, valueX, 230);
+
+
+              
+              const ratecards = details.map((detail, index) => {
+              const totalAwal = parseFloat(detail.ratecard_nominal); 
+              const totalAwalDenganQty = totalAwal * parseInt(detail.qty); 
+              let totalAkhir;
+
+              if  (detail.business_type === 'Perorangan') {
+              totalAkhir = Math.floor(totalAwalDenganQty / 0.97 / 0.98);
+              } 
+              else if (detail.business_type === 'Badan Usaha') {
+              totalAkhir = Math.floor(totalAwalDenganQty / 0.98);
+              }
+
+              return [
+              index + 1,
+              detail.job_description,
+              `${detail.qty} master`,
+              `Rp. ${new Intl.NumberFormat('en-US').format(totalAwal)}`,
+              `Rp. ${new Intl.NumberFormat('en-US').format(totalAkhir)}    `,
+              detail.note
+          ];
+        });
+
+              const totalAkhirSum = details.reduce((sum, detail) => {
+                const totalAwal = parseFloat(detail.ratecard_nominal) * parseInt(detail.qty);
+                let totalAkhir = detail.business_type === 'Perorangan'
+                    ? Math.floor(totalAwal / 0.97 / 0.98)
+                    : Math.floor(totalAwal / 0.98);
+                return sum + totalAkhir;
+            }, 0);
+
+              const agencyFeePercentage = header.agency_fee;
+              const agencyFeeValue = Math.floor((totalAkhirSum * header.agency_fee) / 100);
+              
+              let totalBudget = totalAkhirSum + agencyFeeValue;
+
+              let discountValue = 0; // Default diskon 0
+                  if (header.discount && header.discount > 0) 
+                    {
+                        discountValue = Math.floor((totalAkhirSum + agencyFeeValue) * (header.discount / 100));
+                        totalBudget = totalAkhirSum + agencyFeeValue - discountValue;
+                    } 
+                  else 
+                    {
+                        totalBudget = totalAkhirSum + agencyFeeValue; 
+                    }
+
+              const term = header.term || 1; // Default ke 1 jika term tidak ada
+              const monthlyValue = Math.floor(totalBudget / term);
+              const totalBudgetTerbilang = convertToTerbilang(totalBudget) + " Rupiah";
+            
+              
+              ratecards.push(
+                [
+                  ratecards.length + 1,
+                    `AGENCY FEE ${header.agency_fee}%`,
+                    ``, 
+                    ``, 
+                    `Rp. ${new Intl.NumberFormat('id-ID').format(agencyFeeValue)}    `, 
+                    `` 
+                    
+                  ]);
+                
+
+              doc.autoTable({
+                  startY: 240,
+                  head: [['No', '              Hal','','', '           Total  ', '                        Note']],
+                  body: ratecards,
+                  theme: 'plain',
+                  styles: {
+                      fontSize: 6,
+                      fillColor: [255, 255, 255],
+                      textColor: [0, 0, 0]
+                  },
+                  headStyles: {
+                      fillColor: [255, 255, 255],
+                      textColor: [0, 0, 0],
+                  },
+                  tableWidth: 500, 
+                  columnStyles: {
+                        0: { cellWidth: 20, fontStyle: 'bold' },       
+                        1: { cellWidth: 130, fontStyle: 'bold' },   
+                        2: { cellWidth: 50 },     
+                        3: { cellWidth: 60, halign: 'right' },       
+                        4: { cellWidth: 70 , halign: 'right' }, 
+                        5: { cellWidth: 170 },      
+                  },
+
+                  didDrawCell: function (data) {
+                      if (data.section === 'head') {
+                          const doc = data.doc;
+                          const cell = data.cell;
+
+                          if (data.row.index === 0) {
+                              doc.setLineWidth(1);
+                              doc.setDrawColor(0, 0, 0); 
+                              doc.line(cell.x, cell.y, cell.x + cell.width, cell.y);
+                          }
+
+                          if (data.row.index === 0 && data.cell.raw === 'Note', 'ratecard_nominal') {
+                              doc.setLineWidth(2);
+                              doc.setDrawColor(0, 0, 0); 
+                              doc.line(cell.x, cell.y + cell.height, cell.x + cell.width  , cell.y + cell.height);
+                          } 
+                      }
+                  }
+                });
+
+                
+              let finalY = doc.lastAutoTable.finalY + 5;
+              const pageWidth = doc.internal.pageSize.getWidth();
+
+              doc.line(40, finalY -5, 540, finalY -5);
+
+              if (header.discount && header.discount > 0) 
+              {
+                  doc.line(40, finalY - 4, 540, finalY - 4);
+                  finalY += 5;
+
+                  doc.setFont("helvetica", "bold");
+                  doc.text(`Discount : ${header.discount}% `, 44, finalY);
+                  doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(discountValue)}`, 358, finalY, { align: 'right' });
+                  doc.setFont("helvetica", "normal");
+
+                  finalY += 5; 
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 1; 
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 5; 
+              }
+
+              doc.setFont("helvetica", "bold"); // Set font menjadi bold
+              doc.text('  TOTAL BUDGET :', 40, finalY + 5);
+              doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(totalBudget)}`, pageWidth - 237, finalY + 5, { align: 'right' });
+              doc.setFont("helvetica", "normal"); // Kembali ke font normal jika diperlukan
+              
+              doc.setDrawColor(0, 0, 0);
+              finalY += 10;
+
+              doc.line(40, finalY, 540, finalY);
+              finalY += 1; 
+              doc.line(40, finalY, 540, finalY);
+              finalY += 8;
+
+              
+              // doc.text(`  Monthly : ${header.term} Month `, labelX, finalY + 20);
+              if (header.jenis_pembayaran === "Retainer") 
+              {
+                
+                  doc.setFillColor(255, 153, 203);
+                  doc.rect(labelX, finalY + -8 , 500, 15, 'F');
+
+                  doc.setFont("helvetica", "bold"); // Set font menjadi bold
+                  doc.text(`  MONTHLY :`, labelX, finalY + 1);
+                  doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(monthlyValue)}`, pageWidth - 237, finalY + 1, { align: 'right' });
+                  doc.setFont("helvetica", "normal"); // Kembali ke font normal
+
+                  finalY += 7; 
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 1; 
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 8; 
+              }
+
+              doc.text(`  Terbilang : ${totalBudgetTerbilang}`, labelX, finalY + 1);
+              finalY += 8;
+              doc.line(40, finalY, 540, finalY);
+              finalY += 1; 
+              doc.line(40, finalY, 540, finalY);
+
+              finalY += 10; 
+
+              doc.setFontSize(6);
+              
+              doc.text(`  ${pph23Text}`, labelX, finalY); 
+              finalY += 15;
+              const ppnTextWithPercent = `${ppnText} ${header.ppn_percent}%`;
+              doc.text(`  ${ppnTextWithPercent}`, labelX, finalY);
+              
+              finalY += 15;
+              doc.text(`  Pekerjaan akan dilakukan oleh CS setelah ada pembayaran DP minimal 50% dari Brand.`, labelX, finalY);
+              finalY += 15;
+              doc.text(`  Bila disetujui, mohon approval dari quotation ini di email, dan dikirimkan kembali ke CS.`, labelX, finalY);
+              finalY += 15;
+              doc.text(`  PO/PP segera dikeluarkan langsung setelah quotation di approve.`, labelX, finalY);
+
+              
+              // doc.line(labelX, finalY + 28, labelX + 500, finalY + 28);
+              // doc.line(labelX, finalY + 29, labelX + 500, finalY + 29);
+
+
+              // FUNCTION
+              function convertToTerbilang(num) {
+              const satuan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+              if (num < 12) return satuan[num];
+              if (num < 20) return satuan[num - 10] + " Belas";
+              if (num < 100) return satuan[Math.floor(num / 10)] + " Puluh " + satuan[num % 10];
+              if (num < 200) return "Seratus " + convertToTerbilang(num - 100);
+              if (num < 1000) return satuan[Math.floor(num / 100)] + " Ratus " + convertToTerbilang(num % 100);
+              if (num < 2000) return "Seribu " + convertToTerbilang(num - 1000);
+              if (num < 1000000) return convertToTerbilang(Math.floor(num / 1000)) + " Ribu " + convertToTerbilang(num % 1000);
+              if (num < 1000000000) return convertToTerbilang(Math.floor(num / 1000000)) + " Juta " + convertToTerbilang(num % 1000000);
+              return convertToTerbilang(Math.floor(num / 1000000000)) + " Miliar " + convertToTerbilang(num % 1000000000);
+              } 
+
+              function capitalizeEachWord(text) {
+                return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+              }
+              
+              
+              finalY += 40;
+              doc.text('Terima Kasih', 60, finalY );
+
+              doc.setFontSize(7);
+              
+              doc.text(capitalizeEachWord(`${header.acount_executive}`), 55, finalY + 75);
+              doc.text('Account Executive', 55, finalY + 85);
+
+              doc.text(capitalizeEachWord(`${header.acount_manager}`), 200, finalY + 75);
+              doc.text('Account Manager', 200, finalY + 85);
+
+              doc.text(capitalizeEachWord(`${header.finance_manager}`), 300, finalY + 75);
+              doc.text('Finance Manager', 300, finalY + 85);
+
+              doc.setFontSize(7);
+              doc.text('Tanggal', 400, finalY ); 
+              doc.text('Disetujui Oleh : ', 400, finalY + 15);
+              doc.text('Klien : ', 400, finalY + 85);
+
+              // Simpan file PDF
+              const fileName = `Quotation_${header.trans_number}.pdf`;
+              doc.save(fileName);
+
+              mythis.$root.stopLoading();
+              Swal.fire('Success', 'PDF has been generated successfully', 'success');
+          } catch (error) {
+              console.error('Error generating PDF:', error);
+              mythis.$root.stopLoading();
+              Swal.fire('Error', 'Failed to generate PDF', 'error');
           }
-
-          finalY += 40;
-          doc.text('Terima Kasih', labelX, finalY );
-
-          doc.setFontSize(7);
-          
-          doc.text(capitalizeEachWord(`${header.acount_executive}`), labelX, finalY + 75);
-          doc.text('Account Executive', labelX, finalY + 85);
-
-          doc.text(capitalizeEachWord(`${header.acount_manager}`), 200, finalY + 75);
-          doc.text('Account Manager', 200, finalY + 85);
-
-          doc.text(capitalizeEachWord(`${header.finance_manager}`), 300, finalY + 75);
-          doc.text('Finance Manager', 300, finalY + 85);
-
-
-          doc.setFontSize(7);
-          doc.text('Tanggal', 400, finalY ); 
-          doc.text('Disetujui Oleh : ', 400, finalY + 15);
-          doc.text('Klien : ', 400, finalY + 85);
-
-          // Simpan file PDF
-          const fileName = `Quotation_${header.trans_number}.pdf`;
-          doc.save(fileName);
-
-          mythis.$root.stopLoading();
-          Swal.fire('Success', 'PDF has been generated successfully', 'success');
-      } catch (error) {
-          console.error('Error generating PDF:', error);
-          mythis.$root.stopLoading();
-          Swal.fire('Error', 'Failed to generate PDF', 'error');
-      }
-  },
-
-
-
+    },
 
     // add form
     updateNominal(index) {
@@ -1229,8 +1245,14 @@ export default {
     },
     // remove form
     removeSchedule(index) {
-      this.ratecardForm.splice(index, 1);
-    },
+    const form = this.ratecardForm[index];
+    if (form.id) {
+      // Jika form memiliki ID (berarti data lama), tambahkan ke deletedRatecards
+      this.deletedRatecards.push(form.id);
+    }
+    this.ratecardForm.splice(index, 1); // Hapus dari ratecardForm
+  },
+
     async getMasterJobList() {
       var mythis = this;
       mythis.$root.presentLoading();
@@ -1357,7 +1379,6 @@ export default {
               {
                 trans_number: mythis.todo.trans_number,
                 customer: mythis.todo.customer,
-                // trans_date: mythis.todo.trans_date,
                 person_in_charge: mythis.todo.person_in_charge,
                 address: mythis.todo.address,
                 project: mythis.todo.project,
@@ -1373,6 +1394,7 @@ export default {
                 ppn_percent: mythis.todo.ppn_percent,
                 agency_fee: mythis.todo.agency_fee,
                 status: mythis.todo.status,
+                discount: mythis.todo.discount,
                 created_by: mythis.userid,
                 ratecard: mythis.ratecardForm,
                 userid: mythis.userid,
@@ -1471,21 +1493,21 @@ export default {
     columns: [
       { name: "ID", hidden: true },
       { name: "No", width: "50px" }, 
-      { name: "TRANS NUMBER", width: "150px" }, 
+      { name: "TRANS NUMBER", width: "160px" }, 
       { name: "CUSTOMER", width: "150px" }, 
       { name: "TRANS DATE", width: "150px" },
-      { name: "PERSON IN CHARGE", width: "150px" },
-      { name: "ADDRESS", width: "200px" },
+      { name: "PERSON IN CHARGE", width: "180px" },
+      { name: "ADDRESS", width: "300px" },
       { name: "PROJECT", width: "150px" },
       { name: "JOB", width: "150px" },
-      { name: "ACOUNT EXECUTIVE", width: "150px" },
-      { name: "ACOUNT MANAGER", width: "150px" },
-      { name: "FINANCE MANAGER", width: "150px" },
-      { name: "PAYMENT STATUS", width: "150px" },
-      { name: "JENIS PEMBAYARAN", width: "150px" },
+      { name: "ACOUNT EXECUTIVE", width: "180px" },
+      { name: "ACOUNT MANAGER", width: "180px" },
+      { name: "FINANCE MANAGER", width: "180px" },
+      { name: "PAYMENT STATUS", width: "180px" },
+      { name: "JENIS PEMBAYARAN", width: "190px" },
       {
         name: "TERM",
-        width: "150px",
+        width: "100px",
         formatter: (cell) => cell ? html(`<span class="pull-left">${cell} Month</span>`) : html(`<span class="pull-left"></span>`),
       },
       {
@@ -1500,16 +1522,22 @@ export default {
       },
       {
         name: "PPN PERCENT",
-        width: "150px",
+        width: "140px",
         formatter: (cell) => (cell !== null ? `${cell}%` : ''),
       },
       {
         name: "AGENCY FEE",
-        width: "150px",
+        width: "130px",
+        formatter: (cell) => (cell !== null ? `${cell}%` : ''),
+      },
+      {
+        name: "DISCOUNT",
+        width: "120px",
         formatter: (cell) => (cell !== null ? `${cell}%` : ''),
       },
       {
         name: "Action",
+        width: "120px",
         formatter: (_, row) =>
           mythis.$root.accessRoles[mythis.access_page].update &&
           mythis.$root.accessRoles[mythis.access_page].delete
@@ -1537,20 +1565,20 @@ export default {
     ],
     style: {
       table: {
-        border: "1px solid #ccc",
-        "table-layout": "auto", 
+          border: "1px solid #ccc",
+          "table-layout": "fixed",
       },
       th: {
-        "background-color": "rgba(0, 55, 255, 0.1)",
-        color: "#000",
-        "border-bottom": "1px solid #ccc",
-        "text-align": "center",
+          "background-color": "rgba(0, 55, 255, 0.1)",
+          color: "#000",
+          "border-bottom": "1px solid #ccc",
+          "text-align": "center",
       },
       td: {
-        "white-space": "normal", 
-        "word-wrap": "break-word", 
+          "white-space": "normal", 
+          "word-wrap": "break-word", 
       },
-    },
+  },
     server: {
       url: this.$root.apiHost + this.$root.prefixApi + "trx-header/getData",
       then: (data) =>
@@ -1573,7 +1601,8 @@ export default {
           card.pph23,
           card.ppn,
           card.ppn_percent?.value || card.ppn_percent,
-          card.agency_fee
+          card.agency_fee,
+          card.discount
         ]),
       total: (data) => data.count,
       handle: (res) => {
@@ -1643,6 +1672,7 @@ export default {
         }
       });
     },
+
     editTodo() {
       var mythis = this;
       mythis.$root.flagButtonLoading = true;
@@ -1676,8 +1706,10 @@ export default {
             ppn: mythis.todo.ppn,
             ppn_percent: mythis.todo.ppn_percent,
             agency_fee: mythis.todo.agency_fee,
+            discount: mythis.todo.discount,
             created_by: mythis.userid,
             ratecard: mythis.ratecardForm,
+            deletedRatecards: mythis.deletedRatecards,
             userid: mythis.userid,
           },
           config
@@ -1764,6 +1796,7 @@ export default {
           mythis.todo.ppn_percent = data.header.ppn_percent;
           mythis.todo.agency_fee = data.header.agency_fee;
           mythis.todo.status = data.header.status;
+          mythis.todo.discount = data.header.discount;
 
           mythis.ratecardForm = data.ratecards.map((ratecard) => ({
             id: ratecard.id,
@@ -1780,7 +1813,6 @@ export default {
           console.error("Error fetching data:", error);
         });
     },
-
 
     // generate trx code
     async generateCode(id) {
