@@ -185,7 +185,7 @@ class TransactionHeaderController extends Controller
             'ppn_percent' => 'nullable|numeric|min:0|max:100',
             'agency_fee' => 'required|string',
             // 'status' => 'required|string',
-            
+          
         ]);
 
         $item = TransactionHeader::findOrFail($id);
@@ -355,5 +355,43 @@ class TransactionHeaderController extends Controller
         ->header('Content-Type','application/pdf')
         ->header('Content-Disposition','inline; filename="PO NAMA PERUSAHAAN.pdf"');
     }
+
+    public function updateStatus(Request $request, $id)
+{
+    try {
+        \Log::info('Update status request received', [
+            'id' => $id,
+            'status' => $request->input('status'),
+        ]);
+
+        $this->validate($request, [
+            'status' => 'required|integer|in:1,2',
+        ]);
+
+        $transaction = TransactionHeader::findOrFail($id);
+        $transaction->status = $request->input('status');
+        $transaction->save();
+
+        \Log::info('Status updated successfully', [
+            'id' => $id,
+            'status' => $transaction->status,
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Status updated successfully',
+        ], 200);
+    } catch (\Exception $e) {
+        \Log::error('Failed to update status', [
+            'error' => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Failed to update status: ' . $e->getMessage(),
+        ], 500);
+    }
+}
+
 
 }
