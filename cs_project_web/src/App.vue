@@ -92,6 +92,7 @@ import cmpMasterDocStatus from "@/views/pages/test/cmpMasterDocStatus.vue";
 import cmpHalRoute from "@/views/pages/cmpHalRoute.vue";
 import cmpMasterCategories from "./views/pages/master/cmpMasterCategories.vue";
 import cmpMasterRateCard from "./views/pages/master/cmpMasterRateCard.vue";
+import cmpMasterRateCardStandard from "./views/pages/master/cmpMasterRateCardStandard.vue";
 import cmpTransaction from "./views/pages/transaction/cmpTransaction.vue";
 import cmpApproval from "./views/pages/approval/cmpApproval.vue";
 
@@ -130,6 +131,7 @@ const routeComponent = {
   cmpMasterDocStatus: markRaw(cmpMasterDocStatus),
   cmpMasterCategories: markRaw(cmpMasterCategories),
   cmpMasterRateCard: markRaw(cmpMasterRateCard),
+  cmpMasterRateCardStandard: markRaw(cmpMasterRateCardStandard),
   cmpTransaction: markRaw(cmpTransaction),
   cmpApproval: markRaw(cmpApproval),
 
@@ -360,6 +362,7 @@ export default {
             // cmpMasterDocStatus: "MENU TEST 1",
             cmpMasterCategories: "MASTER CATEGORY",
             cmpMasterRateCard: "MASTER RATECARD",
+            cmpMasterRateCardStandard: "MASTER RATECARD STANDARD",
             
             "SUB MENU": {
               cmpHalDashboard1: "DASHBOARD1",
@@ -376,6 +379,7 @@ export default {
         // cmpMasterDocStatus: "MENU TEST 1",
         cmpMasterCategories: "MASTER CATEGORY",
         cmpMasterRateCard: "MASTER RATECARD",
+        cmpMasterRateCardStandard: "MASTER RATECARD STANDARD",
         cmpApproval: "APPROVAL",
         cmpTransaction: "TRANSACTION",
         cmpHalDashboard1: "DASHBOARD1",
@@ -401,6 +405,11 @@ export default {
           delete: true,
         },
         cmpMasterRateCard: {
+          create: true,
+          update: true,
+          delete: true,
+        },
+        cmpMasterRateCardStandard: {
           create: true,
           update: true,
           delete: true,

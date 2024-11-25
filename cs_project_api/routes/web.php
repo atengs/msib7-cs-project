@@ -27,7 +27,7 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     $router->put('/master-categories/{id}', 'MasterCategoriesController@update');
     $router->delete('/master-categories/{id}', 'MasterCategoriesController@destroy');
     $router->get('/generateCode', 'MasterCategoriesController@generateCode');
-    // $router->get('/master-categories/unique-categories', 'MasterCategoriesController@getUniqueCategories');
+
 
     
 
@@ -38,8 +38,14 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     $router->post('/master-ratecard', 'MasterRatecardController@store');
     $router->put('/master-ratecard/{id}', 'MasterRatecardController@update');
     $router->delete('/master-ratecard/{id}', 'MasterRatecardController@destroy');
-
     $router->get('/master-job-category', 'MasterJobCategoryController@index');
+
+    
+    // Master Rate Card Standard
+    $router->get('/master-ratecard-standard/indexx', 'MasterRatecardStandardController@index');
+    $router->post('/master-ratecard-standard', 'MasterRatecardStandardController@store');
+    $router->get('/master-ratecard-standard/filter-data', 'MasterRatecardStandardController@getFilterData');
+
 
 
     // Transaction Header

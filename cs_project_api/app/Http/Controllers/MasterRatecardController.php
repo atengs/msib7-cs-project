@@ -17,7 +17,7 @@ class MasterRatecardController extends Controller
      */
     public function index()
     {
-        $data = MasterRatecard::select('master_ratecard.*','mc.category_name')
+        $data = MasterRatecard::select('master_ratecard.*','mc.category_name') 
         ->join('master_categories AS mc','mc.category_code', '=', 'master_ratecard.category_code')
         ->get();
 

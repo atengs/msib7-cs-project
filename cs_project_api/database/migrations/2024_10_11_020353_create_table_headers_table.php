@@ -33,6 +33,8 @@ return new class extends Migration
             $table->integer('discount')->nullable();
             $table->integer('status')->default(0)->comment('0: Pending, 1: Approve, 2: Reject');
 
+            $table->integer('is_revision')->nullable()->comment('0: true, 1: false');
+
             $table->timestamps();
             $table->softDeletes();
             $table->string('created_by')->nullable();

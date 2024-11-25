@@ -1588,7 +1588,7 @@ export default {
           data-id="${row.cells[0].data}" 
         >
           <i class="fa fa-check"></i> Approve
-        </button>
+        </button> 
         &nbsp;
         <button 
           class="btn btn-sm btn-danger text-white" 

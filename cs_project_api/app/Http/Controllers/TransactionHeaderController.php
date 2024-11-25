@@ -275,6 +275,7 @@ class TransactionHeaderController extends Controller
          return response()->json($this->return, $this->return['code']);
      }
 
+     
      public function destroy($id)
 {
     
@@ -357,41 +358,41 @@ class TransactionHeaderController extends Controller
     }
 
     public function updateStatus(Request $request, $id)
-{
-    try {
-        \Log::info('Update status request received', [
-            'id' => $id,
-            'status' => $request->input('status'),
-        ]);
+    {
+        try {
+            \Log::info('Update status request received', [
+                'id' => $id,
+                'status' => $request->input('status'),
+            ]);
 
-        $this->validate($request, [
-            'status' => 'required|integer|in:1,2',
-        ]);
+            $this->validate($request, [
+                'status' => 'required|integer|in:1,2',
+            ]);
 
-        $transaction = TransactionHeader::findOrFail($id);
-        $transaction->status = $request->input('status');
-        $transaction->save();
+            $transaction = TransactionHeader::findOrFail($id);
+            $transaction->status = $request->input('status');
+            $transaction->save();
 
-        \Log::info('Status updated successfully', [
-            'id' => $id,
-            'status' => $transaction->status,
-        ]);
+            \Log::info('Status updated successfully', [
+                'id' => $id,
+                'status' => $transaction->status,
+            ]);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Status updated successfully',
-        ], 200);
-    } catch (\Exception $e) {
-        \Log::error('Failed to update status', [
-            'error' => $e->getMessage(),
-        ]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Status updated successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Failed to update status', [
+                'error' => $e->getMessage(),
+            ]);
 
-        return response()->json([
-            'status' => false,
-            'message' => 'Failed to update status: ' . $e->getMessage(),
-        ], 500);
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update status: ' . $e->getMessage(),
+            ], 500);
+        }
     }
-}
 
 
 }

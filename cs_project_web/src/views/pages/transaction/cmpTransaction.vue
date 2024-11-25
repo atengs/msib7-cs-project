@@ -387,7 +387,7 @@
                       :key="index"
                       :value="item.id"
                     >
-                    ({{ item.category_name }}) - {{ item.job_description }}
+                    {{ item.category_name }} - {{ item.job_description }}
                     </option>
                   </select>
                 </div>
