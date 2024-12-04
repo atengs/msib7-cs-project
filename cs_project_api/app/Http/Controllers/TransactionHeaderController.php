@@ -42,31 +42,46 @@ class TransactionHeaderController extends Controller
 
     public function show(String $id)
     {
+        // Ambil header transaksi berdasarkan ID
         $header = TransactionHeader::whereNull('deleted_at')
             ->where('id', $id)
             ->first();
-    
+
+        // Jika header tidak ditemukan, kembalikan respon 404
         if (!$header) {
             return response()->json([
                 'status' => false,
                 'message' => 'Data not found',
             ], 404);
         }
-    
-        $details = TransactionDetail::select('transaction_detail.id', 'mr.job_description', 'ratecard_id', 'ratecard_nominal', 'note', 'business_type','qty')
-            ->join('master_ratecard as mr', 'mr.id', '=','transaction_detail.ratecard_id')
-            ->where('trans_number', $header->trans_number)
-            ->get();
-    
+
+        // Ambil detail transaksi dengan join ke master_ratecard dan master_ratecard_standard
+        $details = TransactionDetail::select(
+            'transaction_detail.id',
+            'mr.job_description',
+            'transaction_detail.ratecard_id',
+            'transaction_detail.ratecard_nominal',
+            'transaction_detail.note',
+            'transaction_detail.business_type',
+            'transaction_detail.qty',
+            'mrs.cost' // Ambil nilai cost langsung dari master_ratecard_standard
+        )
+        ->join('master_ratecard as mr', 'mr.id', '=', 'transaction_detail.ratecard_id')
+        ->join('master_ratecard_standard as mrs', 'mrs.id', '=', 'transaction_detail.ratecard_id') // Join ke tabel master_ratecard_standard
+        ->where('transaction_detail.trans_number', $header->trans_number)
+        ->get();
+
+        // Kembalikan response dengan header dan details
         return response()->json([
             'status' => true,
             'message' => 'Berhasil',
             'data' => [
-                'header' => $header, 
-                'ratecards' => $details 
+                'header' => $header,
+                'ratecards' => $details
             ]
         ], 200);
     }
+
     
 
     public function store (Request $request)
@@ -394,5 +409,45 @@ class TransactionHeaderController extends Controller
         }
     }
 
+    public function saveRevision(Request $request)
+    {
+        $this->validate($request, [
+            'transaction_number' => 'required|exists:transaction_header,trans_number',
+            'revision_note' => 'required|string',
+        ]);
+    
+        DB::beginTransaction();
+    
+        try {
+            // Simpan data ke tabel revision
+            DB::table('revision')->insert([
+                'transaction_number' => $request->input('transaction_number'),
+                'revision_note' => $request->input('revision_note'),
+                'revision_date' => Carbon::now(), // Gunakan Carbon::now()
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+    
+            // Update status di tabel transaction_header
+            DB::table('transaction_header')
+                ->where('trans_number', $request->input('transaction_number'))
+                ->update(['status' => 3]);
+    
+            DB::commit();
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'Revision saved successfully.',
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to save revision: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+    
+    
 
 }

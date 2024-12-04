@@ -6,29 +6,26 @@ use illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class MasterRatecardStandard extends Model
+class TransactionDetail extends Model
 {
-    protected $table = 'master_ratecard_standard';
+    protected $table = 'revision'; 
+    use SoftDeletes; 
 
-    use SoftDeletes;
-    
     protected $fillable = [
-        'ratecard_id',
-        'cost',
-    ]; 
-
-
-    protected $dates = ['deleted_at'];
+        'transaction_number',
+        'revision_note',
+        'revision_date',
+    ];
 
     public function get_data_($search, $arr_pagination)
     {
         if (!empty($search)) $arr_pagination['offset'] = 0;
         $search = strtolower($search);
         $data = $this->select('*')
-            ->whereRaw("lower(ratecard_id) like '%" . $search . "%' OR lower(cost) like '%" . $search . "%'")
+            ->whereRaw("lower(transaction_number) like '%" . $search . "%' OR lower(revision_note) like '%" . $search . "%'")
             ->limit($arr_pagination['limit'])
             ->offset($arr_pagination['offset'])
-            ->orderBy('cost', 'asc')
+            ->orderBy('revision_note', 'asc')
             ->get();
         return $data;
     }

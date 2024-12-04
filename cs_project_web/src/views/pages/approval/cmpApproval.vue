@@ -14,7 +14,7 @@
     <div class="modal-dialog2 modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          {{ flagButtonAdd ? "ADD" : "UPDATE" }} DATA {{ $root.judulHalaman }}
+          {{ flagButtonAdd ? "ADD" : "SHOW" }} DATA {{ $root.judulHalaman }}
           <button
             id="closeModal"
             type="button"
@@ -413,16 +413,34 @@
                 <div class="form-group">
                   <label for="example-nf-email">Nominal</label>
                   <CmpInputText
-                  readonly
-                    type="number"
-                    placeholder="Nominal"
-                    v-model="input.ratecard_nominal"
+                      readonly
+                      type="text"
+                      placeholder="Nominal"
+                      :value="'Rp. ' + new Intl.NumberFormat('id-ID').format(input.ratecard_nominal)"
+                      :class="
+                        errorField.ratecard_nominal
+                          ? 'form-control input-lg input-error'
+                          : 'form-control input-lg'
+                      "
+                    />
+                </div>
+              </div>
+              <div class="col-md-1">
+                <div class="form-group">
+                  <label for="example-nf-email">Cost</label>
+                  <CmpInputText
+                    readonly
+                    type="text"
+                    placeholder="Cost"
+                    :value="'Rp. ' + new Intl.NumberFormat('id-ID').format(input.cost)"
                     :class="
-                      errorField.ratecard_nominal
+                      errorField.cost
                         ? 'form-control input-lg input-error'
                         : 'form-control input-lg'
                     "
                   />
+
+                
                 </div>
               </div>
 
@@ -442,7 +460,7 @@
                 </div>
               </div>
 
-              <div class="col-md-2">
+              <div class="col-md-1">
                 <div class="form-group">
                   <label for="example-nf-email">Tipe Usaha</label>
                   <select
@@ -455,134 +473,180 @@
                 </div>
               </div>
             </div>
-
-            <div class="col-md-12">
-                <button
-                  class="btn btn-danger btn-sm mt-3"
-                  @click="removeSchedule(k)"
-                  v-show="k || (!k && ratecardForm.length > 1)"
-                >
-                  Hapus Form
-                </button>
-                &nbsp;
-                <button
-                  class="btn btn-success btn-sm mt-3"
-                  style="margin-left: -6px"
-                  @click="addSchedule(k)"
-                  v-show="k == ratecardForm.length - 1"
-                >
-                  Tambah Form
-                </button>
-              </div>
-
           </div>
 
-          <!-- END Wizards Row -->
-        </div>
+          <br>
+          <br>
+
+          <div class="row">
+            <div class="col-md-12">
+              
+              <div class="col-md-3">
+              </div>
+              <div class="col-md-1">
+              </div>
+
+              <div class="col-md-2">
+                <div class="form-group">
+                  <label for="example-nf-email">Total Nominal</label>
+                  <div
+                    style="
+                      border: 3px solid #ccc;
+                      padding: 10px;
+                      text-align: left;
+                      font-size: 12px;
+                      font-weight: bold;
+                      background-color: #f8f9fa;
+                    "
+                  >
+                    Rp. {{ new Intl.NumberFormat('id-ID').format(totalNominal) }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-2">
+                <div class="form-group">
+                  <label for="example-nf-email">Total Cost</label>
+                  <div
+                    style="
+                      border: 3px solid #ccc;
+                      padding: 10px;
+                      text-align: left;
+                      font-size: 12px;
+                      font-weight: bold;
+                      background-color: #f8f9fa;
+                    "
+                  >
+                    Rp. {{ new Intl.NumberFormat('id-ID').format(totalCost) }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-1">
+                <div class="form-group">
+                  <label for="example-nf-email">Persentase</label>
+                  <div
+                    style="
+                      border: 3px solid #ccc;
+                      padding: 10px;
+                      text-align: left;
+                      font-size: 12px;
+                      font-weight: bold;
+                      background-color: #f8f9fa;
+                    "
+                  >
+                    {{ calculatePercentage }} %
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+      
+      <!------------- END  --------------------------->
+        <div class="row">
+              <div class="col-md-12">
+                  <div class="col-md-3">
+                  </div>
+                  <div class="col-md-1">
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <div
+                        v-if="calculatePercentage > 30"
+                        style="color: green;  margin-top: 5px;"
+                      >
+                        Persentase memenuhi kriteria
+                      </div>
+                      <div
+                        v-else
+                        style="color: red;  margin-top: 5px;"
+                      >
+                        Tidak memenuhi kriteria
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-2">
+                  </div>
+                  <div class="col-md-1">
+                    </div>
+                    <div class="col-md-3">
+                  </div>
+
+              </div>
+           </div>
+           
+
+           <!-- Jika Persentase di bawah 30%, tampilkan Textarea dan Tombol Revisi -->
+            <div class="row" v-if="calculatePercentage < 30">
+              <div class="col-md-12">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="revision-note">Revisi</label>
+                    <textarea
+                      id="revision-note"
+                      class="form-control"
+                      rows="4"
+                      placeholder="Masukkan catatan revisi"
+                      v-model="revisionNote"
+                    ></textarea>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group" style="text-align: right; margin-top: 30px;">
+                    <button
+                      class="btn btn-sm btn-warning"
+                     @click="handleRevision(todo.trans_number)"
+                    >
+                      Revisi
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+        
+      </div>
+          
+
+
+
+
+
+
+
+
+           <!---------------- END Wizards Row -------------------->
+
+
+        
 
         <div class="modal-footer">
           <div class="form-group form-actions">
             <div class="col-xs-12">
               <button
-                v-if="flagButtonAdd"
-                @click="saveTodo()"
-                type="button"
-                class="btn btn-sm btn-primary pull-left"
-                :disabled="
-                  $root.flagButtonLoading ||
-                  todo.trans_number == null ||
-                  todo.trans_number == '' ||
-                  todo.customer == null ||
-                  todo.customer == '' ||
-                  // todo.trans_date == null ||
-                  // todo.trans_date == '' ||
-                  todo.person_in_charge == null ||
-                  todo.person_in_charge == '' ||
-                  todo.project == null ||
-                  todo.project == '' ||
-                  todo.job == null ||
-                  todo.job == '' ||
-                  todo.acount_executive == null ||
-                  todo.acount_executive == '' ||
-                  todo.acount_manager == null ||
-                  todo.acount_manager == '' ||
-                  todo.finance_manager == null ||
-                  todo.finance_manager == '' ||
-                  todo.payment_status == null ||
-                  todo.payment_status == '' ||
-                  todo.jenis_pembayaran == null ||
-                  todo.jenis_pembayaran == '' ||
-                  // todo.term == null ||
-                  // todo.term == '' ||
-                  // todo.pph23 == null ||
-                  // todo.pph23 == '' ||
-                  todo.ppn == null ||
-                  // todo.ppn == '' ||
-                  // todo.ppn_percent == null ||
-                  // todo.ppn_percent == '' ||
-                  todo.agency_fee == null ||
-                  todo.agency_fee == '' 
+                    v-if="!flagButtonAdd"
+                    @click="handleApprove(todo.id)"
+                    type="button"
+                    class="btn btn-sm btn-success"
+                    :disabled="todo.status === 1 || todo.status === 2"
+                  >
+                    Approve
+                  </button>
 
-                  // todo.ratecard_id == null ||
-                  // todo.ratecard_id == '' ||
-                  // todo.ratecard_nominal == null ||
-                  // todo.ratecard_nominal == '' ||
-                  // todo.note == null ||
-                  // todo.note == ''
-                "
-              >
-                <i
-                  v-if="$root.flagButtonLoading"
-                  class="fa fa-spinner fa-spin text-default"
-                ></i>
-                SAVE DATA
+                  <!-- Button Reject -->
+                  <button
+                    v-if="!flagButtonAdd"
+                    @click="handleReject(todo.id)"
+                    type="button"
+                    class="btn btn-sm btn-danger"
+                    :disabled="todo.status === 1 || todo.status === 2"
+                  >
+                    Reject
               </button>
-
-              <!-- <button
-                v-if="!flagButtonAdd"
-                @click="editTodo()"
-                type="button"
-                class="btn btn-sm btn-primary pull-left"
-                :disabled="
-                  $root.flagButtonLoading ||
-                  todo.trans_number == null ||
-                  todo.trans_number == '' ||
-                  todo.customer == null ||
-                  todo.customer == '' ||
-                  todo.trans_date == null ||
-                  todo.trans_date == '' ||
-                  todo.person_in_charge == null ||
-                  todo.person_in_charge == '' ||
-                  todo.project == null ||
-                  todo.project == '' ||
-                  todo.job == null ||
-                  todo.job == '' ||
-                  todo.acount_executive == null ||
-                  todo.acount_executive == '' ||
-                  todo.acount_manager == null ||
-                  todo.acount_manager == '' ||
-                  todo.finance_manager == null ||
-                  todo.finance_manager == '' ||
-                  todo.jenis_pembayaran == null ||
-                  todo.jenis_pembayaran == '' ||
-                  // todo.term == null ||
-                  // todo.term == '' ||
-                  todo.pph23 == null ||
-                  // todo.pph23 == '' ||
-                  todo.ppn == null ||
-                  // todo.ppn == '' ||
-                  // todo.ppn_percent == null ||
-                  // todo.ppn_percent == '' ||
-                  todo.agency_fee == null ||
-                  todo.agency_fee == '' 
-                "
-              >
-                <i
-                  v-if="$root.flagButtonLoading"
-                  class="fa fa-spinner fa-spin text-default"
-                ></i>
-                UPDATE DATA
-              </button> -->
             </div>
           </div>
         </div>
@@ -614,13 +678,7 @@
         <button class="btn btn-sm btn-danger pull-left" @click="exportPdf()">
           Export PDF</button>
 
-        <!-- <button
-          v-if="status_table && $root.accessRoles[access_page].create"
-          class="btn btn-sm btn-primary pull-right"
-          @click="show_modal()"
-        >
-          ADD DATA
-        </button> -->
+        
 
         <!------------------------>
         <div id="wrapper2"></div>
@@ -724,9 +782,11 @@ export default {
         id: "",
         ratecard_id: "",
         ratecard_nominal: "",
+        cost: "",
+        qty: "",
         note: "",
         business_type: "",
-        qty: "",
+        revisionNote: "",
       },
     ],
     deletedRatecards: [],
@@ -757,11 +817,48 @@ export default {
   },
 
     computed: {
-      // Properti computed untuk disable/enable field term
-      isTermDisabled() {
-        return this.todo.jenis_pembayaran !== 'Retainer';
+
+      totalNominal() 
+      {
+        return this.ratecardForm.reduce((total, item) => {
+          const qty = parseFloat(item.qty) || 0;
+          const nominal = parseFloat(item.ratecard_nominal) || 0;
+          return total + qty * nominal;
+        }, 0);
       },
-    },
+
+      totalCost() 
+      {
+        return this.ratecardForm.reduce((total, item) => {
+          const qty = parseFloat(item.qty) || 0;
+          const cost = parseFloat(item.cost) || 0;
+          return total + qty * cost;
+        }, 0);
+      },
+
+      calculatePercentage() {
+          const totalNominal = this.totalNominal;
+          const totalCost = this.totalCost;
+
+          if (totalNominal > 0) {
+            const percentage = ((totalNominal - totalCost) / totalNominal) * 100;
+            return percentage.toFixed(2); // Menampilkan 2 angka desimal
+          }
+
+          return 0; // Jika totalNominal <= 0, persentase menjadi 0
+        },
+      
+
+      // Properti computed untuk disable/enable field term
+      isTermDisabled() 
+      {
+            return this.todo.jenis_pembayaran !== 'Retainer';
+      },
+  
+  
+  },
+
+    
 
   
 
@@ -780,6 +877,65 @@ export default {
   },
   methods: {
 
+        async handleRevision(transactionNumber) {
+            if (!this.revisionNote) {
+              Swal.fire("Error", "Harap masukkan catatan revisi.", "error");
+              return;
+            }
+
+            Swal.fire({
+              title: "Konfirmasi Revisi",
+              text: "Apakah Anda yakin ingin menyimpan revisi?",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "Ya, Simpan",
+              cancelButtonText: "Batal",
+            }).then(async (result) => {
+              if (result.isConfirmed) {
+                try {
+                  this.$root.presentLoading();
+                  const AuthStr = "bearer " + localStorage.getItem("token");
+                  const config = {
+                    headers: {
+                      Authorization: AuthStr,
+                    },
+                  };
+
+                  // Kirim data revisi ke backend
+                  await axios.post(
+                    `${this.$root.apiHost}${this.$root.prefixApi}transaction/revision`,
+                    {
+                      transaction_number: transactionNumber,
+                      revision_note: this.revisionNote,
+                    },
+                    config
+                  );
+
+                  // Reset textarea setelah berhasil
+                  this.revisionNote = "";
+
+                  Swal.fire("Berhasil", "Revisi berhasil disimpan.", "success");
+                  this.modal = false;
+                  this.refreshTable(); // Perbarui tabel
+                } catch (error) {
+                  console.error("Error saving revision:", error);
+                  Swal.fire("Error", "Gagal menyimpan revisi.", "error");
+                } finally {
+                  this.$root.stopLoading();
+                }
+              }
+            });
+          },
+
+
+
+
+
+
+      
+
       // Pembatasan maks 100 pada input discount
       validateDiscount() {
           if (this.todo.discount < 1) {
@@ -797,52 +953,68 @@ export default {
       },
 
 
-      async updateStatus(id, newStatus) {
-            const mythis = this;
+      async handleApprove(id) {
+          await this.updateStatus(id, 1);
+        },
+        async handleReject(id) {
+          await this.updateStatus(id, 2);
+        },
+        async updateStatus(id, newStatus) {
+          const mythis = this;
 
-            Swal.fire({
-              title: `Are you sure to ${newStatus === 1 ? 'Approve' : 'Reject'}?`,
-              text: "You won't be able to revert this!",
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#3085d6",
-              cancelButtonColor: "#d33",
-              confirmButtonText: "Yes",
-              cancelButtonText: "No",
-            }).then(async (result) => {
-              if (result.isConfirmed) {
-                try {
-                  mythis.$root.presentLoading();
-                  const AuthStr = "bearer " + localStorage.getItem("token");
-                  const config = {
-                    headers: {
-                      Authorization: AuthStr,
-                    },
-                  };
-                  // Kirim update ke backend
-                  await axios.put(
-                    `${mythis.$root.apiHost}${mythis.$root.prefixApi}trx-header/${id}/status`,
-                    { status: newStatus }, // Status baru: 1 untuk Approve, 2 untuk Reject
-                    config
-                  );
+          Swal.fire({
+            title: `Are you sure to ${newStatus === 1 ? 'Approve' : 'Reject'}?`,
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+              try {
+                mythis.$root.presentLoading();
+                const AuthStr = "bearer " + localStorage.getItem("token");
+                const config = {
+                  headers: {
+                    Authorization: AuthStr,
+                  },
+                };
 
-                  Swal.fire(
-                    `${newStatus === 1 ? "Approved" : "Rejected"}!`,
-                    `The transaction has been ${newStatus === 1 ? "approved" : "rejected"}.`,
-                    "success"
-                  );
+                // Kirim update ke backend
+                await axios.put(
+                  `${mythis.$root.apiHost}${mythis.$root.prefixApi}trx-header/${id}/status`,
+                  { status: newStatus },
+                  config
+                );
 
-                  // Refresh tabel untuk memperbarui tampilan
-                  mythis.refreshTable();
-                } catch (error) {
-                  console.error("Error updating status:", error);
-                  Swal.fire("Error", "Failed to update the status.", "error");
-                } finally {
-                  mythis.$root.stopLoading();
-                }
+                Swal.fire(
+                  `${newStatus === 1 ? "Approved" : "Rejected"}!`,
+                  `The transaction has been ${newStatus === 1 ? "approved" : "rejected"}.`,
+                  "success"
+                );
+
+                if (mythis.modal) {
+                mythis.show_modal(false); // Tutup modal jika terbuka
               }
-            });
-          },
+
+                mythis.refreshTable(); // Memperbarui tabel
+              } catch (error) {
+                console.error("Error updating status:", error);
+                Swal.fire("Error", "Failed to update the status.", "error");
+              } finally {
+                mythis.$root.stopLoading();
+              }
+            }
+          });
+        },
+
+        refreshTable() {
+          // Logika untuk merefresh tabel
+          this.getTable();
+        },
+
 
     async exportPdf() {
           const mythis = this;
@@ -1572,46 +1744,52 @@ export default {
             0: "Pending",
             1: "Approve",
             2: "Reject",
+            3: "Revision",
+      
           };
           return html(`<span class="status-label">${statusMap[cell]}</span>`);
         },
       },
-      {
-        name: "Action",
-        width: "160px",
+      { name: "Action", width: "200px",
         formatter: (_, row) => {
-    return html(`
-      <div style="text-align: center;">
-        <button 
-          class="btn btn-sm btn-success text-white" 
-          id="approveButton" 
-          data-id="${row.cells[0].data}" 
-        >
-          <i class="fa fa-check"></i> Approve
-        </button> 
-        &nbsp;
-        <button 
-          class="btn btn-sm btn-danger text-white" 
-          id="rejectButton" 
-          data-id="${row.cells[0].data}" 
-        >
-          <i class="fa fa-times"></i> Reject
-        </button>
-            <br><br>
-            <!-- Button Show -->
-            <button data-id="${row.cells[0].data}" class="btn btn-sm btn-info text-white" id="showData" data-toggle="tooltip" title="Show">
-              <i class="fa fa-eye"></i> <!-- Icon Show -->
-            </button>
-            &nbsp;
-            <!-- Button Export PDF -->
-            <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="exportPdf1" data-toggle="tooltip" title="Export PDF">
-              <i class="fa fa-file-pdf-o"></i>
-            </button>
-          </div>
-        `);
+          const currentStatus = row.cells[14].data;
+          const isDisabled = currentStatus === 1 || currentStatus === 2;
+          console.log("Row ID:", row.cells[0].data, "Current Status:", currentStatus, "Is Disabled:", isDisabled);
+
+          return html(`
+          <div style="text-align: center;">
+              <button 
+                class="btn btn-sm btn-success text-white approveButton"  title="Approv"
+                data-id="${row.cells[0].data}" 
+                ${currentStatus === 1 || currentStatus === 2 ? "disabled" : ""}
+              >
+                <i class="fa fa-check"></i> 
+              </button>
+              &nbsp;
+              <button 
+                class="btn btn-sm btn-danger text-white rejectButton" title="Reject"
+                data-id="${row.cells[0].data}" 
+                ${currentStatus === 1 || currentStatus === 2 ? "disabled" : ""}
+              >
+                <i class="fa fa-times"></i> 
+              </button>
+                <br><br>
+                <!-- Button Show -->
+                <button data-id="${row.cells[0].data}" class="btn btn-sm btn-info text-white" id="showData" data-toggle="tooltip" title="Show">
+                  <i class="fa fa-eye"></i> <!-- Icon Show -->
+                </button>
+                &nbsp;
+                <!-- Button Export PDF -->
+                <button data-id="${row.cells[0].data}" class="btn btn-sm btn-warning text-white" id="exportPdf1" data-toggle="tooltip" title="Export PDF">
+                  <i class="fa fa-file-pdf-o"></i>
+                </button>
+              </div>
+            `);
+          },
       },
-    },
-  ],
+ 
+    ],
+
     style: {
       table: {
           border: "1px solid #ccc",
@@ -1646,7 +1824,7 @@ export default {
           card.term,
           card.agency_fee,
           card.discount,
-          card.status
+          parseInt(card.status),    
         ]),
       total: (data) => data.count,
       handle: (res) => {
@@ -1667,15 +1845,15 @@ export default {
       $(document).off("click", "#exportPdf1");
 
 
-      $(document).on("click", "#approveButton", function () {
-          const id = $(this).data("id");
-          mythis.updateStatus(id, 1); // Set status menjadi 1 (Approve)
-        });
+      $(document).on("click", ".approveButton", function () {
+        const id = $(this).data("id");
+        mythis.updateStatus(id, 1); // Set status menjadi Approve
+      });
 
-        $(document).on("click", "#rejectButton", function () {
-          const id = $(this).data("id");
-          mythis.updateStatus(id, 2); // Set status menjadi 2 (Reject)
-        });
+      $(document).on("click", ".rejectButton", function () {
+        const id = $(this).data("id");
+        mythis.updateStatus(id, 2); // Set status menjadi Reject
+      });
 
       $(document).on("click", "#exportPdf1", function () 
       {
@@ -1817,61 +1995,62 @@ export default {
     },
 
     async getData(id) {
-      var mythis = this;
-      mythis.flagButtonAdd = false;
-      mythis.$root.presentLoading();
-      mythis.todo = {};
-      const AuthStr = "bearer " + localStorage.getItem("token");
-      const config = {
-        headers: {
-          Authorization: AuthStr,
-        },
-      };
-      await axios
-        .get(
-          mythis.$root.apiHost + mythis.$root.prefixApi + `trx-header/${id}`,
-          config
-        )
-        .then(async (res) => {
-          console.log(res.data.data);
-          const data = res.data.data;
-        
-          mythis.todo.id = id;
-          mythis.todo.trans_number = data.header.trans_number;
-          mythis.todo.customer = data.header.customer;
-          mythis.todo.trans_date = data.header.trans_date;
-          mythis.todo.person_in_charge = data.header.person_in_charge;
-          mythis.todo.address = data.header.address;
-          mythis.todo.project = data.header.project;
-          mythis.todo.job = data.header.job;
-          mythis.todo.acount_executive = data.header.acount_executive;
-          mythis.todo.acount_manager = data.header.acount_manager;
-          mythis.todo.finance_manager = data.header.finance_manager;
-          mythis.todo.payment_status = data.header.payment_status;
-          mythis.todo.jenis_pembayaran = data.header.jenis_pembayaran;
-          mythis.todo.term = data.header.term;
-          mythis.todo.pph23 = data.header.pph23;
-          mythis.todo.ppn = data.header.ppn;
-          mythis.todo.ppn_percent = data.header.ppn_percent;
-          mythis.todo.agency_fee = data.header.agency_fee;
-          mythis.todo.status = data.header.status;
-          mythis.todo.discount = data.header.discount;
+          var mythis = this;
+          mythis.flagButtonAdd = false;
+          mythis.$root.presentLoading();
+          const AuthStr = "bearer " + localStorage.getItem("token");
+          const config = {
+              headers: {
+                  Authorization: AuthStr,
+              },
+          };
+          await axios
+              .get(
+                  mythis.$root.apiHost + mythis.$root.prefixApi + `trx-header/${id}`,
+                  config
+              )
+              .then((res) => {
+                  const data = res.data.data;
 
-          mythis.ratecardForm = data.ratecards.map((ratecard) => ({
-            id: ratecard.id,
-            ratecard_id: ratecard.ratecard_id,
-            ratecard_nominal: ratecard.ratecard_nominal,
-            note: ratecard.note,
-            business_type: ratecard.business_type,
-            qty: ratecard.qty,
-          }));
+                  mythis.todo.id = id;
+                  mythis.todo.trans_number = data.header.trans_number;
+                  mythis.todo.customer = data.header.customer;
+                  mythis.todo.trans_date = data.header.trans_date;
+                  mythis.todo.person_in_charge = data.header.person_in_charge;
+                  mythis.todo.address = data.header.address;
+                  mythis.todo.project = data.header.project;
+                  mythis.todo.job = data.header.job;
+                  mythis.todo.acount_executive = data.header.acount_executive;
+                  mythis.todo.acount_manager = data.header.acount_manager;
+                  mythis.todo.finance_manager = data.header.finance_manager;
+                  mythis.todo.payment_status = data.header.payment_status;
+                  mythis.todo.jenis_pembayaran = data.header.jenis_pembayaran;
+                  mythis.todo.term = data.header.term;
+                  mythis.todo.pph23 = data.header.pph23;
+                  mythis.todo.ppn = data.header.ppn;
+                  mythis.todo.ppn_percent = data.header.ppn_percent;
+                  mythis.todo.agency_fee = data.header.agency_fee;
+                  mythis.todo.status = data.header.status;
+                  mythis.todo.discount = data.header.discount;
 
-          mythis.$root.stopLoading();
-        })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-        });
-    },
+                  // Map ratecards untuk memasukkan cost
+                  mythis.ratecardForm = data.ratecards.map((ratecard) => ({
+                      id: ratecard.id,
+                      ratecard_id: ratecard.ratecard_id,
+                      ratecard_nominal: ratecard.ratecard_nominal,
+                      cost: ratecard.cost, // Tambahkan cost di sini
+                      note: ratecard.note,
+                      business_type: ratecard.business_type,
+                      qty: ratecard.qty,
+                  }));
+
+                  mythis.$root.stopLoading();
+              })
+              .catch((error) => {
+                  console.error("Error fetching data:", error);
+              });
+      },
+
 
     // generate trx code
     async generateCode(id) {

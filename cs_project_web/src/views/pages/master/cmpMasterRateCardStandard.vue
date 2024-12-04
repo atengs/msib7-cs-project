@@ -50,7 +50,7 @@
                       >
                         {{ item.category_name }} - {{ item.job_category_name }} - 
                         {{ item.job_description }} - {{ item.ratecard }} - 
-                        {{ item.cost || "COST MISSING" }}
+                        {{ item.cost || " COST MISSING " }}
                       </option>
                     </select>
                   </div>
@@ -79,7 +79,9 @@
           <div class="modal-footer">
             <div class="form-group form-actions">
               <div class="col-xs-12">
+                <!-- Tampilkan tombol SAVE hanya untuk mode tambah -->
                 <button
+                  v-if="flagButtonAdd"
                   @click="saveTodo"
                   type="button"
                   class="btn btn-sm btn-primary pull-left"
@@ -91,21 +93,14 @@
                   ></i>
                   SAVE DATA
                 </button>
-  
+
+                <!-- Tampilkan tombol UPDATE hanya untuk mode edit -->
                 <button
-                  v-if="!flagButtonAdd"
-                  @click="editTodo()"
+                  v-else
+                  @click="editTodo"
                   type="button"
                   class="btn btn-sm btn-primary pull-left"
-                  :disabled="
-                    $root.flagButtonLoading ||
-                    todo.job_description == null ||
-                    todo.job_description == '' ||
-                    todo.ratecard == null ||
-                    todo.ratecard == '' ||
-                    todo.remarks == null ||
-                    todo.remarks == ''
-                  "
+                  :disabled="!cost"
                 >
                   <i
                     v-if="$root.flagButtonLoading"
@@ -116,6 +111,7 @@
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -206,6 +202,7 @@
         grid: new Grid(),
         // grid2: new Grid(),
         errorField: {
+          cost: false,
           category_code: false,
           job_category_code: false,
           job_description: false,
@@ -220,6 +217,7 @@
         modal: false,
   
         todo: {
+          cost: "",
           category_code: "",
           job_category_code: "",
           job_description: "",
@@ -265,24 +263,46 @@
       this.cost = null;
     },
 
-    async fetchOptions() {
+    async fetchOptions() 
+    {
       try {
-        const response = await axios.get(
-          `${this.$root.apiHost + this.$root.prefixApi}master-ratecard-standard/filter-data`
-        );
-        this.options = response.data.data;
-      } catch (error) {
-        console.error("Failed to fetch options:", error);
-      }
+            const response = await axios.get(
+              `${this.$root.apiHost + this.$root.prefixApi}master-ratecard-standard/filter-data`
+            );
+
+            if (response.data.status) 
+            {
+              // Urutkan data: cost yang kosong di atas
+              this.options = response.data.data.sort((a, b) => 
+                {
+                  if (!a.cost && b.cost) return -1; // Cost kosong di atas
+                  if (a.cost && !b.cost) return 1;  // Cost ada di bawah
+                  return 0; // Urutkan lainnya tetap
+                });
+            } 
+            else 
+              {
+                console.error("Failed to fetch options:", response.data.message);
+              }
+            
+          } 
+
+      catch (error) 
+        {
+          console.error("Failed to fetch options:", error);
+        }
     },
     
     checkCost() {
-      if (this.selectedData && !this.selectedData.cost) {
-        this.showCostInput = true;
-      } else {
-        this.showCostInput = false;
-        this.cost = null;
-      }
+      if (this.selectedData && !this.selectedData.cost) 
+        {
+          this.showCostInput = true;
+        } 
+      else 
+        {
+          this.showCostInput = false;
+          this.cost = null;
+        }
     },
 
     async saveData() {
@@ -397,8 +417,8 @@
 
       saveTodo() {
     const payload = {
-        ratecard_id: this.selectedData.id, // Ambil ID dari dropdown yang dipilih
-        cost: this.cost || this.selectedData.cost, // Gunakan cost baru atau yang sudah ada
+        ratecard_id: this.selectedData.id, 
+        cost: this.cost || this.selectedData.cost,
     };
 
     Swal.fire({
@@ -428,8 +448,8 @@
                 Swal.fire("Created!", response.data.message, "success");
                 this.$root.flagButtonLoading = false;
                 this.resetForm();
-                this.show_modal(); // Tutup modal setelah berhasil menyimpan
-                this.refreshTable(); // Refresh data di tabel
+                this.show_modal(); 
+                this.refreshTable(); 
             })
             .catch((error) => {
                 this.$root.flagButtonLoading = false;
@@ -446,11 +466,12 @@
       },
       show_modal() {
         this.modal = !this.modal;
-        if (this.modal == false) {
-          this.flagButtonAdd = true;
+        if (!this.modal) {
+          this.flagButtonAdd = true; // Kembali ke mode Add saat modal ditutup
           this.resetForm();
         }
       },
+
       async jqueryDelEdit() {
         const mythis = this;
         $(document).on("click", "#editData", async function () {
@@ -597,70 +618,63 @@
         });
       },
       editTodo() {
-        var mythis = this;
-        mythis.$root.flagButtonLoading = true;
-        const AuthStr = "bearer " + localStorage.getItem("token");
-        const config = {
-          headers: {
-            Authorization: AuthStr,
-          },
-        };
-        axios
-          .put(
-            mythis.$root.apiHost + mythis.$root.prefixApi +"master-ratecard/" + mythis.todo.id,
-            {
-              category_code: mythis.todo.category_code,
-              job_category_code: mythis.todo.job_category_code,
-              job_description: mythis.todo.job_description,
-              ratecard: mythis.todo.ratecard,
-              remarks: mythis.todo.remarks,
-              status: mythis.todo.status,
-              userid: mythis.userid,
-            },
-            config
-          )
-          .then((res) => {
-            //console.log(res);
-            //alert(res.data.message);
-            Swal.fire("Updated!", res.data.message, "success");
-            mythis.$root.flagButtonLoading = false;
-            mythis.resetForm();
-            mythis.show_modal();
-            mythis.refreshTable();
-          })
-          .catch(function (error) {
-            mythis.$root.flagButtonLoading = false;
-            if (error.response) {
-              //console.log(error.response.data);
-              if (error.response.status == 422) {
-                mythis.errorList = error.response.data;
-                mythis.$root.loader = false;
-                if (Object.keys(mythis.errorList).length > 0) {
-                  //refresh semua menjadi false
-                  Object.keys(mythis.errorField).forEach(function (key) {
-                    mythis.errorField[key] = false;
-                  });
-                  //membuat jika error jadi true
-                  Object.keys(mythis.errorList).forEach(function (key) {
-                    toast.error(mythis.errorList[key], { theme: "colored" });
-  
-                    // const myArray = key.split(".");
-                    // mythis.errorField[myArray[1]] = true;
-                    mythis.errorField[key] = true;
-                  });
-                }
-              } else {
-                toast.error(error.response.data.message, {
-                  theme: "colored",
-                });
-              }
-            } else if (error.request) {
-              console.log(error.request);
-            } else {
-              console.log("Error", error.message);
-            }
-          });
+          var mythis = this;
+          mythis.$root.flagButtonLoading = true;
+          const AuthStr = "bearer " + localStorage.getItem("token");
+          const config = {
+              headers: {
+                  Authorization: AuthStr,
+              },
+          };
+
+          // Payload untuk mengupdate cost
+          const payload = {
+              cost: mythis.cost, // Nilai cost yang baru
+          };
+
+          axios
+              .put(
+                  mythis.$root.apiHost + mythis.$root.prefixApi + "master-ratecard-standard/" + mythis.selectedData.id, // ID untuk update
+                  payload,
+                  config
+              )
+              .then((res) => {
+                  Swal.fire("Updated!", res.data.message, "success");
+                  mythis.$root.flagButtonLoading = false;
+                  mythis.resetForm(); // Reset form setelah update berhasil
+                  mythis.show_modal(); // Tutup modal
+                  mythis.refreshTable(); // Refresh tabel untuk melihat perubahan
+              })
+              .catch(function (error) {
+                  mythis.$root.flagButtonLoading = false;
+                  if (error.response) {
+                      if (error.response.status == 422) {
+                          mythis.errorList = error.response.data;
+                          mythis.$root.loader = false;
+                          if (Object.keys(mythis.errorList).length > 0) {
+                              Object.keys(mythis.errorField).forEach(function (key) {
+                                  mythis.errorField[key] = false;
+                              });
+                              Object.keys(mythis.errorList).forEach(function (key) {
+                                  toast.error(mythis.errorList[key], { theme: "colored" });
+                                  mythis.errorField[key] = true;
+                              });
+                          }
+                      } else {
+                          toast.error(error.response.data.message, {
+                              theme: "colored",
+                          });
+                      }
+                  } else if (error.request) {
+                      console.log(error.request);
+                  } else {
+                      console.log("Error", error.message);
+                  }
+              });
       },
+
+
+
       async getData(id) {
         var mythis = this;
         mythis.flagButtonAdd = false;
@@ -672,24 +686,23 @@
             Authorization: AuthStr,
           },
         };
-        await axios
-        .get(mythis.$root.apiHost + mythis.$root.prefixApi +`master-ratecard/${id}`, config)
-          .then(async (res) => {
-            //console.log(res.data.data);
-            //mythis.acuanEdit = id;
-            //mythis.todo = res.data.data;
-            mythis.todo.id = id;
-            mythis.todo.category_code = res.data.data.category_code;
-            mythis.todo.job_category_code = res.data.data.job_category_code;
-            mythis.todo.job_description = res.data.data.job_description;
-            mythis.todo.ratecard = res.data.data.ratecard;
-            mythis.todo.remarks = res.data.data.remarks;
-            mythis.todo.status = res.data.data.status;
-  
-            document.getElementById("inputA").focus(); // sets the focus on the input
-  
-            mythis.$root.stopLoading();
-          });
+        try {
+          const res = await axios.get(
+              mythis.$root.apiHost + mythis.$root.prefixApi + `master-ratecard-standard/${id}`,
+              config
+          );
+          const data = res.data.data;
+          
+          // Set nilai yang akan diedit ke dalam form
+          mythis.selectedData = data; // Data yang diambil dari API
+          mythis.cost = data.cost; // Set nilai cost untuk form input
+          mythis.show_modal();
+          } catch (error) {
+              console.error("Failed to fetch data:", error);
+          } finally {
+              mythis.$root.stopLoading();
+          }
+
       },
     },
   };

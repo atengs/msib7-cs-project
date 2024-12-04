@@ -11,14 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('revision', function (Blueprint $table) {
+        Schema::create('invoice', function (Blueprint $table) {
             $table->id();
-            $table->string('transaction_number')->nullable();
-            $table->string('revision_note')->nullable();
-            $table->date('revision_date')->nullable();
-            $table->timestamps();
+            $table->string('invoice_number');
+            $table->string('trans_number');
+            $table->string('due_date')->nullable();
+            $table->decimal('cost', 16,2)->nullable();
 
-            $table->foreign('transaction_number')
+            $table->timestamps();
+            $table->softDeletes();
+            $table->string('created_by')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->string('deleted_by')->nullable();
+
+            $table->foreign('trans_number')
             ->references('trans_number')
             ->on('transaction_header')
             ->onUpdate('cascade')
@@ -31,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('revision');
+        Schema::dropIfExists('invoice');
     }
 };

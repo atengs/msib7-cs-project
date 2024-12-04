@@ -44,6 +44,7 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     // Master Rate Card Standard
     $router->get('/master-ratecard-standard/indexx', 'MasterRatecardStandardController@index');
     $router->post('/master-ratecard-standard', 'MasterRatecardStandardController@store');
+    $router->put('/master-ratecard-standard/{id}', 'MasterRatecardStandardController@update');
     $router->get('/master-ratecard-standard/filter-data', 'MasterRatecardStandardController@getFilterData');
 
 
@@ -57,6 +58,7 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     $router->get('/trx-header/generate-code', 'TransactionHeaderController@generateCode');
     $router->get('/trx-header/{id}', 'TransactionHeaderController@show');
     $router->put('/trx-header/{id}/status', 'TransactionHeaderController@updateStatus');
+    $router->post('/transaction/revision', 'TransactionHeaderController@saveRevision');
 
     // $router->get('/trx-header/generatePDF', 'TransactionHeaderController@generatePDF');
 
@@ -64,14 +66,11 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     $router->get('/trx-detail', 'TransactionDetailController@index');
     $router->post('/trx-detail', 'TransactionDetailController@store');
 
+    // Revision Note
+    $router->get('/revision', 'RevisionController@index');
+    $router->post('/revision', 'RevisionController@store');
 
-    // Doc Status
-    $router->post('/storebulky', 'DocStatusController@storebulky');
-    $router->post('/status', 'DocStatusController@store');
-    $router->get('/status', 'DocStatusController@paging');
-    $router->get('/status/{id}', 'DocStatusController@show');
-    $router->put('/status/{id}', 'DocStatusController@update');
-    $router->delete('/status/{id}', 'DocStatusController@destroy'); 
+   
 
     // Check Out
     $router->get('/check-out', 'CheckOutController@index');
@@ -81,7 +80,31 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     $router->get('/check-out/getData', 'CheckOutController@getData');
     $router->get('/check-out/{id}', 'CheckOutController@show');
 
+    
+
+    // Doc Status
+    $router->post('/storebulky', 'DocStatusController@storebulky');
+    $router->post('/status', 'DocStatusController@store');
+    $router->get('/status', 'DocStatusController@paging');
+    $router->get('/status/{id}', 'DocStatusController@show');
+    $router->put('/status/{id}', 'DocStatusController@update');
+    $router->delete('/status/{id}', 'DocStatusController@destroy'); 
+
+
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // $router->group(['prefix' => 'si' ], function () use ($router) {
 //     $router->post('/storebulky', 'DocStatusController@storebulky');

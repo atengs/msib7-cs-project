@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('ratecard_id')->nullable();
             $table->double('cost', 16,2)->nullable();
-            $table->timestamp('deleted_at')->nullable(); // Kolom untuk soft delete
+            $table->timestamps(); 
+            $table->softDeletes();
 
             $table->foreign('ratecard_id')
             ->references('id')
