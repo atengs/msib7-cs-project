@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('invoice_number');
             $table->string('trans_number');
             $table->string('due_date')->nullable();
-            $table->decimal('cost', 16,2)->nullable();
+            $table->decimal('total_invoice', 16,2)->nullable();
 
             $table->timestamps();
             $table->softDeletes();

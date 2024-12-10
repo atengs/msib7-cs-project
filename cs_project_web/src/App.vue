@@ -95,6 +95,7 @@ import cmpMasterRateCard from "./views/pages/master/cmpMasterRateCard.vue";
 import cmpMasterRateCardStandard from "./views/pages/master/cmpMasterRateCardStandard.vue";
 import cmpTransaction from "./views/pages/transaction/cmpTransaction.vue";
 import cmpApproval from "./views/pages/approval/cmpApproval.vue";
+import cmpInvoice from "./views/pages/invoice/cmpInvoice.vue";
 
 
 
@@ -134,6 +135,7 @@ const routeComponent = {
   cmpMasterRateCardStandard: markRaw(cmpMasterRateCardStandard),
   cmpTransaction: markRaw(cmpTransaction),
   cmpApproval: markRaw(cmpApproval),
+  cmpInvoice: markRaw(cmpInvoice),
 
 
   Login: markRaw(_Login),
@@ -372,6 +374,7 @@ export default {
           },
           cmpApproval: "APPROVAL",
           cmpTransaction: "TRANSACTION",
+          cmpInvoice: "INVOICE",
 
         },
       },
@@ -382,6 +385,7 @@ export default {
         cmpMasterRateCardStandard: "MASTER RATECARD STANDARD",
         cmpApproval: "APPROVAL",
         cmpTransaction: "TRANSACTION",
+        cmpInvoice: "INVOICE",
         cmpHalDashboard1: "DASHBOARD1",
         cmpHalDashboard2: "DASHBOARD2",
         cmpHalDashboard3: "DASHBOARD3",
@@ -420,6 +424,11 @@ export default {
           delete: true,
         },
         cmpTransaction: {
+          create: true,
+          update: true,
+          delete: true,
+        },
+        cmpInvoice: {
           create: true,
           update: true,
           delete: true,

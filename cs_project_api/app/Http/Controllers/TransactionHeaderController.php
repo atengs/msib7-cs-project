@@ -40,13 +40,55 @@ class TransactionHeaderController extends Controller
     //     ],200 );
     // }
 
+    // public function show(String $id)
+    // {
+    //     // Ambil header transaksi berdasarkan ID
+    //     $header = TransactionHeader::whereNull('deleted_at')
+    //         ->where('id', $id)
+    //         ->first();
+
+    //     // Jika header tidak ditemukan, kembalikan respon 404
+    //     if (!$header) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Data not found',
+    //         ], 404);
+    //     }
+
+    //     // Ambil detail transaksi dengan join ke master_ratecard dan master_ratecard_standard
+    //     $details = TransactionDetail::select(
+    //         'transaction_detail.id',
+    //         'mr.job_description',
+    //         'transaction_detail.ratecard_id',
+    //         'transaction_detail.ratecard_nominal',
+    //         'transaction_detail.note',
+    //         'transaction_detail.business_type',
+    //         'transaction_detail.qty',
+    //         'mrs.cost' // Ambil nilai cost langsung dari master_ratecard_standard
+    //     )
+    //     ->join('master_ratecard as mr', 'mr.id', '=', 'transaction_detail.ratecard_id')
+    //     ->join('master_ratecard_standard as mrs', 'mrs.id', '=', 'transaction_detail.ratecard_id') // Join ke tabel master_ratecard_standard
+    //     ->where('transaction_detail.trans_number', $header->trans_number)
+    //     ->get();
+
+    //     // Kembalikan response dengan header dan details
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Berhasil',
+    //         'data' => [
+    //             'header' => $header,
+    //             'ratecards' => $details
+    //         ]
+    //     ], 200);
+    // }
+
     public function show(String $id)
     {
         // Ambil header transaksi berdasarkan ID
         $header = TransactionHeader::whereNull('deleted_at')
             ->where('id', $id)
             ->first();
-
+    
         // Jika header tidak ditemukan, kembalikan respon 404
         if (!$header) {
             return response()->json([
@@ -54,7 +96,13 @@ class TransactionHeaderController extends Controller
                 'message' => 'Data not found',
             ], 404);
         }
-
+    
+        // Ambil data invoice berdasarkan trans_number dari header
+        $invoice = DB::table('invoice')
+            ->where('trans_number', $header->trans_number)
+            ->select('invoice_number', 'due_date')
+            ->first();
+    
         // Ambil detail transaksi dengan join ke master_ratecard dan master_ratecard_standard
         $details = TransactionDetail::select(
             'transaction_detail.id',
@@ -70,27 +118,30 @@ class TransactionHeaderController extends Controller
         ->join('master_ratecard_standard as mrs', 'mrs.id', '=', 'transaction_detail.ratecard_id') // Join ke tabel master_ratecard_standard
         ->where('transaction_detail.trans_number', $header->trans_number)
         ->get();
-
-        // Kembalikan response dengan header dan details
+    
+        // Kembalikan response dengan header, invoice, dan details
         return response()->json([
             'status' => true,
             'message' => 'Berhasil',
             'data' => [
                 'header' => $header,
+                'invoice' => $invoice, // Tambahkan data invoice
                 'ratecards' => $details
             ]
         ], 200);
     }
+    
+
 
     
 
-    public function store (Request $request)
+    public function store(Request $request)
     {
         DB::beginTransaction();
+
         $this->validate($request, [
             'trans_number' => 'required|string',
             'customer' => 'required|string',
-            // 'trans_date' => 'required|date',
             'person_in_charge' => 'required|string',
             'address' => 'required|string',
             'project' => 'required|string',
@@ -100,83 +151,114 @@ class TransactionHeaderController extends Controller
             'finance_manager' => 'required|string',
             'payment_status' => 'required|string',
             'jenis_pembayaran' => 'required|string',
-            // 'term' => 'required|string',
-            // 'pph23' => 'required|boolean', 
-            'ppn' => 'required|boolean', 
+            'ppn' => 'required|boolean',
             'ppn_percent' => 'nullable|numeric|min:0|max:100',
             'agency_fee' => 'required|string',
-            // 'status' => 'required|string',
-            
+            'discount' => 'nullable|numeric|min:0|max:100',
         ]);
-        
-        $item = new TransactionHeader;
- 
-        $item->trans_number = $request->input('trans_number');
-        $item->customer = $request->input('customer');
-        // $item->trans_date = $request->input('trans_date');
-        $item->trans_date = date('Y-m-d'); 
-        $item->person_in_charge = $request->input('person_in_charge');
-        $item->address = $request->input('address');
-        $item->project = $request->input('project');
-        $item->job = $request->input('job');
-        $item->acount_executive = $request->input('acount_executive');
-        $item->acount_manager = $request->input('acount_manager');
-        $item->finance_manager = $request->input('finance_manager');
-        $item->payment_status = $request->input('payment_status');
-        $item->jenis_pembayaran = $request->input('jenis_pembayaran');
-        $item->term = $request->input('term');
-        $item->pph23 = $request->input('pph23');
-        $item->ppn = $request->input('ppn');
-        $item->ppn_percent = $request->input('ppn_percent');
-        $item->agency_fee = $request->input('agency_fee');
-        $item->status = $request->input('status');
-        $item->discount = $request->input('discount');
-        $item->created_by = $request->input('created_by');
-        
-        if ($item->save()){ 
 
-            if (!is_array($request->input('ratecard'))) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Ratecard must be an array',
-                ], 400);
+        try {
+            // Buat header transaksi
+            $item = new TransactionHeader();
+            $item->trans_number = $request->input('trans_number');
+            $item->customer = $request->input('customer');
+            $item->trans_date = date('Y-m-d');
+            $item->person_in_charge = $request->input('person_in_charge');
+            $item->address = $request->input('address');
+            $item->project = $request->input('project');
+            $item->job = $request->input('job');
+            $item->acount_executive = $request->input('acount_executive');
+            $item->acount_manager = $request->input('acount_manager');
+            $item->finance_manager = $request->input('finance_manager');
+            $item->payment_status = $request->input('payment_status');
+            $item->jenis_pembayaran = $request->input('jenis_pembayaran');
+            $item->term = $request->input('term');
+            $item->pph23 = true; // Default PPh 23
+            $item->ppn = $request->input('ppn');
+            $item->ppn_percent = $request->input('ppn_percent') ?? 0;
+            $item->agency_fee = $request->input('agency_fee');
+            $item->discount = $request->input('discount') ?? 0;
+            $item->created_by = $request->input('created_by');
+
+            // Hitung nilai total dari ratecard
+            $totalAkhirSum = collect($request->input('ratecard'))->reduce(function ($sum, $ratecard) {
+                $totalAwal = $ratecard['ratecard_nominal'] * $ratecard['qty'];
+                $totalAkhir = ($ratecard['business_type'] === 'Perorangan')
+                    ? floor($totalAwal / 0.97 / 0.98)
+                    : floor($totalAwal / 0.98);
+                return $sum + $totalAkhir;
+            }, 0);
+
+            // Tambahkan agency fee
+            $agencyFeeValue = floor(($totalAkhirSum * $item->agency_fee) / 100);
+            $totalBudget = $totalAkhirSum + $agencyFeeValue;
+
+            // Terapkan diskon jika ada
+            if ($item->discount > 0) {
+                $discountValue = floor($totalBudget * ($item->discount / 100));
+                $totalBudget -= $discountValue;
             }
 
-            foreach($request->input('ratecard') as $key => $value) {
-                // $detail = new TransactionDetail;
-                $detail[] = [
-                    "trans_number" => $request->input('trans_number'),
-                    "ratecard_id" => $value['ratecard_id'],
-                    "ratecard_nominal" => $value['ratecard_nominal'],
-                    "note" => $value['note'],
-                    "business_type" => $value['business_type'],
-                    "qty" => $value['qty'],
-                    "created_by" => $request->input('created_by')
-                ];
-            }
+            // Hitung PPN jika aktif
+            $ppnValue = $item->ppn ? floor(($item->ppn_percent / 100) * $totalBudget) : 0;
 
-            if($save = TransactionDetail::insert($detail)) {
-                DB::commit();
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Berhasil',
-                ], 200);
+            // Hitung total keseluruhan
+            $totalKeseluruhan = $totalBudget + $ppnValue;
+
+            // Simpan nilai total ke kolom total di tabel
+            $item->total = $item->ppn ? $totalKeseluruhan : $totalBudget;
+
+            // Simpan header transaksi
+            if ($item->save()) {
+                // Simpan detail transaksi
+                if (!is_array($request->input('ratecard'))) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Ratecard must be an array',
+                    ], 400);
+                }
+
+                foreach ($request->input('ratecard') as $value) {
+                    $detail[] = [
+                        "trans_number" => $request->input('trans_number'),
+                        "ratecard_id" => $value['ratecard_id'],
+                        "ratecard_nominal" => $value['ratecard_nominal'],
+                        "note" => $value['note'],
+                        "business_type" => $value['business_type'],
+                        "qty" => $value['qty'],
+                        "created_by" => $request->input('created_by'),
+                    ];
+                }
+
+                if (TransactionDetail::insert($detail)) {
+                    DB::commit();
+                    return response()->json([
+                        'status' => true,
+                        'message' => 'Data saved successfully',
+                    ], 200);
+                } else {
+                    DB::rollback();
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Failed to save transaction details',
+                    ], 500);
+                }
             } else {
                 DB::rollback();
                 return response()->json([
                     'status' => false,
-                    'message' => 'Gagal',
-                ], 401);  
+                    'message' => 'Failed to save transaction header',
+                ], 500);
             }
-        } else {
+        } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
                 'status' => false,
-                'message' => 'Error',
-            ], 400);
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ], 500);
         }
-        
     }
+
 
     public function update(Request $request, $id)
     {

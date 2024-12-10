@@ -70,6 +70,12 @@ $router->group(['prefix' => 'api' ], function () use ($router) {
     $router->get('/revision', 'RevisionController@index');
     $router->post('/revision', 'RevisionController@store');
 
+
+    // Invoice
+    $router->get('/api/invoice/transaction-headers', 'InvoiceController@getTransactionHeaderData');
+    $router->post('/invoice', 'InvoiceController@store');
+    $router->get('/invoice/{id}', 'InvoiceController@show');
+
    
 
     // Check Out

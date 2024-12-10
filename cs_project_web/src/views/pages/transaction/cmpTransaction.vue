@@ -993,22 +993,22 @@ export default {
               }
 
               return [
-              index + 1,
-              detail.job_description,
-              `${detail.qty} master`,
-              `Rp. ${new Intl.NumberFormat('en-US').format(totalAwal)}`,
-              `Rp. ${new Intl.NumberFormat('en-US').format(totalAkhir)}    `,
-              detail.note
-          ];
-        });
+                    index + 1,
+                    detail.job_description,
+                    `${detail.qty} master`,
+                    `Rp. ${new Intl.NumberFormat('en-US').format(totalAwal)}`,
+                    `Rp. ${new Intl.NumberFormat('en-US').format(totalAkhir)}    `,
+                    detail.note
+                ];
+              });
 
               const totalAkhirSum = details.reduce((sum, detail) => {
-                const totalAwal = parseFloat(detail.ratecard_nominal) * parseInt(detail.qty);
-                let totalAkhir = detail.business_type === 'Perorangan'
-                    ? Math.floor(totalAwal / 0.97 / 0.98)
-                    : Math.floor(totalAwal / 0.98);
-                return sum + totalAkhir;
-            }, 0);
+                  const totalAwal = parseFloat(detail.ratecard_nominal) * parseInt(detail.qty);
+                  let totalAkhir = detail.business_type === 'Perorangan'
+                      ? Math.floor(totalAwal / 0.97 / 0.98)
+                      : Math.floor(totalAwal / 0.98);
+                  return sum + totalAkhir;
+              }, 0);
 
               const agencyFeePercentage = header.agency_fee;
               const agencyFeeValue = Math.floor((totalAkhirSum * header.agency_fee) / 100);
@@ -1029,7 +1029,9 @@ export default {
               const term = header.term || 1; // Default ke 1 jika term tidak ada
               const monthlyValue = Math.floor(totalBudget / term);
               const totalBudgetTerbilang = convertToTerbilang(totalBudget) + " Rupiah";
-            
+
+              const ppnValue = Math.floor((header.ppn_percent / 100) * totalBudget);
+              const totalKeseluruhan = totalBudget + ppnValue;
               
               ratecards.push(
                 [
@@ -1110,23 +1112,88 @@ export default {
                   finalY += 5; 
               }
 
-              doc.setFont("helvetica", "bold"); // Set font menjadi bold
-              doc.text('  TOTAL BUDGET :', 40, finalY + 5);
-              doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(totalBudget)}`, pageWidth - 237, finalY + 5, { align: 'right' });
-              doc.setFont("helvetica", "normal"); // Kembali ke font normal jika diperlukan
+              if (header.ppn) {
+                  // Jika PPN true, tampilkan total budget dan PPN
+                  doc.setFont("helvetica", "bold"); // Set font menjadi bold
+                  doc.text('  TOTAL BUDGET :', 40, finalY + 5);
+                  doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(totalBudget)}`, pageWidth - 237, finalY + 5, { align: 'right' });
+                  doc.setFont("helvetica", "normal"); // Kembali ke font normal jika diperlukan
+
+                  doc.setDrawColor(0, 0, 0);
+                  finalY += 10;
+
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 1;
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 8;
+
+                  doc.setFont("helvetica", "bold"); // Set font menjadi bold
+                  doc.text(`  PPN ${header.ppn_percent}%:`, 40, finalY + 5); // Tampilkan persentase PPN
+                  doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(ppnValue)}`, pageWidth - 237, finalY + 5, { align: 'right' });
+                  doc.setFont("helvetica", "normal"); // Kembali ke font normal jika diperlukan
+
+                  doc.setDrawColor(0, 0, 0);
+                  finalY += 10;
+
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 1;
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 8;
+              } else {
+                  // Jika PPN false, lewati bagian ini (tidak menampilkan total budget dan PPN)
+                  console.log('PPN is false, skipping Total Budget and PPN display');
+              }
+
+          
+
               
-              doc.setDrawColor(0, 0, 0);
-              finalY += 10;
+              if (header.ppn) {
+                  // Jika PPN true, tampilkan total keseluruhan dengan PPN
+                  doc.setFont("helvetica", "bold"); // Set font menjadi bold
+                  doc.text('  TOTAL KESELURUHAN (dengan PPN)  :', 40, finalY + 5);
+                  doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(totalKeseluruhan)}`, pageWidth - 237, finalY + 5, { align: 'right' });
+                  doc.setFont("helvetica", "normal"); // Kembali ke font normal jika diperlukan
 
-              doc.line(40, finalY, 540, finalY);
-              finalY += 1; 
-              doc.line(40, finalY, 540, finalY);
-              finalY += 8;
+                  doc.setDrawColor(0, 0, 0);
+                  finalY += 10;
 
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 1; 
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 8;
+              } else {
+                  // Jika PPN false, tampilkan total keseluruhan tanpa PPN
+                  doc.setFont("helvetica", "bold"); // Set font menjadi bold
+                  doc.text('  TOTAL KESELURUHAN (tanpa PPN)  :', 40, finalY + 5);
+                  doc.text(`Rp. ${new Intl.NumberFormat('id-ID').format(totalBudget)}`, pageWidth - 237, finalY + 5, { align: 'right' });
+                  doc.setFont("helvetica", "normal"); // Kembali ke font normal jika diperlukan
+
+                  doc.setDrawColor(0, 0, 0);
+                  finalY += 10;
+
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 1; 
+                  doc.line(40, finalY, 540, finalY);
+                  finalY += 8;
+              }
+              
+
+              
+
+              
               
               // doc.text(`  Monthly : ${header.term} Month `, labelX, finalY + 20);
-              if (header.jenis_pembayaran === "Retainer") 
-              {
+              if (header.jenis_pembayaran === "Retainer") {
+              // Hitung nilai monthly berdasarkan kondisi PPN
+              let monthlyValue;
+
+              if (header.ppn) {
+                  // Jika PPN true, gunakan total keseluruhan (dengan PPN)
+                  monthlyValue = Math.floor(totalKeseluruhan / header.term);
+              } else {
+                  // Jika PPN false, gunakan total budget (tanpa PPN)
+                  monthlyValue = Math.floor(totalBudget / header.term);
+              }
                 
                   doc.setFillColor(255, 153, 203);
                   doc.rect(labelX, finalY + -8 , 500, 15, 'F');
@@ -1143,7 +1210,22 @@ export default {
                   finalY += 8; 
               }
 
-              doc.text(`  Terbilang : ${totalBudgetTerbilang}`, labelX, finalY + 1);
+              // doc.text(`  Terbilang : ${totalBudgetTerbilang}`, labelX, finalY + 1);
+
+              // Tentukan nilai terbilang berdasarkan kondisi PPN
+              let terbilangValue;
+
+              if (header.ppn) {
+                  // Jika PPN true, gunakan total keseluruhan (dengan PPN)
+                  terbilangValue = convertToTerbilang(totalKeseluruhan) + " Rupiah";
+              } else {
+                  // Jika PPN false, gunakan total budget (tanpa PPN)
+                  terbilangValue = convertToTerbilang(totalBudget) + " Rupiah";
+              }
+
+              // Tampilkan nilai terbilang di PDF
+              doc.text(`  Terbilang : ${terbilangValue}`, labelX, finalY + 1);
+
               finalY += 8;
               doc.line(40, finalY, 540, finalY);
               finalY += 1; 
