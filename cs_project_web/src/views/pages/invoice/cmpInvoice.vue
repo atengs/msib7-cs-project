@@ -295,15 +295,15 @@
     async mounted() {
       // console.log(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate());
       // await this.$root.refreshToken(localStorage.getItem("token"));
-      await this.getTransactionHeader();
-
-      // Jika data tersedia, unduh PDF berdasarkan data pertama
-      if (this.mstTransaction_header.length > 0) {
-        const firstTransaction = this.mstTransaction_header[0]; // Data pertama
-        if (firstTransaction && firstTransaction.id) {
-          await this.exportInvoice(firstTransaction.id); // Unduh PDF
-        }
-      }
+      
+      // await this.getTransactionHeader();
+      // // Jika data tersedia, unduh PDF berdasarkan data pertama
+      // if (this.mstTransaction_header.length > 0) {
+      //   const firstTransaction = this.mstTransaction_header[0]; // Data pertama
+      //   if (firstTransaction && firstTransaction.id) {
+      //     await this.exportInvoice(firstTransaction.id); // Unduh PDF
+      //   }
+      // }
 
       this.getTable();
       this.getMasterCategory();
@@ -698,7 +698,7 @@
   
                 doc.text('INVOICE DATE', labelX, 190);
                 doc.text(':', colonX, 190);
-                doc.text(`${header.ppn}`, valueX, 190);
+                doc.text(`11-12-2024`, valueX, 190);
   
                 doc.text('DUE DATE', labelX, 210);
                 doc.text(':', colonX, 210);

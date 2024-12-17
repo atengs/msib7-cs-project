@@ -382,7 +382,7 @@ export default {
         // cmpMasterDocStatus: "MENU TEST 1",
         cmpMasterCategories: "MASTER CATEGORY",
         cmpMasterRateCard: "MASTER RATECARD",
-        cmpMasterRateCardStandard: "MASTER RATECARD STANDARD",
+        cmpMasterRateCardStandard: "MASTER RC STANDARD",
         cmpApproval: "APPROVAL",
         cmpTransaction: "TRANSACTION",
         cmpInvoice: "INVOICE",
